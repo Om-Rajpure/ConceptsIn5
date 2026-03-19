@@ -133,14 +133,15 @@ export default function LandingPage() {
               <div className="relative aspect-[4/5] md:aspect-square overflow-hidden rounded-[2rem]">
                 {/* Real Human Side */}
                 <img 
-                  src="/Owner.jpeg" 
-                  alt="Founder" 
+                  src="/images/ai_human_hybrid.png" 
+                  alt="Founder AI-Human Hybrid" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
                 
                 {/* AI Fusion Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/10 to-accent-purple/30 mix-blend-overlay" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(0,240,255,0.2)_0%,transparent_70%)]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/20 to-accent-purple/40 mix-blend-overlay" />
+                <div className="absolute inset-x-0 top-0 h-[1px] bg-white/20 blur-[1px] animate-glitch-line" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(0,240,255,0.3)_0%,transparent_70%)]" />
                 
                 {/* Futuristic HUD Elements */}
                 <div className="absolute inset-0 border-[0.5px] border-white/10 rounded-[2rem] pointer-events-none" />
@@ -220,6 +221,103 @@ export default function LandingPage() {
                 </GlassCard>
               </motion.div>
             </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 2.5 Social Presence Section */}
+      <section className="py-12 px-6 relative max-w-7xl mx-auto overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-accent-purple/5 blur-[120px] rounded-full -z-10" />
+        
+        <motion.div {...fadeInUp} className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-black mb-4 glow-text italic">Connect & Learn Beyond the Platform</h2>
+          <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto">
+            Explore more content, updates, and learning resources across our social platforms.
+          </p>
+        </motion.div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            {
+              platform: "YouTube",
+              handle: "@conceptsin5",
+              name: "ConceptsIn5",
+              desc: "Watch full concept explanations and structured learning videos",
+              icon: <Youtube className="w-8 h-8 text-red-500" />,
+              link: "https://www.youtube.com/@conceptsin5",
+              color: "red",
+              glowColor: "rgba(239, 68, 68, 0.4)"
+            },
+            {
+              platform: "Instagram",
+              handle: "@conceptsin5",
+              name: "ConceptsIn5",
+              desc: "Quick reels and short-form concept breakdowns",
+              icon: <Instagram className="w-8 h-8 text-pink-500" />,
+              link: "https://www.instagram.com/conceptsin5",
+              color: "pink",
+              glowColor: "rgba(236, 72, 153, 0.4)"
+            },
+            {
+              platform: "LinkedIn",
+              handle: "om-rajpure",
+              name: "Om Rajpure",
+              desc: "Follow for professional updates and project insights",
+              icon: <Linkedin className="w-8 h-8 text-accent-blue" />,
+              link: "https://www.linkedin.com/in/om-rajpure",
+              color: "blue",
+              glowColor: "rgba(0, 240, 255, 0.4)"
+            }
+          ].map((social, i) => (
+            <motion.a 
+              href={social.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={i}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="group block"
+            >
+              <GlassCard 
+                glow 
+                neonColor={social.color === "blue" ? "blue" : "purple"} 
+                className="h-full border-white/5 group-hover:border-white/20 relative"
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl -z-10" 
+                  style={{ backgroundColor: social.glowColor }}
+                />
+                
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all">
+                    {social.icon}
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-gradient">
+                      {social.name}
+                    </h3>
+                    <p className="text-accent-cyan text-xs font-black uppercase tracking-widest mt-1">
+                      {social.platform}
+                    </p>
+                  </div>
+
+                  <p className="text-gray-400 text-sm font-light leading-relaxed mb-8">
+                    {social.desc}
+                  </p>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="mt-auto px-8 py-3 rounded-xl border border-white/10 glass-card text-xs font-black uppercase tracking-widest group-hover:bg-white group-hover:text-dark transition-all"
+                  >
+                    Visit Profile
+                  </motion.div>
+                </div>
+              </GlassCard>
+            </motion.a>
           ))}
         </div>
       </section>
