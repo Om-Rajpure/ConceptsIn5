@@ -1,4 +1,5 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -11,9 +12,6 @@ import {
   Sparkles,
   Library
 } from 'lucide-react';
-import { categories } from '../data/categories';
-import { subjects as allSubjects } from '../data/subjects';
-import { videos } from '../data/videos';
 import GlassCard from '../components/GlassCard';
 
 const fadeInUp = {
@@ -25,40 +23,56 @@ const fadeInUp = {
 
 export default function CategoryPage() {
   const { id } = useParams();
-  const category = useMemo(() => categories.find(c => c.id === id), [id]);
+  const [category, setCategory] = useState(null);
+  const [groupedSubjects, setGroupedSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dynamically group subjects for this category
-  const groupedSubjects = useMemo(() => {
-    if (!category) return [];
-    
-    // Filter subjects belonging to this category
-    const categorySubjects = allSubjects.filter(s => s.category === id);
-    
-    // Find unique subcategories within these subjects
-    const subcategories = [...new Set(categorySubjects.map(s => s.subcategory))];
-    
-    return subcategories.map(subName => ({
-      name: subName,
-      items: categorySubjects
-        .filter(s => s.subcategory === subName)
-        .map(s => ({
-          ...s,
-          videoCount: videos.filter(v => v.subjectId === s.id).length,
-          duration: "~" + videos.filter(v => v.subjectId === s.id).reduce((acc, v) => acc + parseInt(v.duration || 0), 0) + " mins"
-        }))
-    }));
-  }, [id, category]);
+  useEffect(() => {
+    const fetchCategoryData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`/api/public/categories/${id}/`);
+        const data = response.data;
+        setCategory(data);
+        
+        // Group subjects by subcategory
+        const groups = data.subcategories.map(sub => ({
+          name: sub.name,
+          items: sub.subjects.map(s => ({
+            ...s,
+            title: s.name,
+            videoCount: '...', // Static or separate call
+            duration: '...' // Static or separate call
+          }))
+        }));
+        setGroupedSubjects(groups);
+      } catch (error) {
+        console.error('Failed to fetch category details', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategoryData();
+  }, [id]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark">
+         <div className="w-12 h-12 border-4 border-accent-blue border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (!category) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
         <div className="text-center">
-          <h2 className="text-4xl font-black mb-4 italic">Category Not Found</h2>
-          <Link to="/" className="text-accent-blue hover:underline uppercase tracking-widest text-sm font-black">Return to Base</Link>
+          <h2 className="text-4xl font-black mb-4 italic uppercase tracking-widest text-white">Category Not Found</h2>
+          <Link to="/" className="text-accent-blue hover:underline font-black uppercase text-xs tracking-widest">Return to Base</Link>
         </div>
       </div>
     );

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -30,53 +31,63 @@ const fadeInUp = {
 export default function VideoPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [context, setContext] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Find the video and its context
-  const context = useMemo(() => {
-    const video = videos.find(v => v.id === id);
-    if (!video) return null;
+  useEffect(() => {
+    const fetchVideoData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`/api/public/videos/${id}/`);
+        const videoData = response.data;
+        
+        // Fetch subject to get other videos in same subject for roadmap
+        const sResponse = await axios.get(`/api/public/subjects/${videoData.subject}/`);
+        const subjectData = sResponse.data;
+        
+        // Fetch all videos for this subject
+        const vResponse = await axios.get(`/api/public/videos/?subject=${videoData.subject}`);
+        const subjectVideos = vResponse.data.results || vResponse.data;
+        
+        const sortedVideos = subjectVideos.sort((a, b) => a.id - b.id);
+        const currentIndex = sortedVideos.findIndex(v => v.id === videoData.id);
 
-    const subject = subjects.find(s => s.id === video.subjectId);
-    
-    // Find all videos in this subject for roadmap and navigation
-    const subjectVideos = videos
-      .filter(v => v.subjectId === video.subjectId)
-      .sort((a, b) => a.order - b.order);
-      
-    const currentIndex = subjectVideos.findIndex(v => v.id === id);
-    
-    // Find associated notes
-    const videoNotes = notes.find(n => n.videoId === id) || {
-      content: video.notes,
-      examPoints: video.examPoints || []
+        setContext({
+          subject: { id: subjectData.id, title: subjectData.name },
+          video: {
+            ...videoData,
+            youtubeUrl: videoData.youtube_id ? `https://www.youtube.com/embed/${videoData.youtube_id}` : videoData.video_url,
+            topicsCovered: videoData.important_topics ? videoData.important_topics.split(',').map(t => t.trim()) : []
+          },
+          subjectVideos: sortedVideos,
+          index: currentIndex,
+          prev: sortedVideos[currentIndex - 1],
+          next: sortedVideos[currentIndex + 1],
+          notes: videoData.notes && videoData.notes.length > 0 ? videoData.notes[0] : { content: '', tags: '', title: 'No Notes' },
+          allNotes: videoData.notes || []
+        });
+      } catch (error) {
+          console.error('Failed to fetch video details', error);
+      } finally {
+          setLoading(false);
+      }
     };
 
-    return {
-      subject,
-      video,
-      subjectVideos,
-      index: currentIndex,
-      prev: subjectVideos[currentIndex - 1],
-      next: subjectVideos[currentIndex + 1],
-      notes: videoNotes
-    };
+    fetchVideoData();
+    window.scrollTo(0, 0);
   }, [id]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     // Save progress for the "Continue Learning" feature
     if (context?.subject?.id && context?.video?.id) {
       localStorage.setItem(`watched_${context.subject.id}`, context.video.id);
     }
-  }, [id, context?.subject?.id, context?.video?.id]);
+  }, [context?.subject?.id, context?.video?.id]);
 
-  if (!context) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
-        <div className="text-center">
-          <h2 className="text-4xl font-black mb-4 italic">Video Not Found</h2>
-          <Link to="/" className="text-accent-blue hover:underline uppercase tracking-widest text-sm font-black">Return to Base</Link>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-dark">
+         <div className="w-12 h-12 border-4 border-accent-blue border-t-white rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -150,9 +161,20 @@ export default function VideoPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-               <button className="w-full py-4 bg-accent-blue rounded-2xl font-black text-white flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all">
-                  Download Study Notes <Download size={18} />
-               </button>
+               {video.notes && video.notes.length > 0 && video.notes[0].pdf_file ? (
+                 <a 
+                   href={video.notes[0].pdf_file}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="w-full py-4 bg-accent-blue rounded-2xl font-black text-white flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all"
+                 >
+                    Download Study Notes <Download size={18} />
+                 </a>
+               ) : (
+                 <button className="w-full py-4 bg-gray-800/50 rounded-2xl font-black text-gray-500 flex items-center justify-center gap-3 cursor-not-allowed">
+                    No Notes Available <Download size={18} />
+                 </button>
+               )}
                <a 
                  href={video.youtubeUrl.replace("embed/", "watch?v=")} 
                  target="_blank" 
@@ -216,12 +238,15 @@ export default function VideoPage() {
                     <Zap className="text-accent-purple" size={24} /> Exam Points
                   </h3>
                   <ul className="space-y-6">
-                    {(context.notes.examPoints || video.examPoints || []).map((point, i) => (
+                    {(context.notes.tags ? context.notes.tags.split(',') : []).map((point, i) => (
                       <li key={i} className="flex gap-4">
                          <div className="w-1.5 h-1.5 rounded-full bg-accent-purple mt-2 flex-shrink-0 animate-pulse" />
-                         <span className="text-gray-300 font-medium leading-relaxed">{point}</span>
+                         <span className="text-gray-300 font-medium leading-relaxed">{point.trim()}</span>
                       </li>
                     ))}
+                    {(!context.notes.tags) && (
+                      <li className="text-gray-500 italic text-sm">No exam points available yet.</li>
+                    )}
                   </ul>
                </div>
             </motion.section>

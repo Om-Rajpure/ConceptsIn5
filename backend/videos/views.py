@@ -1,57 +1,126 @@
-from rest_framework.views import APIView
+from rest_framework import viewsets, permissions, status, views
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
-from .models import Video
-from .serializers import VideoSerializer
-from .services.youtube_service import YouTubeService
+from django.contrib.auth import authenticate, login, logout
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import Category, SubCategory, Subject, Video, Note
+from .serializers import (
+    CategorySerializer, SubCategorySerializer, SubjectSerializer, 
+    VideoSerializer, NoteSerializer
+)
+from .services import YouTubeService
 
-class VideoListView(APIView):
-    """
-    Returns a list of videos, optionally filtered by subject or category.
-    """
-    def get(self, request):
-        subject = request.query_params.get('subject')
-        category = request.query_params.get('category')
+# Public ViewSets
+class PublicCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all().prefetch_related('subcategories__subjects')
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'slug'
+
+class PublicSubCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SubCategory.objects.all().select_related('category').prefetch_related('subjects')
+    serializer_class = SubCategorySerializer
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category']
+    lookup_field = 'slug'
+
+class PublicSubjectViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Subject.objects.all().select_related('subcategory')
+    serializer_class = SubjectSerializer
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['subcategory']
+    lookup_field = 'slug'
+
+class PublicVideoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Video.objects.filter(is_published=True).select_related('subject')
+    serializer_class = VideoSerializer
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['subject', 'is_important']
+
+class PublicNoteViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Note.objects.all().select_related('video', 'subject')
+    serializer_class = NoteSerializer
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['video', 'subject']
+
+# Admin ViewSets
+class AdminVideoViewSet(viewsets.ModelViewSet):
+    queryset = Video.objects.all().select_related('subject')
+    serializer_class = VideoSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    
+    def perform_create(self, serializer):
+        fetch_from_youtube = self.request.data.get('fetch_from_youtube', False)
+        youtube_url = self.request.data.get('youtube_url_input', '')
         
-        queryset = Video.objects.all()
-        if subject:
-            queryset = queryset.filter(subject=subject)
-        if category:
-            queryset = queryset.filter(category=category)
-            
-        serializer = VideoSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-class RefreshVideosView(APIView):
-    """
-    Triggers a manual sync with the YouTube API.
-    """
-    def post(self, request):
-        service = YouTubeService()
-        try:
-            raw_videos = service.fetch_channel_videos()
-            
-            created_count = 0
-            updated_count = 0
-            
-            for v_data in raw_videos:
-                obj, created = Video.objects.update_or_create(
-                    video_id=v_data['video_id'],
-                    defaults=v_data
-                )
-                if created:
-                    created_count += 1
+        if fetch_from_youtube and youtube_url:
+            service = YouTubeService()
+            video_id = service.extract_video_id(youtube_url)
+            if video_id:
+                # Check for duplicates
+                if Video.objects.filter(youtube_id=video_id).exists():
+                     # Potentially raise error or just update
+                     pass
                 else:
-                    updated_count += 1
-                    
+                    details = service.get_video_details(video_id)
+                    if details:
+                        serializer.save(
+                            title=details['title'],
+                            description=details['description'],
+                            thumbnail=details['thumbnail'],
+                            duration=details['duration'],
+                            youtube_id=details['youtube_id'],
+                            source='youtube'
+                        )
+                        return
+        serializer.save()
+
+class AdminNoteViewSet(viewsets.ModelViewSet):
+    queryset = Note.objects.all().select_related('video', 'subject')
+    serializer_class = NoteSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['video', 'subject']
+
+# Auth Views
+class LoginView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)
+            return Response({'detail': 'Logged in successfully', 'username': user.username})
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class LogoutView(views.APIView):
+    def post(self, request):
+        logout(request)
+        return Response({'detail': 'Logged out successfully'})
+
+class UserStatusView(views.APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
             return Response({
-                "status": "Success", 
-                "total": len(raw_videos),
-                "created": created_count,
-                "updated": updated_count
+                'is_authenticated': True,
+                'username': request.user.username,
+                'is_staff': request.user.is_staff
             })
-        except Exception as e:
-            return Response({
-                "status": "Error", 
-                "message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'is_authenticated': False})
+
+# Dashboard Stats
+class AdminDashboardStatsView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    
+    def get(self, request):
+        return Response({
+            'total_videos': Video.objects.count(),
+            'total_subjects': Subject.objects.count(),
+            'total_notes': Note.objects.count(),
+        })

@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowRight, Search, Play, BookOpen, Target } from 'lucide-react';
+import { Menu, X, ArrowRight, Search, Play, BookOpen, Target, Lock, ShieldCheck, Youtube, Instagram, Linkedin } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAdmin } from '../utils/AdminContext';
 import { globalSearch } from '../utils/search';
 import { subjects } from '../data/subjects';
 import { videos } from '../data/videos';
@@ -14,6 +15,7 @@ export default function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAdmin();
 
   // Live suggestions logic
   const suggestions = useMemo(() => {
@@ -167,17 +169,9 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* CTA Button */}
+        {/* CTA Button placeholder or empty */}
         <div className="hidden md:flex items-center gap-4">
-          <motion.button 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(123, 97, 255, 0.4)" }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 py-2.5 bg-gradient-to-r from-accent-blue to-accent-purple rounded-full text-sm font-bold text-white transition-all flex items-center gap-2"
-          >
-            Start Learning <ArrowRight className="w-4 h-4" />
-          </motion.button>
+           {/* If you want a CTA button back, put it here */}
         </div>
 
         {/* Mobile Toggle */}

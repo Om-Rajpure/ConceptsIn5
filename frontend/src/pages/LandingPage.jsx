@@ -19,10 +19,9 @@ import {
   Target
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import GlassCard from '../components/GlassCard';
 import ScrollDots from '../components/ScrollDots';
-import { subjects } from '../data/subjects';
-import { videos } from '../data/videos';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -31,47 +30,10 @@ const fadeInUp = {
   transition: { duration: 0.8, ease: "easeOut" }
 };
 
-const categories = [
-  { 
-    id: "semester",
-    title: "Semester Subjects", 
-    desc: "Precision notes for DBMS, OS, Stats, and more.",
-    image: "/images/cat_subjects.png",
-    color: "blue"
-  },
-  { 
-    id: "ai-ml",
-    title: "AI / ML", 
-    desc: "Master neural networks and AI logic in minutes.",
-    image: "/images/cat_ai.png",
-    color: "purple"
-  },
-  { 
-    id: "web-dev",
-    title: "Web Development", 
-    desc: "From HTML to React. Rapid-fire web engineering.",
-    image: "/images/cat_web.png",
-    color: "cyan"
-  },
-  { 
-    id: "mini-projects",
-    title: "Mini Projects", 
-    desc: "Build lethal projects with step-by-step guidance.",
-    image: "/images/cat_projects.png",
-    color: "blue"
-  }
-];
-
-// Derived data for Landing Page
-const featuredVideos = videos.filter(v => v.isImportant).slice(0, 3);
-
-const reels = [
-  { id: 1, title: "Quick CSS Tip", thumbnail: "https://img.youtube.com/vi/reels1/maxresdefault.jpg" },
-  { id: 2, title: "JS One-Liner", thumbnail: "https://img.youtube.com/vi/reels2/maxresdefault.jpg" },
-  { id: 3, title: "Git Cheat Sheet", thumbnail: "https://img.youtube.com/vi/reels3/maxresdefault.jpg" }
-];
-
 export default function LandingPage() {
+  const [categories, setCategories] = React.useState([]);
+  const [featuredVideos, setFeaturedVideos] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
   const [catIndex, setCatIndex] = React.useState(0);
   const [socialIndex, setSocialIndex] = React.useState(0);
   const [videoIndex, setVideoIndex] = React.useState(0);
@@ -80,14 +42,45 @@ export default function LandingPage() {
   const socialRef = React.useRef(null);
   const videoRef = React.useRef(null);
 
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [cResponse, vResponse] = await Promise.all([
+          axios.get('/api/public/categories/'),
+          axios.get('/api/public/videos/?is_important=true')
+        ]);
+        setCategories(cResponse.data.results || cResponse.data);
+        setFeaturedVideos((vResponse.data.results || vResponse.data).slice(0, 3));
+      } catch (error) {
+        console.error('Failed to fetch landing page data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleScroll = (ref, setIndex, itemCount) => {
     if (!ref.current) return;
     const scrollLeft = ref.current.scrollLeft;
     const width = ref.current.offsetWidth;
-    // Basic calculation for active dot based on scroll position
-    const index = Math.round(scrollLeft / (width * 0.8)); // 0.8 to account for partial visibility
+    const index = Math.round(scrollLeft / (width * 0.8));
     setIndex(Math.min(index, itemCount - 1));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark">
+         <div className="w-12 h-12 border-4 border-accent-blue border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const reels = [
+    { id: 1, title: "Quick CSS Tip", thumbnail: "https://img.youtube.com/vi/reels1/maxresdefault.jpg" },
+    { id: 2, title: "JS One-Liner", thumbnail: "https://img.youtube.com/vi/reels2/maxresdefault.jpg" },
+    { id: 3, title: "Git Cheat Sheet", thumbnail: "https://img.youtube.com/vi/reels3/maxresdefault.jpg" }
+  ];
 
   return (
     <div className="relative">
@@ -218,7 +211,7 @@ export default function LandingPage() {
             className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
           >
             {categories.map((cat, i) => (
-              <Link to={`/category/${cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
+              <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -226,18 +219,19 @@ export default function LandingPage() {
                   transition={{ delay: i * 0.1 }}
                   className="group h-full"
                 >
-                  <GlassCard glow neonColor={cat.color} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
+                  <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
                     <div className="relative aspect-video overflow-hidden">
                       <img 
-                        src={cat.image} 
-                        alt={cat.title} 
+                        src={cat.thumbnail || `/images/cat_${i}.png`} 
+                        alt={cat.name} 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => e.target.src = "/images/hero_bg.png"}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
                     </div>
                     <div className="p-8 flex flex-col flex-1">
-                      <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.title}</h3>
-                      <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light">{cat.desc}</p>
+                      <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.name}</h3>
+                      <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2">{cat.description || "Knowledge module available for deployment."}</p>
                       <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
                         Initialize <ArrowRight size={14} />
                       </div>
@@ -392,7 +386,7 @@ export default function LandingPage() {
                     <div className="p-8">
                       <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
                       <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
-                        <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.semester} module</span>
+                        <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
                         <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
                       </div>
                     </div>
@@ -457,8 +451,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ... Rest of the sections remain same and styled ... */}
-      
       {/* 6 Why ConceptsIn5 Section */}
       <section className="py-20 md:pb-24 px-6 relative overflow-hidden bg-grid opacity-50">
         <div className="max-w-5xl mx-auto">
@@ -511,7 +503,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
+      
       {/* 7 Creator Section */}
       <section id="about" className="py-20 md:py-24 px-6 max-w-6xl mx-auto relative content-center">
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-accent-blue/10 blur-[100px] -z-10" />

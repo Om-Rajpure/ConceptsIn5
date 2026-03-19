@@ -1,8 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { 
   Linkedin, 
   Youtube, 
-  Instagram
+  Instagram,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Layout from './components/Layout';
@@ -14,6 +16,13 @@ import NotesPage from './pages/NotesPage';
 import VideoPage from './pages/VideoPage';
 import SearchPage from './pages/SearchPage';
 import AboutPage from './pages/AboutPage';
+
+// Admin Pages
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminVideoManager from './pages/admin/AdminVideoManager';
+import AdminNoteManager from './pages/admin/AdminNoteManager';
 
 
 export default function App() {
@@ -31,6 +40,14 @@ export default function App() {
           <Route path="/video/:id" element={<VideoPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
+
+          {/* Admin Routes */}
+          <Route path="/om/login" element={<AdminLogin />} />
+          <Route element={<ProtectedRoute />}>
+              <Route path="/om" element={<AdminDashboard />} />
+              <Route path="/om/videos" element={<AdminVideoManager />} />
+              <Route path="/om/notes" element={<AdminNoteManager />} />
+          </Route>
         </Routes>
 
         {/* Global Footer (Common to all pages) */}
@@ -67,10 +84,19 @@ export default function App() {
             <div className="text-sm text-gray-600 font-medium uppercase tracking-[0.2em]">
               © 2026 ConceptsIn5. Initializing Success.
             </div>
-            <div className="flex gap-10 text-gray-500">
-              <Youtube className="w-5 h-5 cursor-pointer hover:text-white transition-colors" />
-              <Instagram className="w-5 h-5 cursor-pointer hover:text-white transition-colors" />
-              <Linkedin className="w-5 h-5 cursor-pointer hover:text-white transition-colors" />
+            <div className="flex gap-10 text-gray-500 items-center">
+              <a href="https://youtube.com/@conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors">
+                <Youtube className="w-5 h-5" />
+              </a>
+              <a href="https://instagram.com/conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="https://linkedin.com/in/om-rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-accent-blue transition-colors">
+                <Linkedin className="w-5 h-5" />
+              </a>
+              <Link to="/om/login" className="hover:text-accent-purple transition-colors p-2 glass-card border-white/5 border">
+                 <Lock className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </footer>
