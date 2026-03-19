@@ -11,14 +11,8 @@ import SubjectPage from './pages/SubjectPage';
 import CategoryPage from './pages/CategoryPage';
 import TopicPage from './pages/TopicPage';
 import NotesPage from './pages/NotesPage';
+import VideoPage from './pages/VideoPage';
 
-const VideoDetailPage = () => (
-  <div className="pt-40 pb-20 px-6 text-center">
-    <h1 className="text-4xl font-black mb-4">Video Detail Page Placeholder</h1>
-    <p className="text-gray-400">Soon, you'll be able to watch high-impact videos with integrated notes here.</p>
-    <Link to="/" className="text-accent-blue hover:underline mt-8 inline-block">Back to Base</Link>
-  </div>
-);
 
 export default function App() {
   return (
@@ -32,7 +26,7 @@ export default function App() {
           <Route path="/subject/:id" element={<SubjectPage />} />
           <Route path="/topic/:id" element={<TopicPage />} />
           <Route path="/notes" element={<NotesPage />} />
-          <Route path="/video/:id" element={<VideoDetailPage />} />
+          <Route path="/video/:id" element={<VideoPage />} />
         </Routes>
 
         {/* Global Footer (Common to all pages) */}

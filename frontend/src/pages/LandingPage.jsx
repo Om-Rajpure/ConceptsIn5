@@ -60,18 +60,21 @@ const categories = [
 
 const featuredVideos = [
   {
+    id: "normalization-dbms",
     title: "DBMS Normalization in 5 Mins",
     duration: "4:58",
     thumbnail: "/images/v_thumb_dbms.png",
     views: "12k"
   },
   {
+    id: "mean-median-mode",
     title: "How Neural Networks Actually Work",
     duration: "5:12",
     thumbnail: "/images/v_thumb_nn.png",
     views: "8k"
   },
   {
+    id: "v1",
     title: "React Hooks Simplified",
     duration: "5:45",
     thumbnail: "/images/v_thumb_react.png",
@@ -255,26 +258,28 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {featuredVideos.map((video, i) => (
-              <GlassCard key={i} className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
-                <div className="relative aspect-video overflow-hidden rounded-t-2xl">
-                  <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
-                      <Play className="text-white fill-current ml-1" />
+              <Link key={i} to={`/video/${video.id}`}>
+                <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
+                  <div className="relative aspect-video overflow-hidden rounded-t-2xl">
+                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
+                        <Play className="text-white fill-current ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
+                      <Clock size={12} className="text-accent-cyan" /> {video.duration}
                     </div>
                   </div>
-                  <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
-                    <Clock size={12} className="text-accent-cyan" /> {video.duration}
+                  <div className="p-8">
+                    <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
+                    <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
+                      <span className="flex items-center gap-1.5"><Users size={14} /> {video.views} Learned</span>
+                      <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
+                    </div>
                   </div>
-                </div>
-                <div className="p-8">
-                  <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
-                  <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
-                    <span className="flex items-center gap-1.5"><Users size={14} /> {video.views} Learned</span>
-                    <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
-                  </div>
-                </div>
-              </GlassCard>
+                </GlassCard>
+              </Link>
             ))}
           </div>
         </div>

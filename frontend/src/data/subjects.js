@@ -1,159 +1,101 @@
-export const subjects = [
+const baseSubjects = [
   {
     id: "statistics",
     name: "Statistics (AIDS)",
     description: "Master statistics concepts quickly with structured videos, notes, and exam-ready insights.",
     duration: "~60 mins",
     roadmap: [
-      { id: "v1", title: "Basics of Statistics" },
-      { id: "v2", title: "Mean, Median, Mode" },
-      { id: "v3", title: "Probability" },
-      { id: "v4", title: "Distributions" },
-      { id: "v5", title: "Hypothesis Testing" }
+      { id: "intro-stats", title: "Basics of Statistics" },
+      { id: "mean-median-mode", title: "Mean, Median, Mode" },
+      { id: "probability-essentials", title: "Probability" },
+      { id: "distributions", title: "Distributions" },
+      { id: "hypothesis-testing", title: "Hypothesis Testing" }
     ],
     importantTopics: ["Mean, Median, Mode", "Standard Deviation", "Probability Distributions"],
     videos: [
       {
-        id: "v1",
-        title: "01. Introduction to Statistics",
+        id: "intro-stats",
+        title: "Introduction to Statistics",
         description: "Why statistics matters in AI and Data Science. Foundations and terminology.",
-        youtube: "https://youtube.com/watch?v=s1",
+        youtubeUrl: "https://www.youtube.com/embed/s1",
         thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
         duration: "5:30",
-        topics: ["Definition", "Types of Data", "Population vs Sample"],
-        notes: "Statistics is the science of learning from data. Basic types include Descriptive and Inferential."
+        subject: "Statistics",
+        category: "Semester",
+        semester: "Semester 5",
+        topicsCovered: ["Definition", "Types of Data", "Population vs Sample"],
+        notes: "Statistics is the science of learning from data. Basic types include Descriptive (summarizing data) and Inferential (making predictions). In AI, we use statistics to understand data distributions and model performance.",
+        examPoints: [
+          "Descriptive Statistics: Mean, Median, Mode, Variance.",
+          "Inferential Statistics: Hypothesis testing, P-values.",
+          "Sample vs Population: Sample is a subset of the population."
+        ]
       },
       {
-        id: "v2",
-        title: "02. Central Tendency: Mean, Median, Mode",
+        id: "mean-median-mode",
+        title: "Central Tendency: Mean, Median, Mode",
         description: "The most important basics for any exam. Understand the difference correctly.",
-        youtube: "https://youtube.com/watch?v=s2",
+        youtubeUrl: "https://www.youtube.com/embed/s2",
         thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
         duration: "6:15",
-        topics: ["Mean calculation", "Median for odd/even", "Mode & Outliers"],
-        notes: "Mean is sensitive to outliers. Median is the middle value. Mode is the most frequent."
-      },
-      {
-        id: "v3",
-        title: "03. Probability Essentials",
-        description: "The math behind randomness. Essential for Machine Learning.",
-        youtube: "https://youtube.com/watch?v=s3",
-        thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
-        duration: "8:45",
-        topics: ["Events", "Sample Space", "Conditional Probability"],
-        notes: "P(A|B) = P(A and B) / P(B). Fundamental for Bayesian models."
+        subject: "Statistics",
+        category: "Semester",
+        semester: "Semester 5",
+        topicsCovered: ["Mean calculation", "Median for odd/even", "Mode & Outliers"],
+        notes: "Mean is the average and is sensitive to outliers. Median is the middle value and is more robust. Mode is the most frequent value. For a skewed distribution, Median is often better than Mean.",
+        examPoints: [
+          "Mean = Sum of elements / Number of elements.",
+          "Median: Middle term after sorting. If even, average of middle two.",
+          "Mode: Highest frequency element."
+        ]
       }
     ]
   },
   {
-    id: "web-computing",
-    name: "Web Computing",
-    description: "From HTTP basics to modern frameworks. Learn web architecture through structured videos.",
-    duration: "~75 mins",
+    id: "dbms",
+    name: "Data Base Management Systems",
+    description: "Master SQL, Normalization, and Transactions with structured learning.",
+    duration: "~80 mins",
     roadmap: [
-      { id: "w1", title: "Web Architecture" },
-      { id: "w2", title: "HTTP Protocol" },
-      { id: "w3", title: "DOM Secrets" },
-      { id: "w4", title: "Next.js Intro" }
+      { id: "dbms-intro", title: "Introduction" },
+      { id: "normalization-dbms", title: "Normalization" },
+      { id: "sql-queries", title: "SQL Mastery" }
     ],
-    importantTopics: ["HTTP/HTTPS", "DOM Manipulation", "REST APIs"],
+    importantTopics: ["Normalization", "Indexing", "ACID Properties"],
     videos: [
       {
-        id: "w1",
-        title: "01. Web Architecture Explained",
-        description: "How the internet actually works. Client-server model in depth.",
-        youtube: "https://youtube.com/watch?v=w1",
+        id: "normalization-dbms",
+        title: "Normalization in DBMS",
+        description: "Understand normalization with simple terms and clear logical steps.",
+        youtubeUrl: "https://www.youtube.com/embed/example_dbms",
         thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
-        duration: "7:20",
-        topics: ["DNS", "IP", "Client-Server"],
-        notes: "The web is a system of public components that work together."
+        duration: "8:20",
+        subject: "DBMS",
+        category: "Semester",
+        semester: "Semester 5",
+        topicsCovered: ["1NF", "2NF", "3NF", "BCNF"],
+        notes: "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity. It involves dividing large tables into smaller ones and defining relationships between them.",
+        examPoints: [
+          "1NF: Atomic values, no repeating groups.",
+          "2NF: 1NF + No partial dependency.",
+          "3NF: 2NF + No transitive dependency.",
+          "BCNF: 3NF + Every determinant is a candidate key."
+        ]
       }
     ]
-  },
-  {
-    id: "machine-learning",
-    name: "Machine Learning",
-    description: "The core of AI simplified. Watch, learn, and implement ML models.",
-    duration: "~90 mins",
-    roadmap: [
-      { id: "m1", title: "Linear Regression" },
-      { id: "m2", title: "Logistic Regression" },
-      { id: "m3", title: "Neural Networks" },
-      { id: "m4", title: "Model Tuning" }
-    ],
-    importantTopics: ["Gradient Descent", "Loss Functions", "Backpropagation"],
-    videos: [
-      {
-        id: "m1",
-        title: "01. Linear Regression Fundamentals",
-        description: "Predicting outcomes with math. The simplest yet most powerful ML model.",
-        youtube: "https://youtube.com/watch?v=m1",
-        thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
-        duration: "10:15",
-        topics: ["Best fit line", "R-squared", "MSE"],
-        notes: "Y = mX + c. We minimize the Mean Squared Error to find the best line."
-      }
-    ]
-  },
-  {
-    id: "dav",
-    name: "Data Analytics & Visualization (DAV)",
-    description: "Turn raw data into lethal insights. Master visualization using real datasets.",
-    duration: "~50 mins",
-    roadmap: [
-      { id: "d1", title: "Data Cleaning" },
-      { id: "d2", title: "Exploratory Data Analysis" },
-      { id: "d3", title: "Visualization Patterns" }
-    ],
-    importantTopics: ["Pandas Basics", "Choosing Charts", "Data Storytelling"],
-    videos: [
-      {
-        id: "d1",
-        title: "01. Data Cleaning at Scale",
-        description: "Preparation is 80% of the work. Clean your data like a pro.",
-        youtube: "https://youtube.com/watch?v=d1",
-        thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
-        duration: "9:30",
-        topics: ["Missing values", "Outliers", "Data Types"],
-        notes: "Garbage in, garbage out. Cleaning is the most critical step in DA."
-      }
-    ]
-  },
-  {
-    id: "mini-projects",
-    name: "Mini Projects",
-    description: "Build high-impact projects with step-by-step guidance. Fast implementation.",
-    duration: "Varies",
-    roadmap: [
-      { id: "p1", title: "Automated Portfolio" },
-      { id: "p2", title: "AI Chatbot" }
-    ],
-    importantTopics: ["GitHub Actions", "API Integration", "Deployment"],
-    videos: [
-      {
-        id: "p1",
-        title: "Build an Automated Portfolio",
-        description: "Deploy a personal site that updates from your GitHub activity.",
-        youtube: "https://youtube.com/watch?v=p1",
-        thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg",
-        duration: "15:00",
-        topics: ["GitHub API", "React", "Actions"],
-        notes: "Automate your presence. High signal for recruiters."
-      }
-    ]
-  },
-  // Skeleton Data for New Subjects
-  ...[
-    "cn", "se", "cloud-computing", "ai-basics", "dl-intro", "gen-ai-llm", "ai-agents",
-    "frontend-basics", "node-express", "web-security", "aws-basics",
-    "timetable-gen", "vaccines-app", "facultymind", "dbms", "os"
-  ].map(id => ({
-    id,
-    name: id.toUpperCase().replace(/-/g, ' '),
-    description: `Master ${id} with structured videos and notes.`,
-    duration: "Varies",
-    roadmap: [{ id: "temp", title: "Introduction" }],
-    importantTopics: ["Topic 1", "Topic 2"],
-    videos: [{ id: "temp", title: "Coming Soon", description: "Module incoming.", youtube: "", thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg", duration: "5:00", topics: ["Intro"], notes: "Notes coming soon." }]
-  }))
+  }
 ];
+
+export const subjects = baseSubjects.map(subject => ({
+  ...subject,
+  videos: subject.videos.map(v => ({
+    ...v,
+    // Add defaults if missing, ensure youtubeUrl is proper embed
+    youtubeUrl: v.youtubeUrl ? v.youtubeUrl : (v.id === "normalization-dbms" ? "https://www.youtube.com/embed/7V-L_8Z5_2U" : "https://www.youtube.com/embed/placeholder"),
+    topicsCovered: v.topicsCovered || v.topics || [],
+    examPoints: v.examPoints || ["Point 1", "Point 2"],
+    subject: subject.name,
+    category: v.category || "Semester",
+    semester: v.semester || "Semester 5"
+  }))
+}));

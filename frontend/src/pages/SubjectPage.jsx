@@ -247,7 +247,7 @@ export default function SubjectPage() {
                     {/* Info Section */}
                     <div className="flex-1 p-8 md:p-10 flex flex-col justify-center">
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {video.topics.slice(0, 3).map((topic, j) => (
+                        {(video.topicsCovered || video.topics || []).slice(0, 3).map((topic, j) => (
                           <span key={j} className="text-[10px] font-black text-accent-purple/60 uppercase tracking-widest border border-accent-purple/20 px-2 py-0.5 rounded">
                             {topic}
                           </span>
@@ -279,16 +279,16 @@ export default function SubjectPage() {
 
             {/* Quick Actions at Bottom */}
             <motion.section {...fadeInUp} className="mt-32 p-12 glass-card border-accent-purple/30 bg-accent-purple/[0.02] text-center">
-               <h3 className="text-3xl font-black mb-6 italic glow-text tracking-tighter">Ready to Begin?</h3>
+               <h3 className="text-3xl font-black mb-6 italic glow-text tracking-tighter uppercase">Ready to Begin?</h3>
                <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                 <button onClick={() => scrollToVideo(subject.videos[0].id)} className="px-10 py-5 bg-white text-dark rounded-2xl font-black text-lg flex items-center justify-center gap-3">
+                 <button onClick={() => scrollToVideo(subject.videos[0].id)} className="px-10 py-5 bg-white text-dark rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all">
                    Start Mission 01 <MousePointer2 className="w-5 h-5 fill-current" />
                  </button>
                  <button className="px-10 py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all">
                    View Resource Base
                  </button>
                </div>
-            </motion.section>main
+            </motion.section>
           </main>
         </div>
       </div>
