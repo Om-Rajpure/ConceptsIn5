@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, 
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
+import ScrollDots from '../components/ScrollDots';
 import { subjects } from '../data/subjects';
 import { videos } from '../data/videos';
 
@@ -70,10 +72,27 @@ const reels = [
 ];
 
 export default function LandingPage() {
+  const [catIndex, setCatIndex] = React.useState(0);
+  const [socialIndex, setSocialIndex] = React.useState(0);
+  const [videoIndex, setVideoIndex] = React.useState(0);
+
+  const catRef = React.useRef(null);
+  const socialRef = React.useRef(null);
+  const videoRef = React.useRef(null);
+
+  const handleScroll = (ref, setIndex, itemCount) => {
+    if (!ref.current) return;
+    const scrollLeft = ref.current.scrollLeft;
+    const width = ref.current.offsetWidth;
+    // Basic calculation for active dot based on scroll position
+    const index = Math.round(scrollLeft / (width * 0.8)); // 0.8 to account for partial visibility
+    setIndex(Math.min(index, itemCount - 1));
+  };
+
   return (
     <div className="relative">
       {/* 1 Hero Section */}
-      <section className="relative pt-20 md:pt-40 pb-20 md:pb-32 px-6 overflow-hidden min-h-[70vh] md:min-h-screen flex items-center">
+      <section className="relative pt-16 md:pt-32 pb-12 md:pb-24 px-6 overflow-hidden min-h-[70vh] md:min-h-screen flex items-center">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent-purple/10 blur-[150px] animate-pulse-glow" />
         
@@ -186,144 +205,159 @@ export default function LandingPage() {
       </section>
 
       {/* 2 Main Categories Section */}
-      <section id="categories" className="py-16 md:py-24 px-6 relative max-w-7xl mx-auto min-h-[50vh] md:min-h-[60vh]">
-        <motion.div {...fadeInUp} className="text-center mb-12 md:mb-20">
+      <section id="categories" className="py-10 md:py-16 px-6 relative max-w-7xl mx-auto">
+        <motion.div {...fadeInUp} className="text-center mb-10 md:mb-16">
           <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text italic">Select Mission</h2>
           <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
-        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory">
-          {categories.map((cat, i) => (
-            <Link to={`/category/${cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group h-full"
-              >
-                <GlassCard glow neonColor={cat.color} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
-                  <div className="relative aspect-video overflow-hidden">
-                    <img 
-                      src={cat.image} 
-                      alt={cat.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-                  </div>
-                  <div className="p-8 flex flex-col flex-1">
-                    <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light">{cat.desc}</p>
-                    <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                      Initialize <ArrowRight size={14} />
+        <div className="relative group/scroll">
+          <div 
+            ref={catRef}
+            onScroll={() => handleScroll(catRef, setCatIndex, categories.length)}
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
+          >
+            {categories.map((cat, i) => (
+              <Link to={`/category/${cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="group h-full"
+                >
+                  <GlassCard glow neonColor={cat.color} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
+                    <div className="relative aspect-video overflow-hidden">
+                      <img 
+                        src={cat.image} 
+                        alt={cat.title} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
                     </div>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            </Link>
-          ))}
+                    <div className="p-8 flex flex-col flex-1">
+                      <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.title}</h3>
+                      <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light">{cat.desc}</p>
+                      <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                        Initialize <ArrowRight size={14} />
+                      </div>
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+          {/* Edge Fade */}
+          <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
         </div>
+        <ScrollDots count={categories.length} activeIndex={catIndex} color="blue" />
       </section>
 
       {/* 2.5 Social Presence Section */}
       <section className="py-12 px-6 relative max-w-7xl mx-auto overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-accent-purple/5 blur-[120px] rounded-full -z-10" />
         
-        <motion.div {...fadeInUp} className="text-center mb-12">
+        <motion.div {...fadeInUp} className="text-center mb-10">
           <h2 className="text-3xl md:text-5xl font-black mb-4 glow-text italic">Connect & Learn Beyond the Platform</h2>
-          <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto">
+          <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto text-center">
             Explore more content, updates, and learning resources across our social platforms.
           </p>
         </motion.div>
 
-        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory">
-          {[
-            {
-              platform: "YouTube",
-              handle: "@conceptsin5",
-              name: "ConceptsIn5",
-              desc: "Watch full concept explanations and structured learning videos",
-              icon: <Youtube className="w-8 h-8 text-red-500" />,
-              link: "https://www.youtube.com/@conceptsin5",
-              color: "red",
-              glowColor: "rgba(239, 68, 68, 0.4)"
-            },
-            {
-              platform: "Instagram",
-              handle: "@conceptsin5",
-              name: "ConceptsIn5",
-              desc: "Quick reels and short-form concept breakdowns",
-              icon: <Instagram className="w-8 h-8 text-pink-500" />,
-              link: "https://www.instagram.com/conceptsin5",
-              color: "pink",
-              glowColor: "rgba(236, 72, 153, 0.4)"
-            },
-            {
-              platform: "LinkedIn",
-              handle: "om-rajpure",
-              name: "Om Rajpure",
-              desc: "Follow for professional updates and project insights",
-              icon: <Linkedin className="w-8 h-8 text-accent-blue" />,
-              link: "https://www.linkedin.com/in/om-rajpure",
-              color: "blue",
-              glowColor: "rgba(0, 240, 255, 0.4)"
-            }
-          ].map((social, i) => (
-            <motion.a 
-              href={social.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="group block min-w-[300px] md:min-w-0 snap-center"
-            >
-              <GlassCard 
-                glow 
-                neonColor={social.color === "blue" ? "blue" : "purple"} 
-                className="h-full border-white/5 group-hover:border-white/20 relative"
+        <div className="relative group/scroll">
+          <div 
+            ref={socialRef}
+            onScroll={() => handleScroll(socialRef, setSocialIndex, 3)}
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
+          >
+            {[
+              {
+                platform: "YouTube",
+                name: "ConceptsIn5",
+                desc: "Watch full concept explanations and structured learning videos",
+                icon: <Youtube className="w-8 h-8 text-red-500" />,
+                link: "https://www.youtube.com/@conceptsin5",
+                color: "red",
+                glowColor: "rgba(239, 68, 68, 0.4)"
+              },
+              {
+                platform: "Instagram",
+                name: "ConceptsIn5",
+                desc: "Quick reels and short-form concept breakdowns",
+                icon: <Instagram className="w-8 h-8 text-pink-500" />,
+                link: "https://www.instagram.com/conceptsin5",
+                color: "pink",
+                glowColor: "rgba(236, 72, 153, 0.4)"
+              },
+              {
+                platform: "LinkedIn",
+                name: "Om Rajpure",
+                desc: "Follow for professional updates and project insights",
+                icon: <Linkedin className="w-8 h-8 text-accent-blue" />,
+                link: "https://www.linkedin.com/in/om-rajpure",
+                color: "blue",
+                glowColor: "rgba(0, 240, 255, 0.4)"
+              }
+            ].map((social, i) => (
+              <motion.a 
+                href={social.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="group block min-w-[300px] md:min-w-0 snap-center"
               >
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl -z-10" 
-                  style={{ backgroundColor: social.glowColor }}
-                />
-                
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all">
-                    {social.icon}
-                  </div>
+                <GlassCard 
+                  glow 
+                  neonColor={social.color === "blue" ? "blue" : "purple"} 
+                  className="h-full border-white/5 group-hover:border-white/20 relative"
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl -z-10" 
+                    style={{ backgroundColor: social.glowColor }}
+                  />
                   
-                  <div className="mb-4">
-                    <h3 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-gradient">
-                      {social.name}
-                    </h3>
-                    <p className="text-accent-cyan text-xs font-black uppercase tracking-widest mt-1">
-                      {social.platform}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all">
+                      {social.icon}
+                    </div>
+                    
+                    <div className="mb-4">
+                      <h3 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-gradient">
+                        {social.name}
+                      </h3>
+                      <p className="text-accent-cyan text-xs font-black uppercase tracking-widest mt-1">
+                        {social.platform}
+                      </p>
+                    </div>
+
+                    <p className="text-gray-400 text-sm font-light leading-relaxed mb-8">
+                      {social.desc}
                     </p>
+
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="mt-auto px-8 py-3 rounded-xl border border-white/10 glass-card text-xs font-black uppercase tracking-widest group-hover:bg-white group-hover:text-dark transition-all"
+                    >
+                      Visit Profile
+                    </motion.div>
                   </div>
-
-                  <p className="text-gray-400 text-sm font-light leading-relaxed mb-8">
-                    {social.desc}
-                  </p>
-
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="mt-auto px-8 py-3 rounded-xl border border-white/10 glass-card text-xs font-black uppercase tracking-widest group-hover:bg-white group-hover:text-dark transition-all"
-                  >
-                    Visit Profile
-                  </motion.div>
-                </div>
-              </GlassCard>
-            </motion.a>
-          ))}
+                </GlassCard>
+              </motion.a>
+            ))}
+          </div>
+          {/* Edge Fade */}
+          <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
         </div>
+        <ScrollDots count={3} activeIndex={socialIndex} color="purple" />
       </section>
 
       {/* 3 Featured Videos Section */}
-      <section className="py-16 md:py-24 px-6 relative bg-white/[0.01] min-h-[50vh] md:min-h-[60vh]">
+      <section className="py-10 md:py-16 px-6 relative bg-white/[0.01]">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 md:mb-16 text-center md:text-left">
             <div>
@@ -335,37 +369,46 @@ export default function LandingPage() {
             </button>
           </motion.div>
 
-          <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory">
-            {featuredVideos.map((video, i) => (
-              <Link key={i} to={`/video/${video.id}`} className="min-w-[300px] md:min-w-0 snap-center">
-                <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
-                  <div className="relative aspect-video overflow-hidden rounded-t-2xl">
-                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
-                        <Play className="text-white fill-current ml-1" />
+          <div className="relative group/scroll">
+            <div 
+              ref={videoRef}
+              onScroll={() => handleScroll(videoRef, setVideoIndex, featuredVideos.length)}
+              className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
+            >
+              {featuredVideos.map((video, i) => (
+                <Link key={i} to={`/video/${video.id}`} className="min-w-[300px] md:min-w-0 snap-center">
+                  <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
+                    <div className="relative aspect-video overflow-hidden rounded-t-2xl">
+                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
+                          <Play className="text-white fill-current ml-1" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
+                        <Clock size={12} className="text-accent-cyan" /> {video.duration}
                       </div>
                     </div>
-                    <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
-                      <Clock size={12} className="text-accent-cyan" /> {video.duration}
+                    <div className="p-8">
+                      <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
+                      <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
+                        <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.semester} module</span>
+                        <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-8">
-                    <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
-                    <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
-                      <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.semester} module</span>
-                      <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
-                    </div>
-                  </div>
-                </GlassCard>
-              </Link>
-            ))}
+                  </GlassCard>
+                </Link>
+              ))}
+            </div>
+            {/* Edge Fade */}
+            <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
           </div>
+          <ScrollDots count={featuredVideos.length} activeIndex={videoIndex} color="blue" />
         </div>
       </section>
 
       {/* 4 Instagram Reels Section */}
-      <section className="py-24 px-6 relative overflow-hidden">
+      <section className="py-16 md:py-20 px-6 relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeInUp} className="flex items-center gap-4 mb-12">
             <h2 className="text-3xl font-black glow-text italic">Quick Concepts ⚡</h2>
@@ -390,7 +433,7 @@ export default function LandingPage() {
       </section>
 
       {/* 5 How it Works Section */}
-      <section className="py-24 px-6 max-w-7xl mx-auto relative border-y border-white/5 min-h-[60vh]">
+      <section className="py-16 md:py-20 px-6 max-w-7xl mx-auto relative border-y border-white/5">
         <motion.div {...fadeInUp} className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text italic underline decoration-accent-purple/30 underline-offset-8">The HUD Logic</h2>
           <p className="text-gray-400 text-lg font-light">Download knowledge into your long-term memory in three steps.</p>
@@ -417,7 +460,7 @@ export default function LandingPage() {
       {/* ... Rest of the sections remain same and styled ... */}
       
       {/* 6 Why ConceptsIn5 Section */}
-      <section className="py-32 px-6 relative overflow-hidden bg-grid opacity-50 min-h-[60vh]">
+      <section className="py-20 md:pb-24 px-6 relative overflow-hidden bg-grid opacity-50">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-20 items-center">
             <motion.div {...fadeInUp}>
@@ -470,7 +513,7 @@ export default function LandingPage() {
       </section>
 
       {/* 7 Creator Section */}
-      <section id="about" className="py-32 px-6 max-w-6xl mx-auto relative content-center min-h-[60vh]">
+      <section id="about" className="py-20 md:py-24 px-6 max-w-6xl mx-auto relative content-center">
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-accent-blue/10 blur-[100px] -z-10" />
         
         <GlassCard className="flex flex-col lg:flex-row items-center gap-16 p-12 lg:p-20 border-accent-purple/10 bg-white/[0.01]">

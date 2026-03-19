@@ -18,9 +18,12 @@ import {
   Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import GlassCard from '../components/GlassCard';
+import ScrollDots from '../components/ScrollDots';
 import { subjects } from '../data/subjects';
 import { videos } from '../data/videos';
-import GlassCard from '../components/GlassCard';
+
+const cn = (...classes) => classes.filter(Boolean).join(' ');
 
 function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
   const fadeInUp = {
@@ -116,11 +119,17 @@ function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
   );
 }
 
-function cn(...inputs) {
-  return inputs.filter(Boolean).join(' ');
-}
-
 export default function SubjectPage() {
+  const [roadmapIndex, setRoadmapIndex] = useState(0);
+  const roadmapRef = useRef(null);
+
+  const handleScroll = (ref, setIndex, itemCount) => {
+    if (!ref.current) return;
+    const scrollLeft = ref.current.scrollLeft;
+    const width = ref.current.offsetWidth;
+    const index = Math.round(scrollLeft / (width * 0.8));
+    setIndex(Math.min(index, itemCount - 1));
+  };
   const { id } = useParams();
   const navigate = useNavigate();
   const subject = useMemo(() => subjects.find(s => s.id === id), [id]);
@@ -293,7 +302,12 @@ export default function SubjectPage() {
                 <h3 className="text-2xl font-black italic tracking-tight">Mission Path</h3>
               </motion.div>
 
-              <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-6 lg:pb-0 scrollbar-hide">
+              <div className="relative group/scroll">
+                <div 
+                  ref={roadmapRef}
+                  onScroll={() => handleScroll(roadmapRef, setRoadmapIndex, subject.roadmap.length)}
+                  className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-6 lg:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 lg:pr-0"
+                >
                 {/* Connecting Line (Desktop Only) */}
                 <div className="hidden lg:block absolute left-[23px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-accent-purple via-accent-blue to-accent-cyan opacity-20" />
                 
@@ -319,9 +333,14 @@ export default function SubjectPage() {
                     </div>
                   </motion.div>
                 ))}
+                </div>
+                {/* Edge Fade */}
+                <div className="absolute top-0 right-0 bottom-6 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none lg:hidden" />
               </div>
+              <ScrollDots count={subject.roadmap.length} activeIndex={roadmapIndex} color="purple" />
+            </div>
 
-              {/* HUD Summary Card */}
+            {/* HUD Summary Card */}
               <div className="mt-8 p-8 glass-card border-accent-blue/10 bg-accent-blue/[0.01]">
                 <div className="flex items-center gap-3 mb-4 text-accent-blue">
                   <Award size={20} />
@@ -332,7 +351,6 @@ export default function SubjectPage() {
                 </div>
                 <p className="text-[10px] text-gray-500 font-medium italic">Begin Mission 01 to initialize progress data.</p>
               </div>
-            </div>
           </aside>
 
           {/* B. Video Grid & Highlights */}
