@@ -73,7 +73,7 @@ export default function LandingPage() {
   return (
     <div className="relative">
       {/* 1 Hero Section */}
-      <section className="relative pt-40 pb-32 px-6 overflow-hidden min-h-screen flex items-center">
+      <section className="relative pt-20 md:pt-40 pb-20 md:pb-32 px-6 overflow-hidden min-h-[70vh] md:min-h-screen flex items-center">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent-purple/10 blur-[150px] animate-pulse-glow" />
         
@@ -92,28 +92,28 @@ export default function LandingPage() {
               Initializing Intelligence v2.0
             </motion.div>
             
-            <h1 className="text-5xl md:text-8xl font-black mb-8 leading-tight tracking-tighter">
+            <h1 className="text-3xl sm:text-4xl md:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tighter text-center lg:text-left">
               From <span className="text-gradient">Confusion</span> <br />
               to Clarity in Mins
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-xl font-light leading-relaxed">
+            <p className="text-lg md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-xl font-light leading-relaxed text-center lg:text-left mx-auto lg:mx-0">
               Understand AI, coding, and semester subjects with structured videos, 
               notes, and exam-ready content.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center lg:justify-start">
               <motion.button 
                 whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(0, 240, 255, 0.4)" }}
                 whileTap={{ scale: 0.95 }}
-                className="group px-10 py-5 bg-gradient-to-r from-accent-blue to-accent-purple rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_40px_rgba(123,97,255,0.2)]"
+                className="group px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-accent-blue to-accent-purple rounded-2xl font-black text-white text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_10px_40px_rgba(123,97,255,0.2)]"
               >
                 Start Learning <ArrowRight className="group-hover:translate-x-1 transition-transform" />
               </motion.button>
               <motion.button 
                 whileHover={{ backgroundColor: "rgba(255,255,255,0.1)", scale: 1.02 }}
                 onClick={() => document.getElementById('categories').scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all flex items-center gap-2"
+                className="px-8 md:px-10 py-4 md:py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2 text-base md:text-lg"
               >
                  Explore Categories <Layers className="w-5 h-5" />
               </motion.button>
@@ -124,7 +124,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="relative"
+            className="relative max-w-[280px] md:max-w-none mx-auto lg:mx-0"
           >
             <div className="absolute -inset-4 bg-gradient-to-tr from-accent-blue via-accent-purple to-accent-cyan rounded-[3rem] blur-3xl opacity-20 animate-pulse-glow" />
             
@@ -186,15 +186,15 @@ export default function LandingPage() {
       </section>
 
       {/* 2 Main Categories Section */}
-      <section id="categories" className="py-24 px-6 relative max-w-7xl mx-auto min-h-[60vh]">
-        <motion.div {...fadeInUp} className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text italic">Select Mission</h2>
-          <p className="text-gray-400 text-lg">Main entry points into the hive of knowledge.</p>
+      <section id="categories" className="py-16 md:py-24 px-6 relative max-w-7xl mx-auto min-h-[50vh] md:min-h-[60vh]">
+        <motion.div {...fadeInUp} className="text-center mb-12 md:mb-20">
+          <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text italic">Select Mission</h2>
+          <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory">
           {categories.map((cat, i) => (
-            <Link to={`/category/${cat.id}`} key={cat.id}>
+            <Link to={`/category/${cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -229,14 +229,14 @@ export default function LandingPage() {
       <section className="py-12 px-6 relative max-w-7xl mx-auto overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-accent-purple/5 blur-[120px] rounded-full -z-10" />
         
-        <motion.div {...fadeInUp} className="text-center mb-16">
+        <motion.div {...fadeInUp} className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-black mb-4 glow-text italic">Connect & Learn Beyond the Platform</h2>
-          <p className="text-gray-400 text-lg font-light max-w-2xl mx-auto">
+          <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto">
             Explore more content, updates, and learning resources across our social platforms.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory">
           {[
             {
               platform: "YouTube",
@@ -278,7 +278,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="group block"
+              className="group block min-w-[300px] md:min-w-0 snap-center"
             >
               <GlassCard 
                 glow 
@@ -323,21 +323,21 @@ export default function LandingPage() {
       </section>
 
       {/* 3 Featured Videos Section */}
-      <section className="py-24 px-6 relative bg-white/[0.01] min-h-[60vh]">
+      <section className="py-16 md:py-24 px-6 relative bg-white/[0.01] min-h-[50vh] md:min-h-[60vh]">
         <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 md:mb-16 text-center md:text-left">
             <div>
-              <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text tracking-tighter italic">Start Learning</h2>
-              <p className="text-gray-400 text-lg font-light">High-density engineering concepts in 5-minute packets.</p>
+              <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text tracking-tighter italic">Start Learning</h2>
+              <p className="text-gray-400 text-base md:text-lg font-light">High-density engineering concepts in 5-minute packets.</p>
             </div>
             <button className="px-8 py-3 glass-card border-white/10 text-xs font-black uppercase tracking-widest text-accent-cyan hover:text-white transition-colors">
               View All Content
             </button>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory">
             {featuredVideos.map((video, i) => (
-              <Link key={i} to={`/video/${video.id}`}>
+              <Link key={i} to={`/video/${video.id}`} className="min-w-[300px] md:min-w-0 snap-center">
                 <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
                   <div className="relative aspect-video overflow-hidden rounded-t-2xl">
                     <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
