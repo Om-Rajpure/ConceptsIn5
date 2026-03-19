@@ -1,12 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowRight } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, ArrowRight, Search, Play, BookOpen, Target } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { globalSearch } from '../utils/search';
+import { subjects } from '../data/subjects';
+import { videos } from '../data/videos';
+import { notes } from '../data/notes';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Live suggestions logic
+  const suggestions = useMemo(() => {
+    if (searchQuery.length < 2) return { subjects: [], videos: [], notes: [] };
+    const results = globalSearch(searchQuery, { subjects, videos, notes });
+    return {
+      subjects: results.subjects.slice(0, 2),
+      videos: results.videos.slice(0, 2),
+      notes: results.notes.slice(0, 2)
+    };
+  }, [searchQuery]);
+
+  const hasSuggestions = suggestions.subjects.length > 0 || suggestions.videos.length > 0 || suggestions.notes.length > 0;
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setIsSearchFocused(false);
+      setSearchQuery("");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,24 +75,96 @@ export default function Navbar() {
           </motion.div>
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex gap-8 items-center">
-          {navLinks.map((link, i) => (
-            <motion.div
-              key={link.name}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Link
-                to={link.href}
-                className="text-sm font-medium text-gray-400 hover:text-white transition-colors relative group"
+        {/* Desktop Search & Links */}
+        <div className="hidden md:flex gap-8 items-center flex-1 justify-center max-w-2xl px-8">
+          {/* Search Bar */}
+          <div className="relative w-full max-w-md group">
+            <form onSubmit={handleSearch} className="relative">
+              <input 
+                type="text"
+                placeholder="Search topics..."
+                className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs text-white placeholder:text-gray-500 focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/50 transition-all"
+                value={searchQuery}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-3.5 h-3.5 group-focus-within:text-accent-blue transition-colors" />
+            </form>
+
+            {/* Suggestions Dropdown */}
+            <AnimatePresence>
+              {isSearchFocused && hasSuggestions && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-0 w-full mt-2 bg-dark/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50 overflow-hidden"
+                >
+                  <div className="space-y-4">
+                    {suggestions.subjects.map(s => (
+                      <Link key={s.id} to={`/subject/${s.id}`} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors group">
+                        <div className="p-1.5 bg-accent-purple/10 rounded text-accent-purple border border-accent-purple/20">
+                          <Target size={14} />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="text-[10px] text-white font-bold truncate">{s.title}</div>
+                          <div className="text-[8px] text-gray-500 uppercase tracking-widest">{s.subcategory}</div>
+                        </div>
+                      </Link>
+                    ))}
+                    {suggestions.videos.map(v => (
+                      <Link key={v.id} to={`/video/${v.id}`} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
+                        <div className="p-1.5 bg-accent-blue/10 rounded text-accent-blue border border-accent-blue/20">
+                          <Play size={14} />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="text-[10px] text-white font-bold truncate">{v.title}</div>
+                          <div className="text-[8px] text-gray-500 uppercase tracking-widest">Video Module</div>
+                        </div>
+                      </Link>
+                    ))}
+                    {suggestions.notes.map(n => (
+                      <Link key={n.id} to={`/notes?id=${n.id}`} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
+                        <div className="p-1.5 bg-accent-cyan/10 rounded text-accent-cyan border border-accent-cyan/20">
+                          <BookOpen size={14} />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="text-[10px] text-white font-bold truncate">{n.title}</div>
+                          <div className="text-[8px] text-gray-500 uppercase tracking-widest">Study Note</div>
+                        </div>
+                      </Link>
+                    ))}
+                    <button 
+                      onClick={handleSearch}
+                      className="w-full pt-2 mt-2 border-t border-white/5 text-[9px] font-black text-accent-blue uppercase tracking-[0.2em] text-center hover:text-white transition-colors"
+                    >
+                      View All Results
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="flex gap-6 shrink-0">
+            {navLinks.map((link, i) => (
+              <motion.div
+                key={link.name}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
               >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
-              </Link>
-            </motion.div>
-          ))}
+                <Link
+                  to={link.href}
+                  className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
+                >
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {/* CTA Button */}
@@ -98,6 +199,17 @@ export default function Navbar() {
             className="md:hidden bg-dark/95 backdrop-blur-2xl border-b border-white/10 overflow-hidden"
           >
             <div className="flex flex-col gap-4 p-6">
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch} className="relative mb-4">
+                <input 
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-accent-blue transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+              </form>
               {navLinks.map((link) => (
                 <Link
                   key={link.name}

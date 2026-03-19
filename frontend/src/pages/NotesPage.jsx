@@ -20,6 +20,7 @@ import { notes } from '../data/notes';
 import { subjects as allSubjects } from '../data/subjects';
 import { videos } from '../data/videos';
 import { categories } from '../data/categories';
+import { globalSearch } from '../utils/search';
 import GlassCard from '../components/GlassCard';
 
 const fadeInUp = {
@@ -53,21 +54,20 @@ export default function NotesPage() {
   const types = ["All", ...new Set(notes.map(n => n.type).filter(Boolean))];
 
   const filteredNotes = useMemo(() => {
-    return notes.filter(note => {
+    // Use globalSearch for the query part
+    const searchResults = globalSearch(searchQuery, { subjects: allSubjects, videos, notes });
+    
+    // Further filter by other dropdowns
+    return searchResults.notes.filter(note => {
       const subject = allSubjects.find(s => s.id === note.subjectId);
       if (!subject) return false;
 
-      const matchesSearch = 
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        subject.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
       const matchesCategory = selectedCategory === "All" || subject.category === selectedCategory;
       const matchesSubcategory = selectedSubcategory === "All" || subject.subcategory === selectedSubcategory;
       const matchesSubject = selectedSubject === "All" || note.subjectId === selectedSubject;
       const matchesType = selectedType === "All" || note.type === selectedType;
 
-      return matchesSearch && matchesCategory && matchesSubcategory && matchesSubject && matchesType;
+      return matchesCategory && matchesSubcategory && matchesSubject && matchesType;
     });
   }, [searchQuery, selectedCategory, selectedSubcategory, selectedSubject, selectedType]);
 
