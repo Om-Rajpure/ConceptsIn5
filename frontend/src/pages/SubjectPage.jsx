@@ -226,7 +226,7 @@ export default function SubjectPage() {
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.6 }}
                 >
-                  <GlassCard className="p-0 border-white/5 overflow-hidden group hover:bg-white/[0.02] flex flex-col md:flex-row gap-0">
+                  <GlassCard className="p-0 border-white/10 overflow-hidden group hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] transition-all flex flex-col md:flex-row gap-0">
                     {/* Thumbnail Section */}
                     <Link to={`/video/${video.id}`} className="md:w-1/3 relative aspect-video overflow-hidden">
                       <img 
@@ -253,7 +253,7 @@ export default function SubjectPage() {
                           </span>
                         ))}
                       </div>
-                      <h3 className="text-2xl font-black mb-4 group-hover:text-accent-blue transition-colors italic">{video.title}</h3>
+                      <h3 className="text-2xl font-black mb-4 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{video.title}</h3>
                       <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-xl font-light">
                         {video.description}
                       </p>

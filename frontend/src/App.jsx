@@ -8,7 +8,9 @@ import Navbar from './components/Navbar';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import SubjectPage from './pages/SubjectPage';
+import CategoryPage from './pages/CategoryPage';
 import TopicPage from './pages/TopicPage';
+import NotesPage from './pages/NotesPage';
 
 const VideoDetailPage = () => (
   <div className="pt-40 pb-20 px-6 text-center">
@@ -26,8 +28,10 @@ export default function App() {
         
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/category/:id" element={<CategoryPage />} />
           <Route path="/subject/:id" element={<SubjectPage />} />
           <Route path="/topic/:id" element={<TopicPage />} />
+          <Route path="/notes" element={<NotesPage />} />
           <Route path="/video/:id" element={<VideoDetailPage />} />
         </Routes>
 

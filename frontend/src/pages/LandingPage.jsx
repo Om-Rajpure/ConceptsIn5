@@ -13,7 +13,9 @@ import {
   Video,
   Layers,
   Award,
-  Users
+  Users,
+  ChevronRight,
+  Target
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
@@ -21,29 +23,29 @@ import GlassCard from '../components/GlassCard';
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
+  viewport: { once: true, margin: "-100px" },
   transition: { duration: 0.8, ease: "easeOut" }
 };
 
 const categories = [
   { 
-    id: "statistics",
+    id: "semester",
     title: "Semester Subjects", 
     desc: "Precision notes for DBMS, OS, Stats, and more.",
     image: "/images/cat_subjects.png",
     color: "blue"
   },
   { 
-    id: "machine-learning",
+    id: "ai-ml",
     title: "AI / ML", 
     desc: "Master neural networks and AI logic in minutes.",
     image: "/images/cat_ai.png",
     color: "purple"
   },
   { 
-    id: "web-computing",
+    id: "web-dev",
     title: "Web Development", 
-    desc: "From HTTP to React. Rapid-fire web engineering.",
+    desc: "From HTML to React. Rapid-fire web engineering.",
     image: "/images/cat_web.png",
     color: "cyan"
   },
@@ -60,19 +62,19 @@ const featuredVideos = [
   {
     title: "DBMS Normalization in 5 Mins",
     duration: "4:58",
-    thumbnail: "https://img.youtube.com/vi/placeholder1/maxresdefault.jpg",
+    thumbnail: "/images/v_thumb_dbms.png",
     views: "12k"
   },
   {
     title: "How Neural Networks Actually Work",
     duration: "5:12",
-    thumbnail: "https://img.youtube.com/vi/placeholder2/maxresdefault.jpg",
+    thumbnail: "/images/v_thumb_nn.png",
     views: "8k"
   },
   {
     title: "React Hooks Simplified",
     duration: "5:45",
-    thumbnail: "https://img.youtube.com/vi/placeholder3/maxresdefault.jpg",
+    thumbnail: "/images/v_thumb_react.png",
     views: "15k"
   }
 ];
@@ -85,7 +87,7 @@ const reels = [
 
 export default function LandingPage() {
   return (
-    <>
+    <div className="relative">
       {/* 1 Hero Section */}
       <section className="relative pt-40 pb-32 px-6 overflow-hidden min-h-screen flex items-center">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
@@ -141,15 +143,43 @@ export default function LandingPage() {
             className="relative"
           >
             <div className="absolute -inset-4 bg-gradient-to-tr from-accent-blue via-accent-purple to-accent-cyan rounded-[3rem] blur-3xl opacity-20 animate-pulse-glow" />
-            <div className="glass-card p-4 border-white/10 relative overflow-hidden group">
-              <img 
-                src="/images/hero_bg.png" 
-                alt="AI Learning" 
-                className="rounded-2xl w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-transparent to-transparent opacity-60" />
-              
-              {/* Floating elements inside image frame */}
+            
+            {/* Custom AI-Human Fusion Image UI */}
+            <div className="glass-card p-2 border-white/10 relative overflow-hidden group rounded-[2.5rem] shadow-2xl">
+              <div className="relative aspect-[4/5] md:aspect-square overflow-hidden rounded-[2rem]">
+                {/* Real Human Side */}
+                <img 
+                  src="/Owner.jpeg" 
+                  alt="Founder" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
+                
+                {/* AI Fusion Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/10 to-accent-purple/30 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(0,240,255,0.2)_0%,transparent_70%)]" />
+                
+                {/* Futuristic HUD Elements */}
+                <div className="absolute inset-0 border-[0.5px] border-white/10 rounded-[2rem] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-accent-blue/5 backdrop-blur-[2px] border-l border-white/10" />
+                
+                {/* Circuit/Glow Detail */}
+                <div className="absolute top-1/2 right-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue to-transparent opacity-30" />
+                <div className="absolute top-0 right-1/4 w-[1px] h-full bg-gradient-to-b from-transparent via-accent-purple to-transparent opacity-30" />
+                
+                <div className="absolute bottom-8 left-8 right-8 p-4 glass-card border-white/10 bg-dark/60 backdrop-blur-md">
+                   <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-accent-blue/20 flex items-center justify-center border border-accent-blue/40">
+                         <Zap size={14} className="text-accent-blue animate-pulse" />
+                      </div>
+                      <div>
+                         <div className="text-[10px] font-black text-white uppercase tracking-widest">AI + Human Clarity</div>
+                         <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Neural Sync Optimized</div>
+                      </div>
+                   </div>
+                </div>
+              </div>
+
+              {/* Float Effect Elements */}
               <motion.div 
                 animate={{ y: [0, -15, 0] }}
                 transition={{ duration: 4, repeat: Infinity }}
@@ -157,13 +187,21 @@ export default function LandingPage() {
               >
                 <Sparkles className="text-accent-blue" />
               </motion.div>
+              
+              <motion.div 
+                animate={{ y: [0, 15, 0] }}
+                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                className="absolute bottom-20 -left-10 p-4 glass-card border-accent-purple/30 backdrop-blur-md hidden lg:block"
+              >
+                <div className="text-accent-purple font-black text-[10px] uppercase tracking-tighter italic">Powered by Clarity</div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* 2 Main Categories Section */}
-      <section id="categories" className="py-24 px-6 relative max-w-7xl mx-auto">
+      <section id="categories" className="py-24 px-6 relative max-w-7xl mx-auto min-h-[60vh]">
         <motion.div {...fadeInUp} className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text italic">Select Mission</h2>
           <p className="text-gray-400 text-lg">Main entry points into the hive of knowledge.</p>
@@ -171,7 +209,7 @@ export default function LandingPage() {
         
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {categories.map((cat, i) => (
-            <Link to={`/subject/${cat.id}`} key={cat.id}>
+            <Link to={`/category/${cat.id}`} key={cat.id}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -179,18 +217,18 @@ export default function LandingPage() {
                 transition={{ delay: i * 0.1 }}
                 className="group h-full"
               >
-                <GlassCard glow neonColor={cat.color} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/30">
-                  <div className="relative h-48 overflow-hidden">
+                <GlassCard glow neonColor={cat.color} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
+                  <div className="relative aspect-video overflow-hidden">
                     <img 
                       src={cat.image} 
                       alt={cat.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
                   </div>
                   <div className="p-8 flex flex-col flex-1">
-                    <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic">{cat.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-6">{cat.desc}</p>
+                    <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.title}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light">{cat.desc}</p>
                     <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
                       Initialize <ArrowRight size={14} />
                     </div>
@@ -203,12 +241,12 @@ export default function LandingPage() {
       </section>
 
       {/* 3 Featured Videos Section */}
-      <section className="py-24 px-6 relative bg-white/[0.01]">
+      <section className="py-24 px-6 relative bg-white/[0.01] min-h-[60vh]">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
             <div>
-              <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text tracking-tighter">Start Learning</h2>
-              <p className="text-gray-400 text-lg">High-density engineering concepts in 5-minute packets.</p>
+              <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text tracking-tighter italic">Start Learning</h2>
+              <p className="text-gray-400 text-lg font-light">High-density engineering concepts in 5-minute packets.</p>
             </div>
             <button className="px-8 py-3 glass-card border-white/10 text-xs font-black uppercase tracking-widest text-accent-cyan hover:text-white transition-colors">
               View All Content
@@ -217,23 +255,23 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {featuredVideos.map((video, i) => (
-              <GlassCard key={i} className="p-0 border-white/5 group bg-white/[0.02] hover:bg-white/[0.04]">
+              <GlassCard key={i} className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
                 <div className="relative aspect-video overflow-hidden rounded-t-2xl">
-                  <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue transition-all">
+                    <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
                       <Play className="text-white fill-current ml-1" />
                     </div>
                   </div>
-                  <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded text-[10px] font-black text-white flex items-center gap-1">
-                    <Clock size={12} /> {video.duration}
+                  <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
+                    <Clock size={12} className="text-accent-cyan" /> {video.duration}
                   </div>
                 </div>
                 <div className="p-8">
-                  <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1">{video.title}</h3>
-                  <div className="flex justify-between items-center text-gray-500 text-xs font-bold uppercase tracking-widest">
+                  <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
+                  <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
                     <span className="flex items-center gap-1.5"><Users size={14} /> {video.views} Learned</span>
-                    <span className="text-accent-cyan">Deploy <ChevronRight size={14} className="inline ml-1" /></span>
+                    <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
                   </div>
                 </div>
               </GlassCard>
@@ -251,6 +289,7 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide">
+            {/* Using mock thumbnails for reels */}
             {reels.map((reel, i) => (
               <GlassCard key={i} className="min-w-[200px] md:min-w-[240px] p-0 border-white/5 group relative aspect-[9/16] overflow-hidden">
                 <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -258,7 +297,7 @@ export default function LandingPage() {
                   <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 group-hover:bg-accent-purple transition-all">
                     <Zap size={20} className="text-white fill-current" />
                   </div>
-                  <h4 className="font-black text-sm text-white group-hover:text-accent-purple transition-colors uppercase tracking-widest">{reel.title}</h4>
+                  <h4 className="font-black text-sm text-white group-hover:text-accent-purple transition-colors uppercase tracking-widest italic">{reel.title}</h4>
                 </div>
               </GlassCard>
             ))}
@@ -267,10 +306,10 @@ export default function LandingPage() {
       </section>
 
       {/* 5 How it Works Section */}
-      <section className="py-24 px-6 max-w-7xl mx-auto relative border-y border-white/5">
+      <section className="py-24 px-6 max-w-7xl mx-auto relative border-y border-white/5 min-h-[60vh]">
         <motion.div {...fadeInUp} className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text italic underline decoration-accent-purple/30 underline-offset-8">The HUD Logic</h2>
-          <p className="text-gray-400 text-lg">Download knowledge into your long-term memory in three steps.</p>
+          <p className="text-gray-400 text-lg font-light">Download knowledge into your long-term memory in three steps.</p>
         </motion.div>
         
         <div className="grid md:grid-cols-3 gap-10">
@@ -279,20 +318,22 @@ export default function LandingPage() {
             { step: "MISSION 02", title: "Watch & Ingest", desc: "Absorb core concepts via 5-minute high-octane video data.", icon: <Video className="text-accent-purple" />, color: "purple" },
             { step: "MISSION 03", title: "Revise & Conquer", desc: "Secure your grades with lethal cheat sheets and notes.", icon: <CheckCircle2 className="text-accent-cyan" />, color: "blue" },
           ].map((item, i) => (
-            <GlassCard key={i} glow neonColor={item.color} className="p-10 group bg-white/[0.01]">
-              <div className="text-xs font-black text-accent-purple/60 mb-6 tracking-widest">{item.step}</div>
+            <GlassCard key={i} glow neonColor={item.color} className="p-10 group bg-white/[0.01] hover:bg-white/[0.03] transition-all">
+              <div className="text-[10px] font-black text-accent-purple/60 mb-6 tracking-[0.3em] uppercase">{item.step}</div>
               <div className="p-5 bg-white/5 rounded-2xl inline-block mb-6 border border-white/5 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all">
                 {item.icon}
               </div>
-              <h3 className="text-2xl font-black mb-4 transition-colors italic">{item.title}</h3>
+              <h3 className="text-2xl font-black mb-4 transition-colors italic uppercase tracking-tighter">{item.title}</h3>
               <p className="text-gray-400 text-base leading-relaxed font-light">{item.desc}</p>
             </GlassCard>
           ))}
         </div>
       </section>
 
+      {/* ... Rest of the sections remain same and styled ... */}
+      
       {/* 6 Why ConceptsIn5 Section */}
-      <section className="py-32 px-6 relative overflow-hidden bg-grid opacity-50">
+      <section className="py-32 px-6 relative overflow-hidden bg-grid opacity-50 min-h-[60vh]">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-20 items-center">
             <motion.div {...fadeInUp}>
@@ -345,7 +386,7 @@ export default function LandingPage() {
       </section>
 
       {/* 7 Creator Section */}
-      <section id="about" className="py-32 px-6 max-w-6xl mx-auto relative">
+      <section id="about" className="py-32 px-6 max-w-6xl mx-auto relative content-center min-h-[60vh]">
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-accent-blue/10 blur-[100px] -z-10" />
         
         <GlassCard className="flex flex-col lg:flex-row items-center gap-16 p-12 lg:p-20 border-accent-purple/10 bg-white/[0.01]">
@@ -389,7 +430,7 @@ export default function LandingPage() {
       </section>
 
       {/* 8 Final CTA Section */}
-      <section className="py-40 px-6 relative text-center overflow-hidden">
+      <section className="py-40 px-6 relative text-center overflow-hidden min-h-[60vh] flex items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.1)_0%,transparent_70%)]" />
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.h2 
@@ -411,46 +452,6 @@ export default function LandingPage() {
           </motion.button>
         </div>
       </section>
-    </>
-  );
-}
-
-function ChevronRight(props) {
-  return (
-    <svg 
-      {...props}
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="m9 18 6-6-6-6"/>
-    </svg>
-  );
-}
-
-function Target(props) {
-  return (
-    <svg 
-      {...props}
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10"/>
-      <circle cx="12" cy="12" r="6"/>
-      <circle cx="12" cy="12" r="2"/>
-    </svg>
+    </div>
   );
 }

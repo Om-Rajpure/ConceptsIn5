@@ -141,5 +141,19 @@ export const subjects = [
         notes: "Automate your presence. High signal for recruiters."
       }
     ]
-  }
+  },
+  // Skeleton Data for New Subjects
+  ...[
+    "cn", "se", "cloud-computing", "ai-basics", "dl-intro", "gen-ai-llm", "ai-agents",
+    "frontend-basics", "node-express", "web-security", "aws-basics",
+    "timetable-gen", "vaccines-app", "facultymind", "dbms", "os"
+  ].map(id => ({
+    id,
+    name: id.toUpperCase().replace(/-/g, ' '),
+    description: `Master ${id} with structured videos and notes.`,
+    duration: "Varies",
+    roadmap: [{ id: "temp", title: "Introduction" }],
+    importantTopics: ["Topic 1", "Topic 2"],
+    videos: [{ id: "temp", title: "Coming Soon", description: "Module incoming.", youtube: "", thumbnail: "https://img.youtube.com/vi/placeholder/maxresdefault.jpg", duration: "5:00", topics: ["Intro"], notes: "Notes coming soon." }]
+  }))
 ];
