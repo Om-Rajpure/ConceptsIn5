@@ -12,6 +12,7 @@ import CategoryPage from './pages/CategoryPage';
 import TopicPage from './pages/TopicPage';
 import NotesPage from './pages/NotesPage';
 import VideoPage from './pages/VideoPage';
+import AboutPage from './pages/AboutPage';
 
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/topic/:id" element={<TopicPage />} />
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/video/:id" element={<VideoPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
 
         {/* Global Footer (Common to all pages) */}
