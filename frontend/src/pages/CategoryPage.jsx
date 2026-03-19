@@ -34,13 +34,13 @@ export default function CategoryPage() {
     // Filter subjects belonging to this category
     const categorySubjects = allSubjects.filter(s => s.category === id);
     
-    // Find unique groups within these subjects
-    const groups = [...new Set(categorySubjects.map(s => s.group))];
+    // Find unique subcategories within these subjects
+    const subcategories = [...new Set(categorySubjects.map(s => s.subcategory))];
     
-    return groups.map(groupName => ({
-      name: groupName,
+    return subcategories.map(subName => ({
+      name: subName,
       items: categorySubjects
-        .filter(s => s.group === groupName)
+        .filter(s => s.subcategory === subName)
         .map(s => ({
           ...s,
           videoCount: videos.filter(v => v.subjectId === s.id).length,

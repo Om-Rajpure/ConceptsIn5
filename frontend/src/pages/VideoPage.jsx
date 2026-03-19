@@ -65,10 +65,10 @@ export default function VideoPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
     // Save progress for the "Continue Learning" feature
-    if (subject?.id && video?.id) {
-      localStorage.setItem(`watched_${subject.id}`, video.id);
+    if (context?.subject?.id && context?.video?.id) {
+      localStorage.setItem(`watched_${context.subject.id}`, context.video.id);
     }
-  }, [id, subject?.id, video?.id]);
+  }, [id, context?.subject?.id, context?.video?.id]);
 
   if (!context) {
     return (
@@ -91,7 +91,7 @@ export default function VideoPage() {
 
       <section className="pt-32 px-6 max-w-7xl mx-auto relative z-10">
         <Link to={`/subject/${subject.id}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-accent-blue mb-8 transition-colors group px-4 py-2 glass-card border-white/5 text-[10px] font-black uppercase tracking-widest">
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {subject.name}
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {subject.title}
         </Link>
 
         {/* 1. Video Hero Section */}
@@ -144,7 +144,7 @@ export default function VideoPage() {
               <div className="glass-card p-4 border-white/5 bg-white/[0.02]">
                  <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Subject</div>
                  <div className="text-xl font-black text-white flex items-center gap-2">
-                    <Target size={16} className="text-accent-purple" /> {video.subject}
+                     <Target size={16} className="text-accent-purple" /> {subject.title}
                  </div>
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function VideoPage() {
 
         {/* 3. Related Videos */}
         <section className="mt-32 pt-20 border-t border-white/5">
-           <h2 className="text-3xl font-black italic mb-12 glow-text tracking-tighter uppercase">More in {subject.name}</h2>
+           <h2 className="text-3xl font-black italic mb-12 glow-text tracking-tighter uppercase">More in {subject.title}</h2>
            <div className="grid md:grid-cols-3 gap-8">
               {context.subjectVideos.filter(v => v.id !== id).slice(0, 3).map((v) => (
                 <Link key={v.id} to={`/video/${v.id}`}>

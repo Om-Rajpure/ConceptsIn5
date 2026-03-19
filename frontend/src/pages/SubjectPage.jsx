@@ -105,7 +105,7 @@ function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
           </div>
 
           <div className="mt-6 flex items-center justify-between pt-6 border-t border-white/5">
-             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.semester}</span>
+             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.subcategory}</span>
              <Link to={`/video/${video.id}`} className="flex items-center gap-2 text-accent-blue font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
                 Watch Module <ChevronRight size={14} />
              </Link>
@@ -220,7 +220,7 @@ export default function SubjectPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-5xl md:text-8xl font-black mb-8 leading-tight tracking-tighter italic"
               >
-                {subject.name}
+                {subject.title}
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, x: -30 }}
@@ -299,27 +299,21 @@ export default function SubjectPage() {
                 
                 {subject.roadmap.map((step, i) => (
                   <motion.div 
-                    key={step.id}
+                    key={i}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
-                    onClick={() => scrollToVideo(step.id)}
-                    className="relative lg:pb-12 group cursor-pointer flex-shrink-0"
+                    className="relative lg:pb-12 group cursor-default flex-shrink-0"
                   >
                     <div className="flex items-center gap-6">
-                      <div className={`relative z-10 w-5 h-5 rounded-full bg-dark border-2 transition-all duration-300 ${
-                        step.id === lastWatchedId ? "border-accent-cyan bg-accent-cyan shadow-[0_0_15px_#00F0FF]" : "border-accent-purple group-hover:bg-accent-purple"
-                      }`}>
+                      <div className="relative z-10 w-5 h-5 rounded-full bg-dark border-2 border-accent-purple transition-all duration-300 group-hover:bg-accent-purple">
                         <div className="absolute inset-0 bg-accent-purple rounded-full animate-ping opacity-0 group-hover:opacity-30" />
-                        {step.id === continueVideo?.id && (
-                          <div className="absolute inset-[-4px] border border-accent-blue/50 rounded-full animate-pulse" />
-                        )}
                       </div>
                       <div className="flex-1 whitespace-nowrap lg:whitespace-normal">
                         <div className="text-[9px] font-black text-gray-500 tracking-[0.2em] mb-1 group-hover:text-accent-purple transition-colors uppercase">Step {String(i + 1).padStart(2, '0')}</div>
                         <h4 className="font-bold text-gray-300 group-hover:text-white transition-all text-xs lg:text-sm uppercase tracking-wide">
-                          {step.title}
+                          {step}
                         </h4>
                       </div>
                     </div>

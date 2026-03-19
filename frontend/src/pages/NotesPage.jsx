@@ -32,7 +32,7 @@ const fadeInUp = {
 export default function NotesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedSemester, setSelectedSemester] = useState("All");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("All");
   const [selectedSubject, setSelectedSubject] = useState("All"); // This is subjectId
   const [selectedType, setSelectedType] = useState("All");
 
@@ -42,15 +42,15 @@ export default function NotesPage() {
 
   // Extract unique values for filters from centralized data
   const categoryOptions = ["All", ...new Set(categories.map(c => c.id))];
-  const semesterOptions = ["All", ...new Set(allSubjects.map(s => s.semester))];
+  const subcategoryOptions = ["All", ...new Set(allSubjects.map(s => s.subcategory))];
   const subjectOptions = useMemo(() => {
     const subs = allSubjects
       .filter(s => (selectedCategory === "All" || s.category === selectedCategory) && 
-                   (selectedSemester === "All" || s.semester === selectedSemester));
+                   (selectedSubcategory === "All" || s.subcategory === selectedSubcategory));
     return ["All", ...subs.map(s => s.id)];
-  }, [selectedCategory, selectedSemester]);
+  }, [selectedCategory, selectedSubcategory]);
   
-  const types = ["All", ...new Set(notes.map(n => n.type))];
+  const types = ["All", ...new Set(notes.map(n => n.type).filter(Boolean))];
 
   const filteredNotes = useMemo(() => {
     return notes.filter(note => {
@@ -63,18 +63,18 @@ export default function NotesPage() {
         note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       
       const matchesCategory = selectedCategory === "All" || subject.category === selectedCategory;
-      const matchesSemester = selectedSemester === "All" || subject.semester === selectedSemester;
+      const matchesSubcategory = selectedSubcategory === "All" || subject.subcategory === selectedSubcategory;
       const matchesSubject = selectedSubject === "All" || note.subjectId === selectedSubject;
       const matchesType = selectedType === "All" || note.type === selectedType;
 
-      return matchesSearch && matchesCategory && matchesSemester && matchesSubject && matchesType;
+      return matchesSearch && matchesCategory && matchesSubcategory && matchesSubject && matchesType;
     });
-  }, [searchQuery, selectedCategory, selectedSemester, selectedSubject, selectedType]);
+  }, [searchQuery, selectedCategory, selectedSubcategory, selectedSubject, selectedType]);
 
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All");
-    setSelectedSemester("All");
+    setSelectedSubcategory("All");
     setSelectedSubject("All");
     setSelectedType("All");
   };
@@ -142,10 +142,10 @@ export default function NotesPage() {
                   onChange={setSelectedCategory} 
                 />
                 <FilterSelect 
-                  label="Semester" 
-                  value={selectedSemester} 
-                  options={semesterOptions} 
-                  onChange={setSelectedSemester} 
+                  label="Subcategory" 
+                  value={selectedSubcategory} 
+                  options={subcategoryOptions} 
+                  onChange={setSelectedSubcategory} 
                 />
                 <FilterSelect 
                   label="Subject" 
@@ -168,7 +168,7 @@ export default function NotesPage() {
                 <QuickFilter label="Most Important" onClick={() => setSearchQuery("Normalization")} />
                 <QuickFilter label="Recently Added" onClick={() => setSelectedCategory("AI/ML")} />
                 <QuickFilter label="Exam Topics" onClick={() => setSelectedType("Theory")} />
-                {(searchQuery || selectedCategory !== "All" || selectedSemester !== "All" || selectedSubject !== "All" || selectedType !== "All") && (
+                {(searchQuery || selectedCategory !== "All" || selectedSubcategory !== "All" || selectedSubject !== "All" || selectedType !== "All") && (
                   <button 
                     onClick={clearFilters}
                     className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors ml-auto"
@@ -329,7 +329,7 @@ function NoteCard({ note }) {
           </div>
           
           <div className="mt-6 flex items-center justify-between pt-6 border-t border-white/5">
-             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.semester}</span>
+             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.subcategory}</span>
              <Link to={`/notes?id=${note.id}`} className="flex items-center gap-2 text-accent-blue font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
                 Detailed View <ChevronRight size={14} />
              </Link>

@@ -8,17 +8,10 @@ export const videos = [
     duration: "8:20",
     subjectId: "dbms",
     category: "semester",
-    semester: "Semester 5",
-    topicsCovered: ["1NF", "2NF", "3NF", "BCNF"],
-    isImportant: true,
+    subcategory: "Semester 5",
     order: 1,
-    notes: "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity. It involves dividing large tables into smaller ones and defining relationships between them.",
-    examPoints: [
-      "1NF: Atomic values, no repeating groups.",
-      "2NF: 1NF + No partial dependency.",
-      "3NF: 2NF + No transitive dependency.",
-      "BCNF: 3NF + Every determinant is a candidate key."
-    ]
+    topicsCovered: ["1NF", "2NF", "3NF", "BCNF"],
+    isImportant: true
   },
   {
     id: "mean-median-mode",
@@ -29,16 +22,10 @@ export const videos = [
     duration: "6:15",
     subjectId: "statistics",
     category: "semester",
-    semester: "Semester 5",
-    topicsCovered: ["Mean calculation", "Median for odd/even", "Mode & Outliers"],
-    isImportant: true,
+    subcategory: "Semester 5",
     order: 2,
-    notes: "Mean is the average and is sensitive to outliers. Median is the middle value and is more robust. Mode is the most frequent value. For a skewed distribution, Median is often better than Mean.",
-    examPoints: [
-      "Mean = Sum of elements / Number of elements.",
-      "Median: Middle term after sorting. If even, average of middle two.",
-      "Mode: Highest frequency element."
-    ]
+    topicsCovered: ["Mean calculation", "Median for odd/even", "Mode & Outliers"],
+    isImportant: true
   },
   {
     id: "intro-stats",
@@ -49,16 +36,10 @@ export const videos = [
     duration: "5:30",
     subjectId: "statistics",
     category: "semester",
-    semester: "Semester 5",
-    topicsCovered: ["Definition", "Types of Data", "Population vs Sample"],
-    isImportant: false,
+    subcategory: "Semester 5",
     order: 1,
-    notes: "Statistics is the science of learning from data. Basic types include Descriptive (summarizing data) and Inferential (making predictions). In AI, we use statistics to understand data distributions and model performance.",
-    examPoints: [
-      "Descriptive Statistics: Mean, Median, Mode, Variance.",
-      "Inferential Statistics: Hypothesis testing, P-values.",
-      "Sample vs Population: Sample is a subset of the population."
-    ]
+    topicsCovered: ["Definition", "Types of Data", "Population vs Sample"],
+    isImportant: false
   },
   {
     id: "neural-networks-intro-vid",
@@ -69,16 +50,10 @@ export const videos = [
     duration: "8:00",
     subjectId: "ai-ml",
     category: "ai-ml",
-    semester: "Semester 7",
-    topicsCovered: ["Architecture", "Neurons", "Layers", "Activation Functions"],
-    isImportant: true,
+    subcategory: "Semester 7",
     order: 1,
-    notes: "Neural networks are inspired by the human brain. They consist of input, hidden, and output layers. Activation functions define the output of a neuron given an input or set of inputs.",
-    examPoints: [
-      "Backpropagation is the key training algorithm.",
-      "ReLU is the most common activation function.",
-      "Weights and Biases are the learnable parameters."
-    ]
+    topicsCovered: ["Architecture", "Neurons", "Layers", "Activation Functions"],
+    isImportant: true
   },
   {
     id: "react-hooks-vid",
@@ -89,15 +64,9 @@ export const videos = [
     duration: "5:45",
     subjectId: "web-dev",
     category: "web-dev",
-    semester: "Semester 5",
-    topicsCovered: ["useState", "useEffect", "useContext"],
-    isImportant: true,
+    subcategory: "Semester 5",
     order: 1,
-    notes: "Hooks allow you to use state and other React features without writing a class. They provide a more functional approach to building components.",
-    examPoints: [
-      "Only call Hooks at the top level.",
-      "Only call Hooks from React functions.",
-      "Rules of Hooks ensure consistent state management."
-    ]
+    topicsCovered: ["useState", "useEffect", "useContext"],
+    isImportant: true
   }
 ];
