@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -16,6 +17,9 @@ import {
   Target
 } from 'lucide-react';
 import { notes } from '../data/notes';
+import { subjects as allSubjects } from '../data/subjects';
+import { videos } from '../data/videos';
+import { categories } from '../data/categories';
 import GlassCard from '../components/GlassCard';
 
 const fadeInUp = {
@@ -29,29 +33,38 @@ export default function NotesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSemester, setSelectedSemester] = useState("All");
-  const [selectedSubject, setSelectedSubject] = useState("All");
+  const [selectedSubject, setSelectedSubject] = useState("All"); // This is subjectId
   const [selectedType, setSelectedType] = useState("All");
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Extract unique values for filters
-  const categories = ["All", ...new Set(notes.map(n => n.category))];
-  const semesters = ["All", ...new Set(notes.map(n => n.semester))];
-  const subjects = ["All", ...new Set(notes.map(n => n.subject))];
+  // Extract unique values for filters from centralized data
+  const categoryOptions = ["All", ...new Set(categories.map(c => c.id))];
+  const semesterOptions = ["All", ...new Set(allSubjects.map(s => s.semester))];
+  const subjectOptions = useMemo(() => {
+    const subs = allSubjects
+      .filter(s => (selectedCategory === "All" || s.category === selectedCategory) && 
+                   (selectedSemester === "All" || s.semester === selectedSemester));
+    return ["All", ...subs.map(s => s.id)];
+  }, [selectedCategory, selectedSemester]);
+  
   const types = ["All", ...new Set(notes.map(n => n.type))];
 
   const filteredNotes = useMemo(() => {
     return notes.filter(note => {
+      const subject = allSubjects.find(s => s.id === note.subjectId);
+      if (!subject) return false;
+
       const matchesSearch = 
         note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        subject.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       
-      const matchesCategory = selectedCategory === "All" || note.category === selectedCategory;
-      const matchesSemester = selectedSemester === "All" || note.semester === selectedSemester;
-      const matchesSubject = selectedSubject === "All" || note.subject === selectedSubject;
+      const matchesCategory = selectedCategory === "All" || subject.category === selectedCategory;
+      const matchesSemester = selectedSemester === "All" || subject.semester === selectedSemester;
+      const matchesSubject = selectedSubject === "All" || note.subjectId === selectedSubject;
       const matchesType = selectedType === "All" || note.type === selectedType;
 
       return matchesSearch && matchesCategory && matchesSemester && matchesSubject && matchesType;
@@ -125,20 +138,21 @@ export default function NotesPage() {
                 <FilterSelect 
                   label="Category" 
                   value={selectedCategory} 
-                  options={categories} 
+                  options={categoryOptions} 
                   onChange={setSelectedCategory} 
                 />
                 <FilterSelect 
                   label="Semester" 
                   value={selectedSemester} 
-                  options={semesters} 
+                  options={semesterOptions} 
                   onChange={setSelectedSemester} 
                 />
                 <FilterSelect 
                   label="Subject" 
                   value={selectedSubject} 
-                  options={subjects} 
+                  options={subjectOptions} 
                   onChange={setSelectedSubject} 
+                  displayMap={Object.fromEntries(allSubjects.map(s => [s.id, s.title]))}
                 />
                 <FilterSelect 
                   label="Type" 
@@ -220,17 +234,19 @@ export default function NotesPage() {
   );
 }
 
-function FilterSelect({ label, value, options, onChange }) {
+function FilterSelect({ label, value, options, onChange, displayMap = {} }) {
   return (
     <div className="flex flex-col gap-2">
       <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{label}</span>
       <select 
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-accent-purple transition-all appearance-none cursor-pointer"
+        className="bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-accent-purple transition-all appearance-none cursor-pointer uppercase tracking-tighter"
       >
         {options.map(opt => (
-          <option key={opt} value={opt} className="bg-dark text-white">{opt}</option>
+          <option key={opt} value={opt} className="bg-dark text-white">
+            {displayMap[opt] || opt}
+          </option>
         ))}
       </select>
     </div>
@@ -249,6 +265,9 @@ function QuickFilter({ label, onClick }) {
 }
 
 function NoteCard({ note }) {
+  const subject = allSubjects.find(s => s.id === note.subjectId);
+  const video = videos.find(v => v.id === note.videoId);
+
   return (
     <motion.div
       layout
@@ -258,17 +277,17 @@ function NoteCard({ note }) {
         {/* Thumbnail */}
         <div className="relative aspect-video overflow-hidden">
           <img 
-            src={note.thumbnail || "/images/hero_bg.png"} 
+            src={note.thumbnail || video?.thumbnail || "/images/hero_bg.png"} 
             alt={note.title} 
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent" />
           <div className="absolute top-4 right-4 flex gap-2">
             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-              <Clock size={10} className="text-accent-cyan" /> {note.time}
+              <Clock size={10} className="text-accent-cyan" /> {note.time || video?.duration}
             </div>
             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-              <Target size={10} className="text-accent-purple" /> {note.subject}
+              <Target size={10} className="text-accent-purple" /> {subject?.title}
             </div>
           </div>
           
@@ -283,7 +302,7 @@ function NoteCard({ note }) {
         {/* Info */}
         <div className="p-8 flex flex-col flex-1">
           <div className="flex gap-2 mb-4">
-            {note.tags.slice(0, 2).map((tag, i) => (
+            {(note.tags || []).slice(0, 2).map((tag, i) => (
               <span key={i} className="text-[9px] font-black text-accent-blue/60 uppercase tracking-widest flex items-center gap-1">
                 <Tag size={8} /> {tag}
               </span>
@@ -302,16 +321,18 @@ function NoteCard({ note }) {
             <button className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white">
               <Download size={14} className="text-accent-cyan" /> PDF
             </button>
-            <button className="flex items-center justify-center gap-2 py-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-purple hover:text-white transition-all text-accent-purple">
-              <Play size={14} /> Video
-            </button>
+            {note.videoId && (
+              <Link to={`/video/${note.videoId}`} className="flex items-center justify-center gap-2 py-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-purple hover:text-white transition-all text-accent-purple">
+                <Play size={14} /> Video
+              </Link>
+            )}
           </div>
           
           <div className="mt-6 flex items-center justify-between pt-6 border-t border-white/5">
-             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{note.semester}</span>
-             <div className="flex items-center gap-2 text-accent-blue font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
+             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.semester}</span>
+             <Link to={`/notes?id=${note.id}`} className="flex items-center gap-2 text-accent-blue font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
                 Detailed View <ChevronRight size={14} />
-             </div>
+             </Link>
           </div>
         </div>
       </GlassCard>

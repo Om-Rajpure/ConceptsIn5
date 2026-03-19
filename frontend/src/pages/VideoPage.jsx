@@ -17,6 +17,8 @@ import {
   Award
 } from 'lucide-react';
 import { subjects } from '../data/subjects';
+import { videos } from '../data/videos';
+import { notes } from '../data/notes';
 import GlassCard from '../components/GlassCard';
 
 const fadeInUp = {
@@ -29,26 +31,44 @@ export default function VideoPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Find the video and its parent subject
+  // Find the video and its context
   const context = useMemo(() => {
-    for (const subject of subjects) {
-      const videoIndex = subject.videos.findIndex(v => v.id === id);
-      if (videoIndex !== -1) {
-        return {
-          subject,
-          video: subject.videos[videoIndex],
-          index: videoIndex,
-          prev: subject.videos[videoIndex - 1],
-          next: subject.videos[videoIndex + 1]
-        };
-      }
-    }
-    return null;
+    const video = videos.find(v => v.id === id);
+    if (!video) return null;
+
+    const subject = subjects.find(s => s.id === video.subjectId);
+    
+    // Find all videos in this subject for roadmap and navigation
+    const subjectVideos = videos
+      .filter(v => v.subjectId === video.subjectId)
+      .sort((a, b) => a.order - b.order);
+      
+    const currentIndex = subjectVideos.findIndex(v => v.id === id);
+    
+    // Find associated notes
+    const videoNotes = notes.find(n => n.videoId === id) || {
+      content: video.notes,
+      examPoints: video.examPoints || []
+    };
+
+    return {
+      subject,
+      video,
+      subjectVideos,
+      index: currentIndex,
+      prev: subjectVideos[currentIndex - 1],
+      next: subjectVideos[currentIndex + 1],
+      notes: videoNotes
+    };
   }, [id]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]);
+    // Save progress for the "Continue Learning" feature
+    if (subject?.id && video?.id) {
+      localStorage.setItem(`watched_${subject.id}`, video.id);
+    }
+  }, [id, subject?.id, video?.id]);
 
   if (!context) {
     return (
@@ -153,7 +173,7 @@ export default function VideoPage() {
             <motion.section {...fadeInUp}>
                <h3 className="text-2xl font-black italic mb-6 glow-text tracking-tight uppercase underline decoration-accent-blue/30 underline-offset-8">Quick Summary</h3>
                <GlassCard className="bg-white/[0.01] border-white/5 font-light text-xl leading-relaxed text-gray-300 italic">
-                 "{video.notes.split('.')[0]}."
+                 "{context.notes.content?.split('.')[0] || video.description}."
                </GlassCard>
             </motion.section>
 
@@ -175,7 +195,7 @@ export default function VideoPage() {
                <GlassCard className="p-10 border-white/5 bg-white/[0.01]">
                  <div className="prose prose-invert max-w-none">
                     <div className="text-gray-400 text-lg leading-relaxed font-light space-y-6">
-                       {video.notes.split('. ').map((para, i) => (
+                       {(context.notes.content || "").split('. ').map((para, i) => (
                          <p key={i}>{para}.</p>
                        ))}
                     </div>
@@ -196,7 +216,7 @@ export default function VideoPage() {
                     <Zap className="text-accent-purple" size={24} /> Exam Points
                   </h3>
                   <ul className="space-y-6">
-                    {video.examPoints.map((point, i) => (
+                    {(context.notes.examPoints || video.examPoints || []).map((point, i) => (
                       <li key={i} className="flex gap-4">
                          <div className="w-1.5 h-1.5 rounded-full bg-accent-purple mt-2 flex-shrink-0 animate-pulse" />
                          <span className="text-gray-300 font-medium leading-relaxed">{point}</span>
@@ -210,7 +230,7 @@ export default function VideoPage() {
             <motion.section {...fadeInUp}>
                 <h3 className="text-xl font-black italic mb-6 opacity-60 uppercase tracking-widest">Subject Roadmap</h3>
                 <div className="space-y-4">
-                  {subject.roadmap.map((step, i) => (
+                  {context.subjectVideos.map((step, i) => (
                     <div 
                       key={step.id}
                       className={cn(
@@ -247,7 +267,7 @@ export default function VideoPage() {
         <section className="mt-32 pt-20 border-t border-white/5">
            <h2 className="text-3xl font-black italic mb-12 glow-text tracking-tighter uppercase">More in {subject.name}</h2>
            <div className="grid md:grid-cols-3 gap-8">
-              {subject.videos.filter(v => v.id !== id).slice(0, 3).map((v) => (
+              {context.subjectVideos.filter(v => v.id !== id).slice(0, 3).map((v) => (
                 <Link key={v.id} to={`/video/${v.id}`}>
                   <GlassCard className="p-0 border-white/5 group hover:border-accent-blue/40">
                     <div className="aspect-video relative overflow-hidden">

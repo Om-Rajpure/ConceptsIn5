@@ -12,14 +12,152 @@ import {
   Award,
   BookOpen,
   MousePointer2,
-  Video
+  Video,
+  ListRestart,
+  Tag,
+  Download
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { subjects } from '../data/subjects';
+import { videos } from '../data/videos';
 import GlassCard from '../components/GlassCard';
+
+function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { duration: 0.6 }
+  };
+
+  return (
+    <motion.div
+      layout
+      {...fadeInUp}
+    >
+      <GlassCard className={cn(
+        "p-0 border-white/5 group h-full flex flex-col hover:border-accent-blue/30 overflow-hidden transition-all duration-500",
+        isActive ? "border-accent-blue shadow-[0_0_30px_rgba(0,240,255,0.15)] bg-white/[0.02]" : "bg-white/[0.01]"
+      )}>
+        {/* Thumbnail */}
+        <div className="relative aspect-video overflow-hidden">
+          <img
+            src={video.thumbnail || "/images/hero_bg.png"}
+            alt={video.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent" />
+          
+          <div className="absolute top-4 right-4 flex gap-2">
+            <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
+              <Clock size={10} className="text-accent-cyan" /> {video.duration}
+            </div>
+            <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
+              <Target size={10} className="text-accent-purple" /> {subject?.title}
+            </div>
+          </div>
+
+          {(isActive || isFirst) && (
+            <div className="absolute top-4 left-4">
+              <div className={cn(
+                "px-2 py-1 text-[9px] font-black text-white rounded uppercase tracking-widest animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.2)]",
+                isActive ? "bg-accent-blue/90" : "bg-accent-purple/90"
+              )}>
+                {isActive && lastWatchedId ? "Next Module" : (isFirst ? "Start Here" : "Next Module")}
+              </div>
+            </div>
+          )}
+
+          {/* Hover Play Icon Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+            <div className="w-14 h-14 rounded-full bg-accent-blue/20 backdrop-blur-md border border-accent-blue/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.4)]">
+              <Play className="text-white fill-current ml-0.5" />
+            </div>
+          </div>
+        </div>
+
+        {/* Info */}
+        <div className="p-8 flex flex-col flex-1">
+          <div className="flex gap-2 mb-4">
+            {(video.topicsCovered || video.topics || []).slice(0, 2).map((topic, i) => (
+              <span key={i} className="text-[9px] font-black text-accent-blue/60 uppercase tracking-widest flex items-center gap-1">
+                <Tag size={8} /> {topic}
+              </span>
+            ))}
+          </div>
+
+          <h3 className="text-xl font-black mb-4 italic group-hover:text-accent-blue transition-colors line-clamp-1 uppercase tracking-tight">
+            {video.title}
+          </h3>
+
+          <p className="text-gray-400 text-sm font-light leading-relaxed line-clamp-2 mb-8">
+            {video.description}
+          </p>
+
+          {/* Action Buttons Grid (New) */}
+          <div className="mt-auto grid grid-cols-2 gap-4">
+            <button className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white">
+              <Download size={14} className="text-accent-cyan" /> PDF
+            </button>
+            <Link to={`/video/${video.id}`} className="flex items-center justify-center gap-2 py-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-purple hover:text-white transition-all text-accent-purple">
+              <Play size={14} /> Video
+            </Link>
+          </div>
+
+          <div className="mt-6 flex items-center justify-between pt-6 border-t border-white/5">
+             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.semester}</span>
+             <Link to={`/video/${video.id}`} className="flex items-center gap-2 text-accent-blue font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
+                Watch Module <ChevronRight size={14} />
+             </Link>
+          </div>
+        </div>
+      </GlassCard>
+    </motion.div>
+  );
+}
+
+function cn(...inputs) {
+  return inputs.filter(Boolean).join(' ');
+}
 
 export default function SubjectPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const subject = useMemo(() => subjects.find(s => s.id === id), [id]);
+
+  // Dynamically fetch and sort videos for this subject
+  const subjectVideos = useMemo(() => {
+    return videos
+      .filter(v => v.subjectId === id)
+      .sort((a, b) => a.order - b.order);
+  }, [id]);
+
+  // Logic for "Continue Learning"
+  const [lastWatchedId, setLastWatchedId] = useState(null);
+  useEffect(() => {
+    const saved = localStorage.getItem(`watched_${id}`);
+    if (saved) setLastWatchedId(saved);
+  }, [id]);
+
+  const continueVideo = useMemo(() => {
+    if (!lastWatchedId) return subjectVideos[0];
+    const index = subjectVideos.findIndex(v => v.id === lastWatchedId);
+    return subjectVideos[index + 1] || subjectVideos[index] || subjectVideos[0];
+  }, [lastWatchedId, subjectVideos]);
+
+  // Related Subjects
+  const relatedSubjects = useMemo(() => {
+    return subjects
+      .filter(s => s.category === subject?.category && s.id !== id)
+      .slice(0, 3);
+  }, [subject, id]);
+
+  // Dynamically calculate duration
+  const totalDuration = useMemo(() => {
+    const mins = subjectVideos.reduce((acc, v) => acc + parseInt(v.duration || 0), 0);
+    return `~${mins} mins`;
+  }, [subjectVideos]);
+
   const videoRefs = useRef({});
 
   // Scroll to top on load
@@ -104,13 +242,13 @@ export default function SubjectPage() {
                 <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
                   <Video size={12} className="text-accent-blue" /> Modules
                 </div>
-                <div className="text-4xl font-black text-white">{subject.videos.length}</div>
+                <div className="text-4xl font-black text-white">{subjectVideos.length}</div>
               </div>
               <div className="glass-card px-8 lg:px-10 py-6 border-white/10 bg-white/[0.02] text-center min-w-[140px]">
                 <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
                   <Clock size={12} className="text-accent-cyan" /> ETA
                 </div>
-                <div className="text-4xl font-black text-accent-cyan">{subject.duration}</div>
+                <div className="text-4xl font-black text-accent-cyan">{totalDuration}</div>
               </div>
             </motion.div>
           </div>
@@ -122,13 +260,22 @@ export default function SubjectPage() {
             className="flex flex-wrap gap-4 mt-6"
           >
             <button 
-              onClick={() => scrollToVideo(subject.videos[0].id)}
-              className="px-10 py-5 bg-accent-blue rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all"
+              onClick={() => scrollToVideo(subjectVideos[0]?.id)}
+              className="px-10 py-5 bg-accent-blue rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+              disabled={subjectVideos.length === 0}
             >
-              Start Mastery <ArrowRight className="w-5 h-5" />
+              Start Course <ArrowRight className="w-5 h-5" />
             </button>
+            {lastWatchedId && (
+              <button 
+                onClick={() => navigate(`/video/${continueVideo.id}`)}
+                className="px-10 py-5 border border-accent-purple/30 glass-card bg-accent-purple/5 rounded-2xl font-black text-accent-purple hover:text-white hover:bg-accent-purple transition-all flex items-center gap-3"
+              >
+                 Continue Learning <ListRestart className="w-5 h-5" />
+              </button>
+            )}
             <button className="px-10 py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all flex items-center gap-3">
-               Download Syllabus <div className="w-2 h-2 rounded-full bg-accent-purple animate-pulse" />
+               Download Resources <div className="w-2 h-2 rounded-full bg-accent-purple animate-pulse" />
             </button>
           </motion.div>
         </div>
@@ -146,9 +293,9 @@ export default function SubjectPage() {
                 <h3 className="text-2xl font-black italic tracking-tight">Mission Path</h3>
               </motion.div>
 
-              <div className="space-y-0 relative pl-4">
-                {/* Connecting Line */}
-                <div className="absolute left-[23px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-accent-purple via-accent-blue to-accent-cyan opacity-20" />
+              <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-6 lg:pb-0 scrollbar-hide">
+                {/* Connecting Line (Desktop Only) */}
+                <div className="hidden lg:block absolute left-[23px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-accent-purple via-accent-blue to-accent-cyan opacity-20" />
                 
                 {subject.roadmap.map((step, i) => (
                   <motion.div 
@@ -158,15 +305,20 @@ export default function SubjectPage() {
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
                     onClick={() => scrollToVideo(step.id)}
-                    className="relative pb-12 group cursor-pointer"
+                    className="relative lg:pb-12 group cursor-pointer flex-shrink-0"
                   >
                     <div className="flex items-center gap-6">
-                      <div className="relative z-10 w-5 h-5 rounded-full bg-dark border-2 border-accent-purple group-hover:scale-150 group-hover:bg-accent-purple group-hover:shadow-[0_0_20px_#7B61FF] transition-all duration-300">
+                      <div className={`relative z-10 w-5 h-5 rounded-full bg-dark border-2 transition-all duration-300 ${
+                        step.id === lastWatchedId ? "border-accent-cyan bg-accent-cyan shadow-[0_0_15px_#00F0FF]" : "border-accent-purple group-hover:bg-accent-purple"
+                      }`}>
                         <div className="absolute inset-0 bg-accent-purple rounded-full animate-ping opacity-0 group-hover:opacity-30" />
+                        {step.id === continueVideo?.id && (
+                          <div className="absolute inset-[-4px] border border-accent-blue/50 rounded-full animate-pulse" />
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <div className="text-[9px] font-black text-gray-500 tracking-[0.2em] mb-1 group-hover:text-accent-purple transition-colors">PHASE {String(i + 1).padStart(2, '0')}</div>
-                        <h4 className="font-bold text-gray-300 group-hover:text-white transition-all text-sm uppercase tracking-wide">
+                      <div className="flex-1 whitespace-nowrap lg:whitespace-normal">
+                        <div className="text-[9px] font-black text-gray-500 tracking-[0.2em] mb-1 group-hover:text-accent-purple transition-colors uppercase">Step {String(i + 1).padStart(2, '0')}</div>
+                        <h4 className="font-bold text-gray-300 group-hover:text-white transition-all text-xs lg:text-sm uppercase tracking-wide">
                           {step.title}
                         </h4>
                       </div>
@@ -210,79 +362,43 @@ export default function SubjectPage() {
               </div>
             </motion.section>
 
-            {/* Video List */}
+            {/* Video Grid (Core Modules) */}
             <div className="space-y-12">
-              <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
-                <h3 className="text-3xl font-black italic">Core Modules</h3>
-                <div className="text-xs text-gray-500 font-black tracking-widest uppercase">Verified Knowledge Stream</div>
+              <div className="flex justify-between items-end mb-8 border-b border-white/5 pb-6">
+                <div>
+                  <h3 className="text-3xl font-black italic uppercase tracking-tight glow-text leading-tight">Course Modules</h3>
+                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mt-2 italic">Follow this sequence to complete the subject</p>
+                </div>
+                <div className="text-xs text-gray-500 font-black tracking-widest uppercase hidden md:block">Verified Knowledge Stream</div>
               </div>
 
-              {subject.videos.map((video, i) => (
-                <motion.div
-                  key={video.id}
-                  ref={el => videoRefs.current[video.id] = el}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <GlassCard className="p-0 border-white/10 overflow-hidden group hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] transition-all flex flex-col md:flex-row gap-0">
-                    {/* Thumbnail Section */}
-                    <Link to={`/video/${video.id}`} className="md:w-1/3 relative aspect-video overflow-hidden">
-                      <img 
-                        src={video.thumbnail} 
-                        alt={video.title} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                      />
-                      <div className="absolute inset-0 bg-dark/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-16 h-16 rounded-full bg-accent-blue flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.5)]">
-                          <Play className="text-white fill-current ml-1" />
-                        </div>
-                      </div>
-                      <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/90 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
-                        <Clock size={12} className="text-accent-cyan" /> {video.duration}
-                      </div>
-                    </Link>
-
-                    {/* Info Section */}
-                    <div className="flex-1 p-8 md:p-10 flex flex-col justify-center">
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {(video.topicsCovered || video.topics || []).slice(0, 3).map((topic, j) => (
-                          <span key={j} className="text-[10px] font-black text-accent-purple/60 uppercase tracking-widest border border-accent-purple/20 px-2 py-0.5 rounded">
-                            {topic}
-                          </span>
-                        ))}
-                      </div>
-                      <h3 className="text-2xl font-black mb-4 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{video.title}</h3>
-                      <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-xl font-light">
-                        {video.description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="flex items-center gap-4">
-                          <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2 cursor-pointer bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/5">
-                             <BookOpen size={14} className="text-accent-cyan" />
-                             <span className="text-[10px] font-black uppercase text-gray-500 group-hover:text-white transition-colors">Exam Notes</span>
-                          </motion.div>
-                        </div>
-                        <Link to={`/video/${video.id}`}>
-                          <motion.div whileHover={{ x: 5 }} className="flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-[0.2em] cursor-pointer">
-                            Deploy <ChevronRight size={16} />
-                          </motion.div>
-                        </Link>
-                      </div>
-                    </div>
-                  </GlassCard>
-                </motion.div>
-              ))}
+              {/* Responsive Grid Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {subjectVideos.map((video, i) => (
+                  <div 
+                    key={video.id} 
+                    ref={el => videoRefs.current[video.id] = el}
+                    className="flex h-full"
+                  >
+                    <VideoCard 
+                      video={video} 
+                      subject={subject} 
+                      isActive={video.id === continueVideo?.id}
+                      isFirst={i === 0}
+                      lastWatchedId={lastWatchedId}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
+
 
             {/* Quick Actions at Bottom */}
             <motion.section {...fadeInUp} className="mt-32 p-12 glass-card border-accent-purple/30 bg-accent-purple/[0.02] text-center">
                <h3 className="text-3xl font-black mb-6 italic glow-text tracking-tighter uppercase">Ready to Begin?</h3>
                <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                 <button onClick={() => scrollToVideo(subject.videos[0].id)} className="px-10 py-5 bg-white text-dark rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all">
-                   Start Mission 01 <MousePointer2 className="w-5 h-5 fill-current" />
+                 <button onClick={() => scrollToVideo(subjectVideos[0]?.id)} className="px-10 py-5 bg-white text-dark rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all disabled:opacity-50" disabled={subjectVideos.length === 0}>
+                   Start Course <MousePointer2 className="w-5 h-5 fill-current" />
                  </button>
                  <button className="px-10 py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all">
                    View Resource Base

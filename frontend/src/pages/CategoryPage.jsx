@@ -12,6 +12,8 @@ import {
   Library
 } from 'lucide-react';
 import { categories } from '../data/categories';
+import { subjects as allSubjects } from '../data/subjects';
+import { videos } from '../data/videos';
 import GlassCard from '../components/GlassCard';
 
 const fadeInUp = {
@@ -24,6 +26,28 @@ const fadeInUp = {
 export default function CategoryPage() {
   const { id } = useParams();
   const category = useMemo(() => categories.find(c => c.id === id), [id]);
+
+  // Dynamically group subjects for this category
+  const groupedSubjects = useMemo(() => {
+    if (!category) return [];
+    
+    // Filter subjects belonging to this category
+    const categorySubjects = allSubjects.filter(s => s.category === id);
+    
+    // Find unique groups within these subjects
+    const groups = [...new Set(categorySubjects.map(s => s.group))];
+    
+    return groups.map(groupName => ({
+      name: groupName,
+      items: categorySubjects
+        .filter(s => s.group === groupName)
+        .map(s => ({
+          ...s,
+          videoCount: videos.filter(v => v.subjectId === s.id).length,
+          duration: "~" + videos.filter(v => v.subjectId === s.id).reduce((acc, v) => acc + parseInt(v.duration || 0), 0) + " mins"
+        }))
+    }));
+  }, [id, category]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -82,7 +106,7 @@ export default function CategoryPage() {
 
       {/* 2. Grouped Subjects Content */}
       <div className="max-w-7xl mx-auto px-6 space-y-32">
-        {category.subcategories.map((group, groupIdx) => (
+        {groupedSubjects.map((group, groupIdx) => (
           <motion.section 
             key={group.name}
             initial={{ opacity: 0 }}

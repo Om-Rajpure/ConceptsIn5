@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
+import { subjects } from '../data/subjects';
+import { videos } from '../data/videos';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -58,29 +60,8 @@ const categories = [
   }
 ];
 
-const featuredVideos = [
-  {
-    id: "normalization-dbms",
-    title: "DBMS Normalization in 5 Mins",
-    duration: "4:58",
-    thumbnail: "/images/v_thumb_dbms.png",
-    views: "12k"
-  },
-  {
-    id: "mean-median-mode",
-    title: "How Neural Networks Actually Work",
-    duration: "5:12",
-    thumbnail: "/images/v_thumb_nn.png",
-    views: "8k"
-  },
-  {
-    id: "v1",
-    title: "React Hooks Simplified",
-    duration: "5:45",
-    thumbnail: "/images/v_thumb_react.png",
-    views: "15k"
-  }
-];
+// Derived data for Landing Page
+const featuredVideos = videos.filter(v => v.isImportant).slice(0, 3);
 
 const reels = [
   { id: 1, title: "Quick CSS Tip", thumbnail: "https://img.youtube.com/vi/reels1/maxresdefault.jpg" },
@@ -274,7 +255,7 @@ export default function LandingPage() {
                   <div className="p-8">
                     <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
                     <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
-                      <span className="flex items-center gap-1.5"><Users size={14} /> {video.views} Learned</span>
+                      <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.semester} module</span>
                       <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
                     </div>
                   </div>
