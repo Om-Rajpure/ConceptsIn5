@@ -10,6 +10,14 @@ import LandingPage from './pages/LandingPage';
 import SubjectPage from './pages/SubjectPage';
 import TopicPage from './pages/TopicPage';
 
+const VideoDetailPage = () => (
+  <div className="pt-40 pb-20 px-6 text-center">
+    <h1 className="text-4xl font-black mb-4">Video Detail Page Placeholder</h1>
+    <p className="text-gray-400">Soon, you'll be able to watch high-impact videos with integrated notes here.</p>
+    <Link to="/" className="text-accent-blue hover:underline mt-8 inline-block">Back to Base</Link>
+  </div>
+);
+
 export default function App() {
   return (
     <Router>
@@ -20,6 +28,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/subject/:id" element={<SubjectPage />} />
           <Route path="/topic/:id" element={<TopicPage />} />
+          <Route path="/video/:id" element={<VideoDetailPage />} />
         </Routes>
 
         {/* Global Footer (Common to all pages) */}

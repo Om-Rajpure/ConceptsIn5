@@ -1,47 +1,31 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, 
-  Filter, 
+  Play, 
   Clock, 
   Zap, 
   ChevronRight, 
-  BookOpen,
-  Layout as LayoutIcon,
   Target,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  Award,
+  BookOpen,
+  MousePointer2,
+  Video
 } from 'lucide-react';
 import { subjects } from '../data/subjects';
 import GlassCard from '../components/GlassCard';
 
 export default function SubjectPage() {
   const { id } = useParams();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState('All');
-  const [timeFilter, setTimeFilter] = useState('All');
-  
-  // Find current subject
   const subject = useMemo(() => subjects.find(s => s.id === id), [id]);
+  const videoRefs = useRef({});
 
   // Scroll to top on load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
-
-  // Filtering Logic
-  const filteredTopics = useMemo(() => {
-    if (!subject) return [];
-    return subject.topics.filter(topic => {
-      const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDifficulty = difficultyFilter === 'All' || topic.difficulty === difficultyFilter;
-      const matchesTime = timeFilter === 'All' || 
-                         (timeFilter === '5 min' && topic.time === '5 min') || 
-                         (timeFilter === '10 min+' && (topic.time === '10 min' || topic.time === '15 min'));
-      return matchesSearch && matchesDifficulty && matchesTime;
-    });
-  }, [subject, searchQuery, difficultyFilter, timeFilter]);
 
   if (!subject) {
     return (
@@ -54,272 +38,259 @@ export default function SubjectPage() {
     );
   }
 
+  const scrollToVideo = (videoId) => {
+    videoRefs.current[videoId]?.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'center' 
+    });
+  };
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
     transition: { duration: 0.6 }
   };
 
   return (
-    <div className="pt-32 pb-20 px-6">
-      {/* Subject Hero Section */}
-      <section className="max-w-7xl mx-auto mb-20 relative">
-        <div className="absolute -top-20 -left-20 w-96 h-96 bg-accent-blue/10 blur-[120px] rounded-full animate-pulse-glow" />
-        
-        <div className="relative z-10">
-          <motion.div {...fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-accent-purple/30 text-accent-purple text-[10px] font-black uppercase tracking-widest rounded bg-accent-purple/5">
-             <Target className="w-3 h-3" /> Learning Path Initialized
+    <div className="pb-32">
+      {/* 1. Subject Hero Section */}
+      <section className="relative pt-48 pb-32 px-6 overflow-hidden min-h-[60vh] flex items-center">
+        {/* Hero Background with AI Visual */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/images/subject_hero.png" 
+            alt="Hero Background" 
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10 w-full">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 border border-accent-purple/30 text-accent-purple text-[10px] font-black uppercase tracking-widest rounded bg-accent-purple/5 backdrop-blur-sm shadow-[0_0_15px_rgba(123,97,255,0.1)]"
+          >
+            <Target className="w-4 h-4" /> Neural Learning Roadmap Initiated
           </motion.div>
-          
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-12">
+
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-12">
             <div className="max-w-3xl">
               <motion.h1 
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-5xl md:text-7xl font-black mb-6 leading-tight tracking-tight"
+                className="text-5xl md:text-8xl font-black mb-8 leading-tight tracking-tighter italic"
               >
                 {subject.name}
               </motion.h1>
               <motion.p 
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl text-gray-400 font-light leading-relaxed"
+                className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed mb-10"
               >
                 {subject.description}
               </motion.p>
             </div>
-            
+
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex gap-4"
+              className="flex gap-6 mb-4"
             >
-              <div className="glass-card px-6 py-4 border-white/5 bg-white/[0.02]">
-                <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Topics</div>
-                <div className="text-2xl font-black text-white">{subject.topics.length}</div>
+              <div className="glass-card px-8 lg:px-10 py-6 border-white/10 bg-white/[0.02] text-center min-w-[140px]">
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                  <Video size={12} className="text-accent-blue" /> Modules
+                </div>
+                <div className="text-4xl font-black text-white">{subject.videos.length}</div>
               </div>
-              <div className="glass-card px-6 py-4 border-white/5 bg-white/[0.02]">
-                <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Duration</div>
-                <div className="text-2xl font-black text-accent-cyan">{subject.duration}</div>
+              <div className="glass-card px-8 lg:px-10 py-6 border-white/10 bg-white/[0.02] text-center min-w-[140px]">
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                  <Clock size={12} className="text-accent-cyan" /> ETA
+                </div>
+                <div className="text-4xl font-black text-accent-cyan">{subject.duration}</div>
               </div>
             </motion.div>
           </div>
 
-          <div className="flex flex-wrap gap-4 mt-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-wrap gap-4 mt-6"
+          >
             <button 
-              onClick={() => document.getElementById('roadmap').scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 bg-accent-purple rounded-xl font-black text-white shadow-lg shadow-accent-purple/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              onClick={() => scrollToVideo(subject.videos[0].id)}
+              className="px-10 py-5 bg-accent-blue rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all"
             >
-              Start Mission <ArrowRight className="w-5 h-5" />
+              Start Mastery <ArrowRight className="w-5 h-5" />
             </button>
-            <button className="px-8 py-4 border border-white/10 glass-card rounded-xl font-bold text-gray-300 hover:text-white transition-all">
-              Important Topics
+            <button className="px-10 py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all flex items-center gap-3">
+               Download Syllabus <div className="w-2 h-2 rounded-full bg-accent-purple animate-pulse" />
             </button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Filter & Search Bar */}
-      <section className="max-w-7xl mx-auto mb-16 relative z-20">
-        <div className="glass-card p-4 md:p-6 border-white/10 bg-white/[0.03] flex flex-col md:flex-row gap-6 items-center">
-          {/* Search */}
-          <div className="relative flex-1 w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-accent-blue transition-colors" size={20} />
-            <input 
-              type="text" 
-              placeholder="Search topic in database..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-accent-blue/50 focus:ring-2 focus:ring-accent-blue/10 transition-all placeholder:text-gray-600"
-            />
-          </div>
+      {/* 2. Page Content: Roadmap & Video Grid */}
+      <div className="max-w-7xl mx-auto px-6 mt-20 relative">
+        <div className="flex flex-col lg:flex-row gap-20">
           
-          {/* Filters */}
-          <div className="flex gap-4 w-full md:w-auto">
-            <div className="relative group flex-1 md:w-40">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
-              <select 
-                value={difficultyFilter}
-                onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-accent-purple/50 appearance-none cursor-pointer"
-              >
-                <option value="All">Difficulty: All</option>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                <ChevronRight className="rotate-90" size={16} />
+          {/* A. Roadmap (Step-Flow) */}
+          <aside className="lg:w-1/4">
+            <div className="sticky top-32">
+              <motion.div {...fadeInUp} className="flex items-center gap-3 mb-10">
+                <TrendingUp className="text-accent-purple" />
+                <h3 className="text-2xl font-black italic tracking-tight">Mission Path</h3>
+              </motion.div>
+
+              <div className="space-y-0 relative pl-4">
+                {/* Connecting Line */}
+                <div className="absolute left-[23px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-accent-purple via-accent-blue to-accent-cyan opacity-20" />
+                
+                {subject.roadmap.map((step, i) => (
+                  <motion.div 
+                    key={step.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => scrollToVideo(step.id)}
+                    className="relative pb-12 group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className="relative z-10 w-5 h-5 rounded-full bg-dark border-2 border-accent-purple group-hover:scale-150 group-hover:bg-accent-purple group-hover:shadow-[0_0_20px_#7B61FF] transition-all duration-300">
+                        <div className="absolute inset-0 bg-accent-purple rounded-full animate-ping opacity-0 group-hover:opacity-30" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-[9px] font-black text-gray-500 tracking-[0.2em] mb-1 group-hover:text-accent-purple transition-colors">PHASE {String(i + 1).padStart(2, '0')}</div>
+                        <h4 className="font-bold text-gray-300 group-hover:text-white transition-all text-sm uppercase tracking-wide">
+                          {step.title}
+                        </h4>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* HUD Summary Card */}
+              <div className="mt-8 p-8 glass-card border-accent-blue/10 bg-accent-blue/[0.01]">
+                <div className="flex items-center gap-3 mb-4 text-accent-blue">
+                  <Award size={20} />
+                  <span className="font-black text-xs uppercase tracking-widest">Mastery Status</span>
+                </div>
+                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mb-4">
+                   <motion.div initial={{ width: 0 }} whileInView={{ width: '0%' }} className="h-full bg-accent-blue" />
+                </div>
+                <p className="text-[10px] text-gray-500 font-medium italic">Begin Mission 01 to initialize progress data.</p>
               </div>
             </div>
+          </aside>
 
-            <div className="relative group flex-1 md:w-40">
-              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
-              <select 
-                value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value)}
-                className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-accent-cyan/50 appearance-none cursor-pointer"
-              >
-                <option value="All">Time: All</option>
-                <option value="5 min">5 min</option>
-                <option value="10 min+">10 min+</option>
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                <ChevronRight className="rotate-90" size={16} />
+          {/* B. Video Grid & Highlights */}
+          <main className="lg:w-3/4">
+            {/* Important Topics Tags */}
+            <motion.section {...fadeInUp} className="mb-20">
+              <div className="flex items-center gap-4 mb-8">
+                 <Zap className="text-accent-cyan animate-pulse" />
+                 <h3 className="text-xl font-black uppercase tracking-widest text-white italic">Exam Essentials</h3>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
+              <div className="flex flex-wrap gap-4">
+                {subject.importantTopics.map((topic, i) => (
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="px-6 py-3 border border-accent-cyan/20 glass-card bg-accent-cyan/[0.03] text-accent-cyan text-xs font-black uppercase tracking-widest rounded-xl hover:border-accent-cyan hover:shadow-[0_0_15px_rgba(0,240,255,0.2)] transition-all cursor-default"
+                  >
+                    {topic}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
 
-      {/* Learning Roadmap & Topics Container */}
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16">
-        
-        {/* Roadmap Visualization (Left) */}
-        <aside id="roadmap" className="lg:w-1/3 relative">
-          <div className="sticky top-32">
-            <h3 className="text-2xl font-black mb-10 flex items-center gap-3">
-              <LayoutIcon className="text-accent-purple" /> Roadmap
-            </h3>
-            
-            <div className="space-y-0 relative pl-4">
-              {/* Connecting Line */}
-              <div className="absolute left-[23px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-accent-purple via-accent-blue to-accent-cyan opacity-20" />
-              
-              {subject.topics.map((topic, i) => (
-                <motion.div 
-                  key={topic.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="relative pb-10 group cursor-pointer"
+            {/* Video List */}
+            <div className="space-y-12">
+              <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
+                <h3 className="text-3xl font-black italic">Core Modules</h3>
+                <div className="text-xs text-gray-500 font-black tracking-widest uppercase">Verified Knowledge Stream</div>
+              </div>
+
+              {subject.videos.map((video, i) => (
+                <motion.div
+                  key={video.id}
+                  ref={el => videoRefs.current[video.id] = el}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.6 }}
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="relative z-10 w-5 h-5 rounded-full bg-dark border-2 border-accent-purple group-hover:scale-125 group-hover:bg-accent-purple group-hover:shadow-[0_0_15px_#7B61FF] transition-all duration-300">
-                      <div className="absolute inset-0 bg-accent-purple rounded-full animate-ping opacity-0 group-hover:opacity-30" />
+                  <GlassCard className="p-0 border-white/5 overflow-hidden group hover:bg-white/[0.02] flex flex-col md:flex-row gap-0">
+                    {/* Thumbnail Section */}
+                    <Link to={`/video/${video.id}`} className="md:w-1/3 relative aspect-video overflow-hidden">
+                      <img 
+                        src={video.thumbnail} 
+                        alt={video.title} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      />
+                      <div className="absolute inset-0 bg-dark/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-16 h-16 rounded-full bg-accent-blue flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.5)]">
+                          <Play className="text-white fill-current ml-1" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/90 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
+                        <Clock size={12} className="text-accent-cyan" /> {video.duration}
+                      </div>
+                    </Link>
+
+                    {/* Info Section */}
+                    <div className="flex-1 p-8 md:p-10 flex flex-col justify-center">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {video.topics.slice(0, 3).map((topic, j) => (
+                          <span key={j} className="text-[10px] font-black text-accent-purple/60 uppercase tracking-widest border border-accent-purple/20 px-2 py-0.5 rounded">
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                      <h3 className="text-2xl font-black mb-4 group-hover:text-accent-blue transition-colors italic">{video.title}</h3>
+                      <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-xl font-light">
+                        {video.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-4">
+                          <motion.div whileHover={{ scale: 1.1 }} className="flex items-center gap-2 cursor-pointer bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/5">
+                             <BookOpen size={14} className="text-accent-cyan" />
+                             <span className="text-[10px] font-black uppercase text-gray-500 group-hover:text-white transition-colors">Exam Notes</span>
+                          </motion.div>
+                        </div>
+                        <Link to={`/video/${video.id}`}>
+                          <motion.div whileHover={{ x: 5 }} className="flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-[0.2em] cursor-pointer">
+                            Deploy <ChevronRight size={16} />
+                          </motion.div>
+                        </Link>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-[10px] font-black text-gray-500 tracking-[0.2em] mb-1">STEP {i + 1}</div>
-                      <h4 className="font-bold text-gray-300 group-hover:text-white group-hover:translate-x-1 transition-all">
-                        {topic.title}
-                      </h4>
-                    </div>
-                  </div>
+                  </GlassCard>
                 </motion.div>
               ))}
             </div>
-            
-            <div className="mt-12 p-8 glass-card border-accent-blue/10 bg-accent-blue/[0.02]">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="text-accent-blue" />
-                <span className="font-black text-sm uppercase tracking-widest text-white">Efficiency Meter</span>
-              </div>
-              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  whileInView={{ width: '85%' }}
-                  className="h-full bg-gradient-to-r from-accent-blue to-accent-purple" 
-                />
-              </div>
-              <p className="mt-4 text-xs text-gray-500 font-medium italic">You are following an optimized path designed for 3x retention.</p>
-            </div>
-          </div>
-        </aside>
 
-        {/* Topics Grid (Right) */}
-        <main className="lg:w-2/3">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-2xl font-black">All Topics</h3>
-            <div className="text-sm text-gray-500 font-medium">Showing {filteredTopics.length} Results</div>
-          </div>
-
-          <AnimatePresence mode="popLayout">
-            <div className="grid gap-6">
-              {filteredTopics.length > 0 ? (
-                filteredTopics.map((topic, i) => (
-                  <motion.div
-                    key={topic.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Link to={`/topic/${topic.id}`}>
-                      <GlassCard 
-                        glow 
-                        neonColor={topic.difficulty === 'Hard' ? 'purple' : 'blue'}
-                        className="p-8 border-white/5 group bg-white/[0.02] hover:bg-white/[0.04]"
-                      >
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
-                                topic.difficulty === 'Easy' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                                topic.difficulty === 'Medium' ? 'bg-accent-blue/10 text-accent-blue border border-accent-blue/20' :
-                                'bg-accent-purple/10 text-accent-purple border border-accent-purple/20'
-                              }`}>
-                                {topic.difficulty}
-                              </div>
-                              <div className="flex items-center gap-1.5 text-gray-500 text-[10px] font-black uppercase tracking-widest">
-                                <Clock size={12} className="text-accent-cyan" /> {topic.time}
-                              </div>
-                            </div>
-                            <h3 className="text-2xl font-black mb-3 text-white group-hover:text-accent-blue transition-colors italic">
-                              {topic.title}
-                            </h3>
-                            <p className="text-gray-400 text-base leading-relaxed font-light">
-                              {topic.description}
-                            </p>
-                          </div>
-                          
-                          <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/[0.05] group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.05)] border border-white/5 group-hover:border-accent-purple/30">
-                            <Zap className="text-accent-purple" size={24} />
-                          </div>
-                        </div>
-                        
-                        <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                           <div className="flex items-center gap-4">
-                            <div className="flex -space-x-2">
-                              {[1,2,3].map(j => (
-                                <div key={j} className="w-6 h-6 rounded-full border border-dark bg-gray-800" />
-                              ))}
-                            </div>
-                            <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">4.2k Students Learned</span>
-                           </div>
-                           <div className="flex items-center gap-2 text-accent-cyan group-hover:text-white transition-colors font-black text-[10px] uppercase tracking-widest">
-                             Deploy Knowledge <ChevronRight size={14} />
-                           </div>
-                        </div>
-                      </GlassCard>
-                    </Link>
-                  </motion.div>
-                ))
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="py-20 text-center glass-card border-dashed border-white/10"
-                >
-                  <p className="text-gray-500 font-bold mb-4">No topics match your current filters.</p>
-                  <button 
-                    onClick={() => {
-                      setSearchQuery('');
-                      setDifficultyFilter('All');
-                      setTimeFilter('All');
-                    }}
-                    className="text-accent-blue hover:underline font-black text-xs uppercase"
-                  >
-                    Clear Database Filters
-                  </button>
-                </motion.div>
-              )}
-            </div>
-          </AnimatePresence>
-        </main>
+            {/* Quick Actions at Bottom */}
+            <motion.section {...fadeInUp} className="mt-32 p-12 glass-card border-accent-purple/30 bg-accent-purple/[0.02] text-center">
+               <h3 className="text-3xl font-black mb-6 italic glow-text tracking-tighter">Ready to Begin?</h3>
+               <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                 <button onClick={() => scrollToVideo(subject.videos[0].id)} className="px-10 py-5 bg-white text-dark rounded-2xl font-black text-lg flex items-center justify-center gap-3">
+                   Start Mission 01 <MousePointer2 className="w-5 h-5 fill-current" />
+                 </button>
+                 <button className="px-10 py-5 border border-white/10 glass-card rounded-2xl font-bold text-gray-300 hover:text-white transition-all">
+                   View Resource Base
+                 </button>
+               </div>
+            </motion.section>main
+          </main>
+        </div>
       </div>
     </div>
   );
