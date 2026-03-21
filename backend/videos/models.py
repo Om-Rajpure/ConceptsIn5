@@ -61,7 +61,7 @@ class Video(models.Model):
     description = models.TextField(blank=True)
     youtube_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     video_url = models.URLField(max_length=500, blank=True, null=True) # For Instagram/LinkedIn
-    subject = models.ForeignKey(Subject, related_name='videos', on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, related_name='videos', on_delete=models.SET_NULL, null=True, blank=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='Theory')
     important_topics = models.TextField(blank=True, help_text="Comma separated topics")
     duration = models.CharField(max_length=20, blank=True)
@@ -96,3 +96,13 @@ class Note(models.Model):
 
     def __str__(self):
         return self.title
+
+class FetchLog(models.Model):
+    fetch_type = models.CharField(max_length=50, default='youtube')
+    last_fetched_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='success')
+    videos_added = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.fetch_type} - {self.created_at}"

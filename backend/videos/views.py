@@ -2,6 +2,8 @@ from rest_framework import viewsets, permissions, status, views
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, SubCategory, Subject, Video, Note
 from .serializers import (
@@ -87,6 +89,7 @@ class AdminNoteViewSet(viewsets.ModelViewSet):
     filterset_fields = ['video', 'subject']
 
 # Auth Views
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(views.APIView):
     permission_classes = [permissions.AllowAny]
 

@@ -5,7 +5,28 @@ const AdminContext = createContext();
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:8000'; // Adjust as needed
+// Removing baseURL because we use Vite proxy in dev
+// axios.defaults.baseURL = 'http://localhost:8000'; 
+
+// Add a request interceptor to include the CSRF token if it exists in cookies
+axios.interceptors.request.use((config) => {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    if (cookieValue) {
+        config.headers['X-CSRFToken'] = cookieValue;
+    }
+    return config;
+});
 
 export const AdminProvider = ({ children }) => {
     const [user, setUser] = useState(null);
