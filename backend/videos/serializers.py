@@ -12,11 +12,10 @@ class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = [
-            'id', 'title', 'description', 'youtube_id', 'video_url', 
+            'id', 'title', 'description', 'youtube_id', 'youtube_url', 'video_url', 
             'subject', 'type', 'important_topics', 'duration', 
             'thumbnail', 'source', 'is_published', 'is_important', 'is_verified', 
-            'created_at', 'updated_at', 'notes', 'fetch_from_youtube', 
-            'youtube_url_input'
+            'created_at', 'updated_at', 'notes'
         ]
 
 class SubjectSerializer(serializers.ModelSerializer):

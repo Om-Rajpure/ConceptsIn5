@@ -20,6 +20,52 @@ class YouTubeService:
         minutes, seconds = divmod(seconds, 60)
         return f"{minutes}:{seconds:02d}"
 
+    def extract_video_id(self, url):
+        if not url:
+            return None
+        patterns = [
+            r'(?:v=|\/)([0-9A-Za-z_-]{11}).*',
+            r'youtu\.be\/([0-9A-Za-z_-]{11})',
+            r'embed\/([0-9A-Za-z_-]{11})',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, url)
+            if match:
+                return match.group(1)
+        return None
+
+    def fetch_video_metadata(self, youtube_url):
+        video_id = self.extract_video_id(youtube_url)
+        if not video_id or not self.youtube:
+            return None
+
+        try:
+            request = self.youtube.videos().list(
+                part="snippet,contentDetails",
+                id=video_id
+            )
+            response = request.execute()
+
+            if not response['items']:
+                return None
+
+            item = response['items'][0]
+            snippet = item['snippet']
+            content_details = item['contentDetails']
+
+            duration = self.convert_duration(content_details['duration'])
+
+            return {
+                'title': snippet['title'],
+                'description': snippet['description'],
+                'thumbnail': snippet['thumbnails']['high']['url'],
+                'duration': duration,
+                'youtube_id': video_id
+            }
+        except Exception as e:
+            print(f"Error fetching YouTube metadata: {e}")
+            return None
+
     def fetch_latest_videos(self, max_results=10, published_after=None):
         if not self.youtube or not self.channel_id:
             return []

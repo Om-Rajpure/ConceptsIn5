@@ -10,7 +10,8 @@ from .serializers import (
     CategorySerializer, SubCategorySerializer, SubjectSerializer, 
     VideoSerializer, NoteSerializer
 )
-from .services import YouTubeService
+from .utils.youtube_utils import extract_video_id, get_thumbnail, get_embed_url
+from rest_framework.exceptions import ValidationError
 
 # Public ViewSets
 class PublicCategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -54,32 +55,34 @@ class AdminVideoViewSet(viewsets.ModelViewSet):
     queryset = Video.objects.all().select_related('subject')
     serializer_class = VideoSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
-    
+
     def perform_create(self, serializer):
-        fetch_from_youtube = self.request.data.get('fetch_from_youtube', False)
-        youtube_url = self.request.data.get('youtube_url_input', '')
-        
-        if fetch_from_youtube and youtube_url:
-            service = YouTubeService()
-            video_id = service.extract_video_id(youtube_url)
-            if video_id:
-                # Check for duplicates
-                if Video.objects.filter(youtube_id=video_id).exists():
-                     # Potentially raise error or just update
-                     pass
-                else:
-                    details = service.get_video_details(video_id)
-                    if details:
-                        serializer.save(
-                            title=details['title'],
-                            description=details['description'],
-                            thumbnail=details['thumbnail'],
-                            duration=details['duration'],
-                            youtube_id=details['youtube_id'],
-                            source='youtube'
-                        )
-                        return
-        serializer.save()
+        youtube_url = self.request.data.get('youtube_url')
+        if youtube_url:
+            video_id = extract_video_id(youtube_url)
+            if not video_id:
+                raise ValidationError({"youtube_url": "Invalid YouTube URL"})
+            serializer.save(
+                youtube_id=video_id,
+                thumbnail=get_thumbnail(video_id),
+                video_url=get_embed_url(video_id)
+            )
+        else:
+            serializer.save()
+
+    def perform_update(self, serializer):
+        youtube_url = self.request.data.get('youtube_url')
+        if youtube_url:
+            video_id = extract_video_id(youtube_url)
+            if not video_id:
+                raise ValidationError({"youtube_url": "Invalid YouTube URL"})
+            serializer.save(
+                youtube_id=video_id,
+                thumbnail=get_thumbnail(video_id),
+                video_url=get_embed_url(video_id)
+            )
+        else:
+            serializer.save()
 
 class AdminNoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all().select_related('video', 'subject')

@@ -27,7 +27,7 @@ urlpatterns = [
     path('public/', include(public_router.urls)),
     path('admin/', include(admin_router.urls)),
     path('auth/login/', LoginView.as_view(), name='api-login'),
-    path('auth/logout/', LogoutView.as_view(), name='api-logout'),
     path('auth/status/', UserStatusView.as_view(), name='api-status'),
     path('admin/stats/', AdminDashboardStatsView.as_view(), name='admin-stats'),
+    path('auth/logout/', LogoutView.as_view(), name='api-logout'),
 ]

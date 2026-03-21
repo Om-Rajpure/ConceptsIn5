@@ -61,6 +61,7 @@ class Video(models.Model):
     description = models.TextField(blank=True)
     youtube_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     video_url = models.URLField(max_length=500, blank=True, null=True) # For Instagram/LinkedIn
+    youtube_url = models.URLField(max_length=500, blank=True, null=True)
     subject = models.ForeignKey(Subject, related_name='videos', on_delete=models.SET_NULL, null=True, blank=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='Theory')
     important_topics = models.TextField(blank=True, help_text="Comma separated topics")

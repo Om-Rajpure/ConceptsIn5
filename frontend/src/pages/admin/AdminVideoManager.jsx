@@ -30,11 +30,13 @@ const AdminVideoManager = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        youtube_url_input: '',
+        youtube_url: '',
         fetch_from_youtube: false,
         subject: '',
         type: 'Theory',
         important_topics: '',
+        duration: '',
+        thumbnail: '',
         is_published: true,
         is_verified: false
     });
@@ -81,26 +83,27 @@ const AdminVideoManager = () => {
         }
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            let response;
             if (editingVideo) {
-                response = await axios.put(`/api/admin/videos/${editingVideo.id}/`, formData);
+                await axios.put(`/api/admin/videos/${editingVideo.id}/`, formData);
             } else {
-                response = await axios.post('/api/admin/videos/', formData);
+                await axios.post('/api/admin/videos/', formData);
             }
             fetchData();
             setShowAddForm(false);
             setEditingVideo(null);
             setFormData({
-                title: '', description: '', youtube_url_input: '', 
+                title: '', description: '', youtube_url: '', 
                 fetch_from_youtube: false, subject: '', type: 'Theory',
-                important_topics: '', is_published: true, is_verified: false
+                important_topics: '', duration: '', thumbnail: '',
+                is_published: true, is_verified: false
             });
         } catch (error) {
             console.error('Save failed', error);
-            alert('Failed to save video. Check if YouTube URL is valid or duplicate.');
+            alert('Failed to save video. Possible duplicate YouTube ID or invalid data.');
         }
     };
 
@@ -255,37 +258,32 @@ const AdminVideoManager = () => {
                                         {formData.fetch_from_youtube && (
                                             <input 
                                                 type="url"
-                                                value={formData.youtube_url_input}
-                                                onChange={(e) => setFormData({...formData, youtube_url_input: e.target.value})}
-                                                placeholder="Paste YouTube Module URL"
+                                                value={formData.youtube_url}
+                                                onChange={(e) => setFormData({...formData, youtube_url: e.target.value})}
+                                                placeholder="Paste YouTube URL (Auto-fills thumbnail/embed)"
                                                 className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:border-accent-blue outline-none"
-                                                required={formData.fetch_from_youtube}
                                             />
                                         )}
                                     </div>
 
-                                    {!formData.fetch_from_youtube && (
-                                        <>
-                                            <div>
-                                                <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Module Title</label>
-                                                <input 
-                                                    type="text"
-                                                    value={formData.title}
-                                                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-blue transition-colors"
-                                                    required={!formData.fetch_from_youtube}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Intel Brief (Description)</label>
-                                                <textarea 
-                                                    value={formData.description}
-                                                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-blue transition-colors h-32"
-                                                />
-                                            </div>
-                                        </>
-                                    )}
+                                    <div>
+                                        <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Module Title</label>
+                                        <input 
+                                            type="text"
+                                            value={formData.title}
+                                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-blue transition-colors"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Intel Brief (Description)</label>
+                                        <textarea 
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-blue transition-colors h-32"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="space-y-6">
@@ -310,6 +308,25 @@ const AdminVideoManager = () => {
                                                 <option value="Theory">Theory</option>
                                                 <option value="Numerical">Numerical</option>
                                             </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Duration</label>
+                                            <input 
+                                                type="text"
+                                                value={formData.duration}
+                                                onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                                                placeholder="5:00"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-purple"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Thumbnail URL</label>
+                                            <input 
+                                                type="text"
+                                                value={formData.thumbnail}
+                                                onChange={(e) => setFormData({...formData, thumbnail: e.target.value})}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-purple"
+                                            />
                                         </div>
                                         <div className="flex flex-col justify-end gap-2">
                                             <div className="flex items-center gap-3">
