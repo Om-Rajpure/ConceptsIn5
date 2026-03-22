@@ -91,6 +91,38 @@ class AdminNoteViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['video', 'subject']
 
+class AdminSubjectViewSet(viewsets.ModelViewSet):
+    queryset = Subject.objects.all().select_related('subcategory')
+    serializer_class = SubjectSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+
+    def perform_create(self, serializer):
+        name = self.request.data.get('name')
+        if Subject.objects.filter(name__iexact=name).exists():
+            raise ValidationError({"error": "Subject already exists"})
+        serializer.save()
+
+class AdminSubCategoryViewSet(viewsets.ModelViewSet):
+    queryset = SubCategory.objects.all().select_related('category')
+    serializer_class = SubCategorySerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+
+    def perform_create(self, serializer):
+        name = self.request.data.get('name')
+        category_id = self.request.data.get('category')
+        
+        # Check if sub-category with this name already exists for THIS category
+        if SubCategory.objects.filter(name__iexact=name, category_id=category_id).exists():
+            raise ValidationError({"error": f"Sub-category '{name}' already exists for this category"})
+            
+        # Due to global unique slug constraint, we must also check if name results in a duplicate slug
+        from django.utils.text import slugify
+        candidate_slug = slugify(name)
+        if SubCategory.objects.filter(slug=candidate_slug).exists():
+            raise ValidationError({"error": f"A sub-category with name '{name}' (slug: {candidate_slug}) already exists globally. Please use a slightly different name."})
+            
+        serializer.save()
+
 # Auth Views
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(views.APIView):

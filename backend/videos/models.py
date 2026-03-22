@@ -15,6 +15,7 @@ class Category(models.Model):
 
     class Meta:
         verbose_name_plural = "Categories"
+        ordering = ['name']
 
 class SubCategory(models.Model):
     name = models.CharField(max_length=100)
@@ -31,6 +32,7 @@ class SubCategory(models.Model):
 
     class Meta:
         verbose_name_plural = "SubCategories"
+        ordering = ['name']
 
 class Subject(models.Model):
     name = models.CharField(max_length=100)
@@ -42,6 +44,9 @@ class Subject(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name

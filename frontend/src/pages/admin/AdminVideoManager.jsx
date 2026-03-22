@@ -23,7 +23,20 @@ const AdminVideoManager = () => {
     const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showSubjectModal, setShowSubjectModal] = useState(false);
+    const [showSubCategoryModal, setShowSubCategoryModal] = useState(false);
     const [editingVideo, setEditingVideo] = useState(null);
+
+    // Subject/SubCategory Modal State
+    const [categories, setCategories] = useState([]);
+    const [subCategories, setSubCategories] = useState([]);
+    const [newSubject, setNewSubject] = useState({
+        name: '',
+        category: '',
+        subcategory: ''
+    });
+    const [newSubCategoryName, setNewSubCategoryName] = useState('');
+    const [modalLoading, setModalLoading] = useState(false);
     const location = useLocation();
     
     // Form State
@@ -61,6 +74,83 @@ const AdminVideoManager = () => {
             console.error('Failed to fetch data', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchModalData = async () => {
+        try {
+            const [cResponse, scResponse] = await Promise.all([
+                axios.get('/api/public/categories/'),
+                axios.get('/api/public/subcategories/')
+            ]);
+            setCategories(cResponse.data.results || cResponse.data);
+            setSubCategories(scResponse.data.results || scResponse.data);
+        } catch (error) {
+            console.error('Failed to fetch modal data', error);
+        }
+    };
+
+    useEffect(() => {
+        if (showSubjectModal) {
+            fetchModalData();
+        }
+    }, [showSubjectModal]);
+
+    const handleAddSubject = async (e) => {
+        e.preventDefault();
+        if (!newSubject.name || !newSubject.subcategory) {
+            alert('Please fill all required fields');
+            return;
+        }
+        setModalLoading(true);
+        try {
+            const response = await axios.post('/api/admin/subjects/', {
+                name: newSubject.name,
+                subcategory: newSubject.subcategory
+            });
+            const createdSubject = response.data;
+            
+            // Update subjects list
+            setSubjects(prev => [...prev, createdSubject]);
+            // Select the new subject
+            setFormData(prev => ({ ...prev, subject: createdSubject.id }));
+            // Reset and close modal
+            setNewSubject({ name: '', category: '', subcategory: '' });
+            setShowSubjectModal(false);
+        } catch (error) {
+            console.error('Failed to add subject', error);
+            alert(error.response?.data?.error || 'Failed to add subject');
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    const handleAddSubCategory = async (e) => {
+        e.preventDefault();
+        if (!newSubCategoryName || !newSubject.category) {
+            alert('Name and category are required');
+            return;
+        }
+        setModalLoading(true);
+        try {
+            const response = await axios.post('/api/admin/subcategories/', {
+                name: newSubCategoryName,
+                category: newSubject.category
+            });
+            const createdSubCategory = response.data;
+            
+            // Update subcategories list
+            setSubCategories(prev => [...prev, createdSubCategory]);
+            // Auto-select the new subcategory
+            setNewSubject(prev => ({ ...prev, subcategory: createdSubCategory.id }));
+            // Reset and close modal
+            setNewSubCategoryName('');
+            setShowSubCategoryModal(false);
+        } catch (error) {
+            console.error('Failed to add subcategory', error);
+            alert(error.response?.data?.error || 'Failed to add sub-category');
+        } finally {
+            setModalLoading(false);
         }
     };
 
@@ -275,17 +365,26 @@ const AdminVideoManager = () => {
                                 <div className="space-y-6">
                                     <div>
                                         <label className="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Subject Anchor</label>
-                                        <div className="relative group">
-                                            <select 
-                                                value={formData.subject}
-                                                onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                                                className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-blue focus:ring-4 focus:ring-accent-blue/5 transition-all cursor-pointer"
-                                                required
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative group flex-1">
+                                                <select 
+                                                    value={formData.subject}
+                                                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                                                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-blue focus:ring-4 focus:ring-accent-blue/5 transition-all cursor-pointer"
+                                                    required
+                                                >
+                                                    <option value="" disabled className="bg-dark">Select Subject</option>
+                                                    {subjects.map(s => <option key={s.id} value={s.id} className="bg-dark">{s.name}</option>)}
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-accent-blue transition-colors pointer-events-none" size={16} />
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setShowSubjectModal(true)}
+                                                className="px-4 py-4 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-blue hover:text-white transition-all shadow-lg"
                                             >
-                                                <option value="" disabled className="bg-dark">Select Subject</option>
-                                                {subjects.map(s => <option key={s.id} value={s.id} className="bg-dark">{s.name}</option>)}
-                                            </select>
-                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-accent-blue transition-colors pointer-events-none" size={16} />
+                                                + Add
+                                            </button>
                                         </div>
                                     </div>
 
@@ -416,6 +515,185 @@ const AdminVideoManager = () => {
                                             Abort Operation
                                         </button>
                                     </div>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* Subject Creation Modal */}
+            <AnimatePresence>
+                {showSubjectModal && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-dark/90 backdrop-blur-md"
+                            onClick={() => setShowSubjectModal(false)}
+                        />
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="w-full max-w-md glass-card border-accent-blue/30 p-8 relative z-10 rounded-[24px] shadow-2xl"
+                        >
+                            <h2 className="text-2xl font-black italic uppercase text-gradient mb-8">Add New Subject</h2>
+                            
+                            <form onSubmit={handleAddSubject} className="space-y-6">
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Subject Name</label>
+                                    <input 
+                                        type="text"
+                                        value={newSubject.name}
+                                        onChange={(e) => setNewSubject({...newSubject, name: e.target.value})}
+                                        placeholder="e.g. Data Structures"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-blue transition-all"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Parent Category</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={newSubject.category}
+                                            onChange={(e) => {
+                                                setNewSubject({...newSubject, category: e.target.value, subcategory: ''});
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-blue"
+                                            required
+                                        >
+                                            <option value="" disabled className="bg-dark">Select Category</option>
+                                            {categories.map(c => <option key={c.id} value={c.id} className="bg-dark">{c.name}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Sub-Category Anchor</label>
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative flex-1">
+                                            <select 
+                                                value={newSubject.subcategory}
+                                                onChange={(e) => setNewSubject({...newSubject, subcategory: e.target.value})}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-blue disabled:opacity-50"
+                                                required
+                                                disabled={!newSubject.category}
+                                            >
+                                                <option value="" disabled className="bg-dark">Select Sub-Category</option>
+                                                {(() => {
+                                                    const selectedCategoryName = categories.find(c => c.id === parseInt(newSubject.category))?.name;
+                                                    if (selectedCategoryName === "Semester Subjects" || selectedCategoryName === "Semester") {
+                                                        return [
+                                                            { id: 3, name: "Sem 4" },
+                                                            { id: 4, name: "Sem 5" },
+                                                            { id: 5, name: "Sem 6" },
+                                                            { id: 6, name: "Sem 7" },
+                                                            { id: 7, name: "Sem 8" }
+                                                        ].map(opt => <option key={opt.id} value={opt.id} className="bg-dark">{opt.name}</option>);
+                                                    }
+                                                    return subCategories
+                                                        .filter(sc => sc.category === parseInt(newSubject.category))
+                                                        .map(sc => <option key={sc.id} value={sc.id} className="bg-dark">{sc.name}</option>);
+                                                })()}
+                                            </select>
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+                                        </div>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowSubCategoryModal(true)}
+                                            disabled={!newSubject.category}
+                                            className="px-4 py-4 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-blue hover:text-white transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            + Add
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowSubjectModal(false)}
+                                        className="flex-1 py-4 glass-card border-white/5 text-gray-400 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all rounded-xl"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        disabled={modalLoading}
+                                        className="flex-[2] py-4 bg-accent-blue rounded-xl text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-accent-blue/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                                    >
+                                        {modalLoading ? 'Creating...' : 'Add Subject'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* Sub-Category Creation Modal */}
+            <AnimatePresence>
+                {showSubCategoryModal && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-dark/90 backdrop-blur-md"
+                            onClick={() => setShowSubCategoryModal(false)}
+                        />
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="w-full max-w-md glass-card border-accent-purple/30 p-8 relative z-10 rounded-[24px] shadow-2xl"
+                        >
+                            <h2 className="text-2xl font-black italic uppercase text-gradient-purple mb-8">Add Sub-Category</h2>
+                            
+                            <form onSubmit={handleAddSubCategory} className="space-y-6">
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Sub-Category Name</label>
+                                    <input 
+                                        type="text"
+                                        value={newSubCategoryName}
+                                        onChange={(e) => setNewSubCategoryName(e.target.value)}
+                                        placeholder="e.g. Semester 5"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white outline-none focus:border-accent-purple transition-all"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Category (Locked)</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={newSubject.category}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none opacity-50 cursor-not-allowed"
+                                            disabled
+                                        >
+                                            {categories.map(c => <option key={c.id} value={c.id} className="bg-dark">{c.name}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowSubCategoryModal(false)}
+                                        className="flex-1 py-4 glass-card border-white/5 text-gray-400 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all rounded-xl"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        disabled={modalLoading}
+                                        className="flex-[2] py-4 bg-accent-purple rounded-xl text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-accent-purple/20 hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                                    >
+                                        {modalLoading ? 'Adding...' : 'Add'}
+                                    </button>
                                 </div>
                             </form>
                         </motion.div>
