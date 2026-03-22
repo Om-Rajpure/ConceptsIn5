@@ -118,7 +118,7 @@ function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
 }
 
 export default function SubjectPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [subject, setSubject] = useState(null);
   const [subjectVideos, setSubjectVideos] = useState([]);
@@ -132,8 +132,8 @@ export default function SubjectPage() {
       setLoading(true);
       try {
         const [sResponse, vResponse] = await Promise.all([
-          axios.get(`/api/public/subjects/${id}/`),
-          axios.get(`/api/public/videos/?subject=${id}`)
+          axios.get(`/api/public/subjects/${slug}/`),
+          axios.get(`/api/public/videos/?subject__slug=${slug}`)
         ]);
         
         const sData = sResponse.data;
@@ -153,13 +153,13 @@ export default function SubjectPage() {
       }
     };
     fetchSubjectData();
-  }, [id]);
+  }, [slug]);
 
   const [lastWatchedId, setLastWatchedId] = useState(null);
   useEffect(() => {
-    const saved = localStorage.getItem(`watched_${id}`);
+    const saved = localStorage.getItem(`watched_${slug}`);
     if (saved) setLastWatchedId(saved);
-  }, [id]);
+  }, [slug]);
 
   const continueVideo = useMemo(() => {
     if (!lastWatchedId || subjectVideos.length === 0) return subjectVideos[0];

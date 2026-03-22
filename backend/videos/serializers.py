@@ -6,6 +6,11 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Note
         fields = '__all__'
 
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = '__all__'
+
 class VideoSerializer(serializers.ModelSerializer):
     notes = NoteSerializer(many=True, read_only=True)
     
@@ -18,10 +23,18 @@ class VideoSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'notes'
         ]
 
-class SubjectSerializer(serializers.ModelSerializer):
+class PublicVideoSerializer(serializers.ModelSerializer):
+    notes = NoteSerializer(many=True, read_only=True)
+    subject = SubjectSerializer(read_only=True)
+    
     class Meta:
-        model = Subject
-        fields = '__all__'
+        model = Video
+        fields = [
+            'id', 'title', 'description', 'youtube_id', 'youtube_url', 'video_url', 
+            'subject', 'type', 'important_topics', 'duration', 
+            'thumbnail', 'source', 'is_published', 'is_important', 'is_verified', 
+            'created_at', 'updated_at', 'notes'
+        ]
 
 class SubCategorySerializer(serializers.ModelSerializer):
     subjects = SubjectSerializer(many=True, read_only=True)

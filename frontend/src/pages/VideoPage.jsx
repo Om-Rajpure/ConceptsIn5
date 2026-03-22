@@ -40,20 +40,17 @@ export default function VideoPage() {
       try {
         const response = await axios.get(`/api/public/videos/${id}/`);
         const videoData = response.data;
+        const subjectData = videoData.subject;
         
-        // Fetch subject to get other videos in same subject for roadmap
-        const sResponse = await axios.get(`/api/public/subjects/${videoData.subject}/`);
-        const subjectData = sResponse.data;
-        
-        // Fetch all videos for this subject
-        const vResponse = await axios.get(`/api/public/videos/?subject=${videoData.subject}`);
+        // Fetch all videos for this subject roadmap using subject__slug filter
+        const vResponse = await axios.get(`/api/public/videos/?subject__slug=${subjectData.slug}`);
         const subjectVideos = vResponse.data.results || vResponse.data;
         
         const sortedVideos = subjectVideos.sort((a, b) => a.id - b.id);
         const currentIndex = sortedVideos.findIndex(v => v.id === videoData.id);
 
         setContext({
-          subject: { id: subjectData.id, title: subjectData.name },
+          subject: { id: subjectData.id, title: subjectData.name, slug: subjectData.slug },
           video: {
             ...videoData,
             youtubeUrl: videoData.youtube_id ? `https://www.youtube.com/embed/${videoData.youtube_id}` : videoData.video_url,
@@ -78,11 +75,11 @@ export default function VideoPage() {
   }, [id]);
 
   useEffect(() => {
-    // Save progress for the "Continue Learning" feature
-    if (context?.subject?.id && context?.video?.id) {
-      localStorage.setItem(`watched_${context.subject.id}`, context.video.id);
+    // Save progress using subject slug
+    if (context?.subject?.slug && context?.video?.id) {
+      localStorage.setItem(`watched_${context.subject.slug}`, context.video.id);
     }
-  }, [context?.subject?.id, context?.video?.id]);
+  }, [context?.subject?.slug, context?.video?.id]);
 
   if (loading) {
     return (
@@ -101,7 +98,7 @@ export default function VideoPage() {
       <div className="absolute top-1/4 -right-1/4 w-[600px] h-[600px] bg-accent-purple/5 blur-[150px] animate-pulse-glow" />
 
       <section className="pt-32 px-6 max-w-7xl mx-auto relative z-10">
-        <Link to={`/subject/${subject.id}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-accent-blue mb-8 transition-colors group px-4 py-2 glass-card border-white/5 text-[10px] font-black uppercase tracking-widest">
+        <Link to={`/subject/${subject.slug}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-accent-blue mb-8 transition-colors group px-4 py-2 glass-card border-white/5 text-[10px] font-black uppercase tracking-widest">
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {subject.title}
         </Link>
 

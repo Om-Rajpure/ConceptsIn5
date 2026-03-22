@@ -148,7 +148,7 @@ export default function CategoryPage() {
             {/* Subjects Grid/Scroll */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12">
               {group.items.map((subject, subIdx) => (
-                <Link to={`/subject/${subject.id}`} key={subject.id}>
+                <Link to={`/subject/${subject.slug}`} key={subject.id}>
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}

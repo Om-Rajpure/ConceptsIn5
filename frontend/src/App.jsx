@@ -34,7 +34,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/category/:id" element={<CategoryPage />} />
-          <Route path="/subject/:id" element={<SubjectPage />} />
+          <Route path="/subject/:slug" element={<SubjectPage />} />
           <Route path="/topic/:id" element={<TopicPage />} />
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/video/:id" element={<VideoPage />} />

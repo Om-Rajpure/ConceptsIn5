@@ -8,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, SubCategory, Subject, Video, Note
 from .serializers import (
     CategorySerializer, SubCategorySerializer, SubjectSerializer, 
-    VideoSerializer, NoteSerializer
+    VideoSerializer, PublicVideoSerializer, NoteSerializer
 )
 from .utils.youtube_utils import extract_video_id, get_thumbnail, get_embed_url
 from rest_framework.exceptions import ValidationError
@@ -38,10 +38,13 @@ class PublicSubjectViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PublicVideoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Video.objects.filter(is_published=True).select_related('subject')
-    serializer_class = VideoSerializer
+    serializer_class = PublicVideoSerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['subject', 'is_important']
+    filterset_fields = {
+        'subject': ['exact'],
+        'subject__slug': ['exact'],
+    }
 
 class PublicNoteViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Note.objects.all().select_related('video', 'subject')
