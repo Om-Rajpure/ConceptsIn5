@@ -93,7 +93,7 @@ function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
           </h3>
 
           <p className="text-gray-400 text-sm font-light leading-relaxed line-clamp-2 mb-8">
-            {video.description}
+            {video.quick_summary}
           </p>
 
           <div className="mt-auto grid grid-cols-2 gap-4">

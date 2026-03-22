@@ -291,7 +291,7 @@ const AdminVideoManager = () => {
                                 </span>
                             </div>
                             <h3 className="text-xl font-black italic uppercase tracking-tight mb-2 group-hover:text-accent-blue transition-colors">{video.title}</h3>
-                            <p className="text-gray-500 text-sm line-clamp-1 font-medium">{video.description}</p>
+                            <p className="text-gray-500 text-sm line-clamp-1 font-medium">{video.quick_summary || video.description}</p>
                         </div>
                          <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto">
                             <div className="flex-1 flex md:flex-col gap-2">

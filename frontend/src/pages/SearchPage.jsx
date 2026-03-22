@@ -201,7 +201,7 @@ function VideoSearchCard({ video }) {
         <div className="p-8 flex flex-col flex-1">
           <div className="text-[9px] font-black text-accent-blue/60 uppercase tracking-widest mb-3">{subject?.title}</div>
           <h3 className="text-xl font-black mb-4 italic group-hover:text-accent-blue transition-colors line-clamp-1 uppercase tracking-tight">{video.title}</h3>
-          <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 mb-8">{video.description}</p>
+          <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 mb-8">{video.quick_summary}</p>
           <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5 text-accent-blue font-black text-[10px] uppercase tracking-widest">
             Watch Module <ChevronRight size={14} />
           </div>

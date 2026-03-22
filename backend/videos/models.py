@@ -88,6 +88,43 @@ class Video(models.Model):
     fetch_from_youtube = models.BooleanField(default=False)
     youtube_url_input = models.URLField(max_length=500, blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        from services.ai_service import generate_summary
+        from videos.utils.description_processor import process_description
+
+        # Generate summary if missing
+        if not self.quick_summary and self.description:
+            summary = generate_summary(self.description)
+
+            if not summary:
+                summary, _ = process_description(self.description)
+
+            self.quick_summary = summary
+        elif not self.quick_summary and not self.description:
+            self.quick_summary = "No summary available"
+
+        # Generate roadmap
+        if self.topic_flow:
+            topics = [
+                topic.strip()
+                for topic in self.topic_flow.split(",")
+                if topic.strip()
+            ]
+        elif self.description:
+            _, topics = process_description(self.description)
+        else:
+            topics = []
+
+        self.roadmap = topics
+
+        # Debug Logs
+        print("Saving video:", self.title)
+        print("Summary:", self.quick_summary)
+        print("Roadmap:", self.roadmap)
+        print("Description:", self.description)
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 

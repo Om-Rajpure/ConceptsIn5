@@ -4,6 +4,7 @@ from .views import (
     PublicCategoryViewSet, PublicSubCategoryViewSet, PublicSubjectViewSet,
     PublicVideoViewSet, PublicNoteViewSet,
     AdminVideoViewSet, AdminNoteViewSet, AdminSubjectViewSet, AdminSubCategoryViewSet,
+    AdminCategoryViewSet,
     LoginView, LogoutView, UserStatusView, AdminDashboardStatsView
 )
 
@@ -21,6 +22,7 @@ public_router.register(r'videos', PublicVideoViewSet, basename='public-video')
 public_router.register(r'notes', PublicNoteViewSet, basename='public-note')
 
 admin_router = DefaultRouter()
+admin_router.register(r'categories', AdminCategoryViewSet, basename='admin-category')
 admin_router.register(r'videos', AdminVideoViewSet, basename='admin-video')
 admin_router.register(r'notes', AdminNoteViewSet, basename='admin-note')
 admin_router.register(r'subjects', AdminSubjectViewSet, basename='admin-subject')

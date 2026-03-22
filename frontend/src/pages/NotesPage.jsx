@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import { 
   Search, 
   Filter, 
@@ -14,12 +15,9 @@ import {
   Sparkles,
   Layers,
   Zap,
-  Target
+  Target,
+  Loader2
 } from 'lucide-react';
-import { notes } from '../data/notes';
-import { subjects as allSubjects } from '../data/subjects';
-import { videos } from '../data/videos';
-import { categories } from '../data/categories';
 import { globalSearch } from '../utils/search';
 import GlassCard from '../components/GlassCard';
 
@@ -37,39 +35,106 @@ export default function NotesPage() {
   const [selectedSubject, setSelectedSubject] = useState("All"); // This is subjectId
   const [selectedType, setSelectedType] = useState("All");
 
+  const [notes, setNotes] = useState([]);
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchData();
   }, []);
 
-  // Extract unique values for filters from centralized data
-  const categoryOptions = ["All", ...new Set(categories.map(c => c.id))];
-  const subcategoryOptions = ["All", ...new Set(allSubjects.map(s => s.subcategory))];
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [nRes, sRes, vRes, cRes, scRes] = await Promise.all([
+        axios.get('/api/public/notes/'),
+        axios.get('/api/public/subjects/'),
+        axios.get('/api/public/videos/'),
+        axios.get('/api/public/categories/'),
+        axios.get('/api/public/subcategories/')
+      ]);
+
+      // Map API data to UI structure if needed
+      const mappedNotes = (nRes.data.results || nRes.data).map(note => ({
+        ...note,
+        subjectId: note.subject,
+        videoId: note.video,
+        description: note.content.substring(0, 150) + '...'
+      }));
+
+      const mappedSubjects = (sRes.data.results || sRes.data).map(s => ({
+        ...s,
+        title: s.name // globalSearch expects title
+      }));
+
+      const mappedVideos = (vRes.data.results || vRes.data).map(v => ({
+        ...v,
+        title: v.title // already title? Let's check serializer
+      }));
+
+      setNotes(mappedNotes);
+      setAllSubjects(mappedSubjects);
+      setVideos(mappedVideos);
+      setCategories(cRes.data.results || cRes.data);
+      setSubcategories(scRes.data.results || scRes.data);
+    } catch (error) {
+      console.error("Critical failure in neural data link:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Extract unique values for filters from dynamic data
+  const categoryOptions = useMemo(() => ["All", ...categories.map(c => ({ id: c.id, name: c.name }))], [categories]);
+  
+  const subcategoryOptions = useMemo(() => {
+    const list = subcategories
+      .filter(sc => selectedCategory === "All" || sc.category === parseInt(selectedCategory))
+      .map(sc => ({ id: sc.id, name: sc.name }));
+    return ["All", ...list];
+  }, [subcategories, selectedCategory]);
+
   const subjectOptions = useMemo(() => {
     const subs = allSubjects
-      .filter(s => (selectedCategory === "All" || s.category === selectedCategory) && 
-                   (selectedSubcategory === "All" || s.subcategory === selectedSubcategory));
-    return ["All", ...subs.map(s => s.id)];
-  }, [selectedCategory, selectedSubcategory]);
+      .filter(s => {
+        const matchesCategory = selectedCategory === "All" || 
+          subcategories.find(sc => sc.id === s.subcategory)?.category === parseInt(selectedCategory);
+        const matchesSubcategory = selectedSubcategory === "All" || s.subcategory === parseInt(selectedSubcategory);
+        return matchesCategory && matchesSubcategory;
+      });
+    return ["All", ...subs.map(s => ({ id: s.id, name: s.name }))];
+  }, [allSubjects, selectedCategory, selectedSubcategory, subcategories]);
   
   const types = ["All", ...new Set(notes.map(n => n.type).filter(Boolean))];
 
   const filteredNotes = useMemo(() => {
-    // Use globalSearch for the query part
-    const searchResults = globalSearch(searchQuery, { subjects: allSubjects, videos, notes });
+    if (loading) return [];
+    
+    // If no search query, use all notes as the base
+    let baseNotes = notes;
+    if (searchQuery && searchQuery.trim() !== "") {
+      const searchResults = globalSearch(searchQuery, { subjects: allSubjects, videos, notes });
+      baseNotes = searchResults.notes;
+    }
     
     // Further filter by other dropdowns
-    return searchResults.notes.filter(note => {
+    return baseNotes.filter(note => {
       const subject = allSubjects.find(s => s.id === note.subjectId);
       if (!subject) return false;
 
-      const matchesCategory = selectedCategory === "All" || subject.category === selectedCategory;
-      const matchesSubcategory = selectedSubcategory === "All" || subject.subcategory === selectedSubcategory;
-      const matchesSubject = selectedSubject === "All" || note.subjectId === selectedSubject;
+      const subcat = subcategories.find(sc => sc.id === subject.subcategory);
+      const matchesCategory = selectedCategory === "All" || subcat?.category === parseInt(selectedCategory);
+      const matchesSubcategory = selectedSubcategory === "All" || subject.subcategory === parseInt(selectedSubcategory);
+      const matchesSubject = selectedSubject === "All" || note.subjectId === parseInt(selectedSubject);
       const matchesType = selectedType === "All" || note.type === selectedType;
 
       return matchesCategory && matchesSubcategory && matchesSubject && matchesType;
     });
-  }, [searchQuery, selectedCategory, selectedSubcategory, selectedSubject, selectedType]);
+  }, [searchQuery, selectedCategory, selectedSubcategory, selectedSubject, selectedType, notes, allSubjects, subcategories, videos, loading]);
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -79,8 +144,19 @@ export default function NotesPage() {
     setSelectedType("All");
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark">
+        <div className="flex flex-col items-center gap-6">
+          <Loader2 className="w-12 h-12 text-accent-purple animate-spin" />
+          <p className="text-gray-500 font-black uppercase tracking-[0.4em] text-xs">Synchronizing Neural Link...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen pb-32 relative overflow-hidden">
+    <div className="min-h-screen pb-32 relative overflow-hidden bg-dark">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full bg-grid opacity-10 -z-10" />
       <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
@@ -125,7 +201,7 @@ export default function NotesPage() {
               <div className="relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-accent-blue transition-colors" />
                 <input 
-                  type="text"
+                  type="text" 
                   placeholder="Search topics, subjects, or keywords..."
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/50 transition-all font-medium"
                   value={searchQuery}
@@ -139,20 +215,21 @@ export default function NotesPage() {
                   label="Category" 
                   value={selectedCategory} 
                   options={categoryOptions} 
-                  onChange={setSelectedCategory} 
+                  onChange={(val) => { setSelectedCategory(val); setSelectedSubcategory("All"); setSelectedSubject("All"); }} 
                 />
                 <FilterSelect 
                   label="Subcategory" 
                   value={selectedSubcategory} 
                   options={subcategoryOptions} 
-                  onChange={setSelectedSubcategory} 
+                  onChange={(val) => { setSelectedSubcategory(val); setSelectedSubject("All"); }}
+                  disabled={selectedCategory === "All"}
                 />
                 <FilterSelect 
                   label="Subject" 
                   value={selectedSubject} 
                   options={subjectOptions} 
                   onChange={setSelectedSubject} 
-                  displayMap={Object.fromEntries(allSubjects.map(s => [s.id, s.title]))}
+                  disabled={selectedSubcategory === "All"}
                 />
                 <FilterSelect 
                   label="Type" 
@@ -165,9 +242,8 @@ export default function NotesPage() {
               {/* Quick Filters */}
               <div className="flex flex-wrap items-center gap-3 mt-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 mr-2">Shortcuts:</span>
-                <QuickFilter label="Most Important" onClick={() => setSearchQuery("Normalization")} />
-                <QuickFilter label="Recently Added" onClick={() => setSelectedCategory("AI/ML")} />
-                <QuickFilter label="Exam Topics" onClick={() => setSelectedType("Theory")} />
+                <QuickFilter label="Recently Added" onClick={() => clearFilters()} />
+                <QuickFilter label="Quick Revise" onClick={() => setSelectedType("Theory")} />
                 {(searchQuery || selectedCategory !== "All" || selectedSubcategory !== "All" || selectedSubject !== "All" || selectedType !== "All") && (
                   <button 
                     onClick={clearFilters}
@@ -203,7 +279,7 @@ export default function NotesPage() {
                 className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {filteredNotes.map((note) => (
-                  <NoteCard key={note.id} note={note} />
+                  <NoteCard key={note.id} note={note} allSubjects={allSubjects} videos={videos} />
                 ))}
               </motion.div>
             ) : (
@@ -220,8 +296,8 @@ export default function NotesPage() {
                   Try adjusting your query or resetting the system.
                 </p>
                 <button 
-                  onClick={clearFilters}
-                  className="px-8 py-4 bg-accent-blue text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all"
+                   onClick={clearFilters}
+                   className="px-8 py-4 bg-accent-blue text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all"
                 >
                   Reset All Filters
                 </button>
@@ -234,18 +310,18 @@ export default function NotesPage() {
   );
 }
 
-function FilterSelect({ label, value, options, onChange, displayMap = {} }) {
+function FilterSelect({ label, value, options, onChange, disabled }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex flex-col gap-2 ${disabled ? 'opacity-30 pointer-events-none' : ''}`}>
       <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">{label}</span>
       <select 
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-accent-purple transition-all appearance-none cursor-pointer uppercase tracking-tighter"
+        className="bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-accent-purple transition-all appearance-none cursor-pointer uppercase tracking-tighter w-full"
       >
-        {options.map(opt => (
-          <option key={opt} value={opt} className="bg-dark text-white">
-            {displayMap[opt] || opt}
+        {options.map((opt, i) => (
+          <option key={i} value={typeof opt === 'object' ? opt.id : opt} className="bg-dark text-white">
+            {typeof opt === 'object' ? opt.name : opt}
           </option>
         ))}
       </select>
@@ -264,7 +340,7 @@ function QuickFilter({ label, onClick }) {
   );
 }
 
-function NoteCard({ note }) {
+function NoteCard({ note, allSubjects, videos }) {
   const subject = allSubjects.find(s => s.id === note.subjectId);
   const video = videos.find(v => v.id === note.videoId);
 
@@ -273,7 +349,7 @@ function NoteCard({ note }) {
       layout
       {...fadeInUp}
     >
-      <GlassCard className="p-0 border-white/5 group h-full flex flex-col hover:border-accent-blue/30 overflow-hidden">
+      <GlassCard className="p-0 border-white/5 group h-full flex flex-col hover:border-accent-blue/30 overflow-hidden bg-white/[0.01]">
         {/* Thumbnail */}
         <div className="relative aspect-video overflow-hidden">
           <img 
@@ -284,10 +360,10 @@ function NoteCard({ note }) {
           <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent" />
           <div className="absolute top-4 right-4 flex gap-2">
             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-              <Clock size={10} className="text-accent-cyan" /> {note.time || video?.duration}
+              <Clock size={10} className="text-accent-cyan" /> {note.time || video?.duration || '10:00'}
             </div>
             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-              <Target size={10} className="text-accent-purple" /> {subject?.title}
+              <Target size={10} className="text-accent-purple" /> {subject?.name || 'Knowledge'}
             </div>
           </div>
           
@@ -302,9 +378,9 @@ function NoteCard({ note }) {
         {/* Info */}
         <div className="p-8 flex flex-col flex-1">
           <div className="flex gap-2 mb-4">
-            {(note.tags || []).slice(0, 2).map((tag, i) => (
+            {(note.tags || 'Intel').split(',').slice(0, 2).map((tag, i) => (
               <span key={i} className="text-[9px] font-black text-accent-blue/60 uppercase tracking-widest flex items-center gap-1">
-                <Tag size={8} /> {tag}
+                <Tag size={8} /> {tag.trim()}
               </span>
             ))}
           </div>
@@ -314,13 +390,20 @@ function NoteCard({ note }) {
           </h3>
           
           <p className="text-gray-400 text-sm font-light leading-relaxed line-clamp-2 mb-8">
-            {note.description}
+            {note.content}
           </p>
 
           <div className="mt-auto grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white">
-              <Download size={14} className="text-accent-cyan" /> PDF
-            </button>
+            {note.pdf_file ? (
+                <a href={note.pdf_file} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white">
+                  <Download size={14} className="text-accent-cyan" /> PDF
+                </a>
+            ) : (
+                <button disabled className="flex items-center justify-center gap-2 py-3 bg-white/[0.01] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-700 cursor-not-allowed">
+                  No PDF
+                </button>
+            )}
+            
             {note.videoId && (
               <Link to={`/video/${note.videoId}`} className="flex items-center justify-center gap-2 py-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-purple hover:text-white transition-all text-accent-purple">
                 <Play size={14} /> Video
@@ -329,7 +412,7 @@ function NoteCard({ note }) {
           </div>
           
           <div className="mt-6 flex items-center justify-between pt-6 border-t border-white/5">
-             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">{subject?.subcategory}</span>
+             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">Intel Stream</span>
              <Link to={`/notes?id=${note.id}`} className="flex items-center gap-2 text-accent-blue font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
                 Detailed View <ChevronRight size={14} />
              </Link>
