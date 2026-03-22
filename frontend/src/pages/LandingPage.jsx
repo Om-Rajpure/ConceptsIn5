@@ -22,6 +22,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import GlassCard from '../components/GlassCard';
 import ScrollDots from '../components/ScrollDots';
+import SkeletonCard from '../components/SkeletonCard';
+import ErrorState from '../components/ErrorState';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -34,6 +36,7 @@ export default function LandingPage() {
   const [categories, setCategories] = React.useState([]);
   const [featuredVideos, setFeaturedVideos] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const [catIndex, setCatIndex] = React.useState(0);
   const [socialIndex, setSocialIndex] = React.useState(0);
   const [videoIndex, setVideoIndex] = React.useState(0);
@@ -44,6 +47,8 @@ export default function LandingPage() {
 
   React.useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const [cResponse, vResponse] = await Promise.all([
           axios.get('/api/public/categories/'),
@@ -51,14 +56,21 @@ export default function LandingPage() {
         ]);
         setCategories(cResponse.data.results || cResponse.data);
         setFeaturedVideos((vResponse.data.results || vResponse.data).slice(0, 3));
-      } catch (error) {
-        console.error('Failed to fetch landing page data', error);
+      } catch (err) {
+        console.error('Failed to fetch landing page data', err);
+        setError('Synchronizing with the main neural core failed. System disruption detected.');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  const handleRetry = () => {
+    // Re-triggering the fetch logic via a local function or by forcing a re-render if needed
+    // In this case, we can just call the same logic or use a dependency if we refactored it
+    window.location.reload(); // Simple retry for Landing Page or re-fetch if logic allows
+  };
 
   const handleScroll = (ref, setIndex, itemCount) => {
     if (!ref.current) return;
@@ -68,19 +80,17 @@ export default function LandingPage() {
     setIndex(Math.min(index, itemCount - 1));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-dark">
-         <div className="w-12 h-12 border-4 border-accent-blue border-t-white rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  // Removed full-page loader to allow for section-specific skeleton UI
 
   const reels = [
     { id: 1, title: "Quick CSS Tip", thumbnail: "https://img.youtube.com/vi/reels1/maxresdefault.jpg" },
     { id: 2, title: "JS One-Liner", thumbnail: "https://img.youtube.com/vi/reels2/maxresdefault.jpg" },
     { id: 3, title: "Git Cheat Sheet", thumbnail: "https://img.youtube.com/vi/reels3/maxresdefault.jpg" }
   ];
+
+  if (error) {
+    return <ErrorState message={error} onRetry={() => window.location.reload()} />;
+  }
 
   return (
     <div className="relative">
@@ -210,36 +220,44 @@ export default function LandingPage() {
             onScroll={() => handleScroll(catRef, setCatIndex, categories.length)}
             className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
           >
-            {categories.map((cat, i) => (
-              <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="group h-full"
-                >
-                  <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
-                    <div className="relative aspect-video overflow-hidden">
-                      <img 
-                        src={cat.thumbnail || `/images/cat_${i}.png`} 
-                        alt={cat.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        onError={(e) => e.target.src = "/images/hero_bg.png"}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-                    </div>
-                    <div className="p-8 flex flex-col flex-1">
-                      <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.name}</h3>
-                      <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2">{cat.description || "Knowledge module available for deployment."}</p>
-                      <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                        Initialize <ArrowRight size={14} />
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="min-w-[280px] md:min-w-0 snap-center">
+                  <SkeletonCard />
+                </div>
+              ))
+            ) : (
+              categories.map((cat, i) => (
+                <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="group h-full"
+                  >
+                    <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
+                      <div className="relative aspect-video overflow-hidden">
+                        <img 
+                          src={cat.thumbnail || `/images/cat_${i}.png`} 
+                          alt={cat.name} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => e.target.src = "/images/hero_bg.png"}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
                       </div>
-                    </div>
-                  </GlassCard>
-                </motion.div>
-              </Link>
-            ))}
+                      <div className="p-8 flex flex-col flex-1">
+                        <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.name}</h3>
+                        <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2">{cat.description || "Knowledge module available for deployment."}</p>
+                        <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                          Initialize <ArrowRight size={14} />
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                </Link>
+              ))
+            )}
           </div>
           {/* Edge Fade */}
           <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
@@ -369,30 +387,38 @@ export default function LandingPage() {
               onScroll={() => handleScroll(videoRef, setVideoIndex, featuredVideos.length)}
               className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
             >
-              {featuredVideos.map((video, i) => (
-                <Link key={i} to={`/video/${video.id}`} className="min-w-[300px] md:min-w-0 snap-center">
-                  <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
-                    <div className="relative aspect-video overflow-hidden rounded-t-2xl">
-                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                      <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
-                          <Play className="text-white fill-current ml-1" />
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <div key={i} className="min-w-[300px] md:min-w-0 snap-center">
+                    <SkeletonCard />
+                  </div>
+                ))
+              ) : (
+                featuredVideos.map((video, i) => (
+                  <Link key={i} to={`/video/${video.id}`} className="min-w-[300px] md:min-w-0 snap-center">
+                    <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
+                      <div className="relative aspect-video overflow-hidden rounded-t-2xl">
+                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
+                          <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
+                            <Play className="text-white fill-current ml-1" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
+                          <Clock size={12} className="text-accent-cyan" /> {video.duration}
                         </div>
                       </div>
-                      <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
-                        <Clock size={12} className="text-accent-cyan" /> {video.duration}
+                      <div className="p-8">
+                        <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
+                        <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
+                          <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
+                          <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="p-8">
-                      <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
-                      <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
-                        <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
-                        <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
-                      </div>
-                    </div>
-                  </GlassCard>
-                </Link>
-              ))}
+                    </GlassCard>
+                  </Link>
+                ))
+              )}
             </div>
             {/* Edge Fade */}
             <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />

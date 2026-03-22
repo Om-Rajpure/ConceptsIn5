@@ -13,6 +13,9 @@ import {
   Library
 } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
+import SkeletonCard from '../components/SkeletonCard';
+import ErrorState from '../components/ErrorState';
+import EmptyState from '../components/EmptyState';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -26,32 +29,36 @@ export default function CategoryPage() {
   const [category, setCategory] = useState(null);
   const [groupedSubjects, setGroupedSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchCategoryData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`/api/public/categories/${id}/`);
+      const data = response.data;
+      setCategory(data);
+      
+      // Group subjects by subcategory
+      const groups = data.subcategories.map(sub => ({
+        name: sub.name,
+        items: sub.subjects.map(s => ({
+          ...s,
+          title: s.name,
+          videoCount: '...', // Static or separate call
+          duration: '...' // Static or separate call
+        }))
+      }));
+      setGroupedSubjects(groups);
+    } catch (err) {
+      console.error('Failed to fetch category details', err);
+      setError('Neural pathway synchronization failed. Category database inaccessible.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategoryData = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`/api/public/categories/${id}/`);
-        const data = response.data;
-        setCategory(data);
-        
-        // Group subjects by subcategory
-        const groups = data.subcategories.map(sub => ({
-          name: sub.name,
-          items: sub.subjects.map(s => ({
-            ...s,
-            title: s.name,
-            videoCount: '...', // Static or separate call
-            duration: '...' // Static or separate call
-          }))
-        }));
-        setGroupedSubjects(groups);
-      } catch (error) {
-        console.error('Failed to fetch category details', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCategoryData();
   }, [id]);
 
@@ -59,22 +66,19 @@ export default function CategoryPage() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-dark">
-         <div className="w-12 h-12 border-4 border-accent-blue border-t-white rounded-full animate-spin"></div>
-      </div>
-    );
+  if (error) {
+    return <ErrorState message={error} onRetry={fetchCategoryData} />;
   }
 
-  if (!category) {
+  // Removed full-page loader to allow for section-specific skeleton UI
+
+  // Only show "Not Found" if we are finished loading and still have no category
+  if (!loading && (!subjects || subjects.length === 0)) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
-        <div className="text-center">
-          <h2 className="text-4xl font-black mb-4 italic uppercase tracking-widest text-white">Category Not Found</h2>
-          <Link to="/" className="text-accent-blue hover:underline font-black uppercase text-xs tracking-widest">Return to Base</Link>
-        </div>
-      </div>
+      <EmptyState 
+        title="Sector Depleted"
+        message="No neural subjects discovered in this category yet. Archive synchronization required."
+      />
     );
   }
 
@@ -99,7 +103,7 @@ export default function CategoryPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-6xl md:text-9xl font-black mb-8 italic tracking-tighter leading-none"
           >
-            {category.name}
+            {loading ? <div className="h-20 md:h-32 bg-white/10 rounded-2xl w-3/4 mx-auto animate-pulse"></div> : category.name}
           </motion.h1>
           
           <motion.p 
@@ -108,7 +112,12 @@ export default function CategoryPage() {
             transition={{ delay: 0.2 }}
             className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed mb-12"
           >
-            {category.description}
+            {loading ? (
+              <div className="space-y-3">
+                <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
+                <div className="h-4 bg-white/5 rounded-full w-5/6 mx-auto animate-pulse"></div>
+              </div>
+            ) : category.description}
           </motion.p>
 
           <div className="flex justify-center gap-8 text-xs font-black uppercase tracking-[0.3em] text-gray-500">
@@ -120,90 +129,98 @@ export default function CategoryPage() {
 
       {/* 2. Grouped Subjects Content */}
       <div className="max-w-7xl mx-auto px-6 space-y-32">
-        {groupedSubjects.map((group, groupIdx) => (
-          <motion.section 
-            key={group.name}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
-            {/* Group Title Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-b border-white/5 pb-10">
-              <div>
-                <motion.div 
-                  initial={{ x: -20, opacity: 0 }}
-                  whileInView={{ x: 0, opacity: 1 }}
-                  className="text-accent-purple text-[10px] font-black uppercase tracking-[0.4em] mb-4"
-                >
-                  PHASE {String(groupIdx + 1).padStart(2, '0')}
-                </motion.div>
-                <h2 className="text-4xl md:text-6xl font-black italic glow-text tracking-tighter">{group.name}</h2>
-              </div>
-              <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
-                {group.items.length} Units Available
-              </p>
-            </div>
-
-            {/* Subjects Grid/Scroll */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12">
-              {group.items.map((subject, subIdx) => (
-                <Link to={`/subject/${subject.slug}`} key={subject.id}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: subIdx * 0.1 }}
-                    className="group"
+        {loading ? (
+          <section className="relative">
+             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-b border-white/5 pb-10">
+               <div>
+                 <div className="h-3 w-24 bg-white/5 rounded mb-4 animate-pulse"></div>
+                 <div className="h-12 w-64 bg-white/10 rounded-xl animate-pulse"></div>
+               </div>
+             </div>
+             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12">
+               {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+             </div>
+          </section>
+        ) : (
+          groupedSubjects.map((group, groupIdx) => (
+            <motion.section 
+              key={group.name}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              {/* Group Title Section */}
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-b border-white/5 pb-10">
+                <div>
+                  <motion.div 
+                    initial={{ x: -20, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    className="text-accent-purple text-[10px] font-black uppercase tracking-[0.4em] mb-4"
                   >
-                    {/* 9:16 Subject Card */}
-                    <GlassCard className="p-0 border-white/5 bg-white/[0.01] hover:border-accent-blue/30 transition-all overflow-hidden flex flex-col h-full">
-                      {/* 16:9 Subject Card */}
-                      <div className="relative aspect-video overflow-hidden">
-                        <img 
-                          src={subject.thumbnail || "/images/hero_bg.png"} 
-                          alt={subject.title} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        {/* Gradient Overlay for Text Readability */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-                        <div className="absolute inset-0 bg-accent-blue/5 group-hover:bg-accent-blue/10 transition-colors" />
-                        
-                        {/* Hover Play Icon Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                           <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md border border-accent-blue/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.4)]">
-                             <Play className="text-white fill-current ml-1" />
-                           </div>
-                        </div>
-
-                        {/* Subject Metadata Badges */}
-                        <div className="absolute top-4 right-4 flex flex-col gap-2">
-                           <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-                             <Video size={10} className="text-accent-blue" /> {subject.videoCount}
-                           </div>
-                           <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-                             <Clock size={10} className="text-accent-cyan" /> {subject.duration}
-                           </div>
-                        </div>
-                      </div>
-
-                      {/* Subject Info */}
-                      <div className="p-6 md:p-8 flex flex-col flex-1">
-                        <h3 className="text-xl md:text-2xl font-black mb-3 italic group-hover:text-accent-blue transition-colors line-clamp-1 uppercase tracking-tight">{subject.title}</h3>
-                        <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light line-clamp-2 mb-6">{subject.description}</p>
-                        
-                        <div className="mt-auto flex items-center justify-between text-accent-blue font-black text-[10px] uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all">
-                           <span>Initialize</span>
-                           <ChevronRight size={16} />
-                        </div>
-                      </div>
-                    </GlassCard>
+                    PHASE {String(groupIdx + 1).padStart(2, '0')}
                   </motion.div>
-                </Link>
-              ))}
-            </div>
-          </motion.section>
-        ))}
+                  <h2 className="text-4xl md:text-6xl font-black italic glow-text tracking-tighter">{group.name}</h2>
+                </div>
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
+                  {group.items.length} Units Available
+                </p>
+              </div>
+
+              {/* Subjects Grid/Scroll */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12">
+                {group.items.map((subject, subIdx) => (
+                  <Link to={`/subject/${subject.slug}`} key={subject.id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: subIdx * 0.1 }}
+                      className="group"
+                    >
+                      <GlassCard className="p-0 border-white/5 bg-white/[0.01] hover:border-accent-blue/30 transition-all overflow-hidden flex flex-col h-full">
+                        <div className="relative aspect-video overflow-hidden">
+                          <img 
+                            src={subject.thumbnail || "/images/hero_bg.png"} 
+                            alt={subject.title} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
+                          <div className="absolute inset-0 bg-accent-blue/5 group-hover:bg-accent-blue/10 transition-colors" />
+                          
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                             <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md border border-accent-blue/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.4)]">
+                               <Play className="text-white fill-current ml-1" />
+                             </div>
+                          </div>
+
+                          <div className="absolute top-4 right-4 flex flex-col gap-2">
+                             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
+                               <Video size={10} className="text-accent-blue" /> {subject.videoCount}
+                             </div>
+                             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
+                               <Clock size={10} className="text-accent-cyan" /> {subject.duration}
+                             </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6 md:p-8 flex flex-col flex-1">
+                          <h3 className="text-xl md:text-2xl font-black mb-3 italic group-hover:text-accent-blue transition-colors line-clamp-1 uppercase tracking-tight">{subject.title}</h3>
+                          <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light line-clamp-2 mb-6">{subject.description}</p>
+                          
+                          <div className="mt-auto flex items-center justify-between text-accent-blue font-black text-[10px] uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all">
+                             <span>Initialize</span>
+                             <ChevronRight size={16} />
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </motion.div>
+                  </Link>
+                ))}
+              </div>
+            </motion.section>
+          ))
+        )}
       </div>
 
       {/* 3. Final Call to Action */}

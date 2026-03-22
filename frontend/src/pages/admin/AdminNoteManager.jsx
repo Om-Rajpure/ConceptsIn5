@@ -21,6 +21,7 @@ import {
     PlusCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const AdminNoteManager = () => {
     const [notes, setNotes] = useState([]);
@@ -32,6 +33,8 @@ const AdminNoteManager = () => {
     const [showForm, setShowForm] = useState(false);
     const [showSubjectModal, setShowSubjectModal] = useState(false);
     const [editingNote, setEditingNote] = useState(null);
+    const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
+    const [filterSubject, setFilterSubject] = useState('');
     
     const [formData, setFormData] = useState({
         title: '',
@@ -50,22 +53,41 @@ const AdminNoteManager = () => {
 
     useEffect(() => {
         fetchData();
+    }, [filterSubject]);
+
+    useEffect(() => {
         fetchAuxiliaryData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (url = '/api/admin/notes/') => {
         setLoading(true);
         try {
+            let finalUrl = url;
+            if (filterSubject) {
+                finalUrl += (finalUrl.includes('?') ? '&' : '?') + `subject=${filterSubject}`;
+            }
+
             const [nResponse, vResponse, sResponse] = await Promise.all([
-                axios.get('/api/admin/notes/'),
-                axios.get('/api/admin/videos/'),
-                axios.get('/api/admin/subjects/')
+                axios.get(finalUrl),
+                axios.get('/api/admin/videos/?limit=1000'),
+                axios.get('/api/admin/subjects/?limit=1000')
             ]);
-            setNotes(nResponse.data.results || nResponse.data);
+            
+            if (nResponse.data.results) {
+                setNotes(nResponse.data.results);
+                setPagination({
+                    next: nResponse.data.next,
+                    previous: nResponse.data.previous,
+                    count: nResponse.data.count
+                });
+            } else {
+                setNotes(nResponse.data);
+            }
             setVideos(vResponse.data.results || vResponse.data);
             setSubjects(sResponse.data.results || sResponse.data);
         } catch (error) {
             console.error('Failed to fetch data', error);
+            toast.error('Sector synchronization failed.');
         } finally {
             setLoading(false);
         }
@@ -93,10 +115,11 @@ const AdminNoteManager = () => {
 
         try {
             await axios.delete(`/api/admin/notes/${id}/`);
+            toast.success('Intel purged successfully.');
         } catch (error) {
             console.error('Delete failed', error);
             setNotes(originalNotes);
-            alert('Intel deletion failed. Sector synchronized.');
+            toast.error('Intel deletion failed. Sector synchronized.');
         }
     };
 
@@ -126,9 +149,10 @@ const AdminNoteManager = () => {
             setShowForm(false);
             setEditingNote(null);
             setFormData({ title: '', content: '', video: '', subject: '', tags: '', pdf_file: null });
+            toast.success(editingNote ? 'Intel updated' : 'Intel registered');
         } catch (error) {
             console.error('Save failed', error);
-            alert('Transfer failed. Verify all sectors are correctly filled.');
+            toast.error('Transfer failed. Verify all sectors are correctly filled.');
         }
     };
 
@@ -144,9 +168,10 @@ const AdminNoteManager = () => {
             setFormData({ ...formData, subject: newSubject.id });
             setShowSubjectModal(false);
             setSubjectFormData({ name: '', category: '', subcategory: '' });
+            toast.success('Subject sector initialized');
         } catch (error) {
             console.error('Subject creation failed', error);
-            alert(error.response?.data?.error || 'Failed to create subject sector.');
+            toast.error(error.response?.data?.error || 'Failed to create subject sector.');
         }
     };
 
@@ -357,6 +382,14 @@ const AdminNoteManager = () => {
                     </div>
                     
                     <div className="flex items-center gap-4">
+                        <select 
+                            value={filterSubject}
+                            onChange={(e) => setFilterSubject(e.target.value)}
+                            className="bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-accent-purple/50 transition-all"
+                        >
+                            <option value="" className="bg-dark">All Sectors</option>
+                            {subjects.map(s => <option key={s.id} value={s.id} className="bg-dark">{s.name}</option>)}
+                        </select>
                         <div className="flex items-center gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
                             <button className="px-4 py-2 bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">All</button>
                             <button className="px-4 py-2 text-gray-500 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">Recent</button>
@@ -441,6 +474,37 @@ const AdminNoteManager = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Pagination Controls */}
+                {!loading && (pagination.next || pagination.previous) && (
+                    <div className="mt-12 flex items-center justify-center gap-6">
+                        <button 
+                            onClick={() => fetchData(pagination.previous)}
+                            disabled={!pagination.previous}
+                            className="px-8 py-4 glass-card border-white/5 enabled:hover:border-accent-purple/30 disabled:opacity-20 disabled:cursor-not-allowed transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 group"
+                        >
+                            <ArrowLeft size={16} className="group-enabled:group-hover:-translate-x-1 transition-transform" /> 
+                            <span>Previous Core</span>
+                        </button>
+                        
+                        <div className="flex items-center gap-3">
+                            <span className="h-[2px] w-8 bg-accent-purple/30"></span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
+                                Segment <span className="text-white">{Math.ceil(pagination.count / 6)}</span>
+                            </span>
+                            <span className="h-[2px] w-8 bg-accent-purple/30"></span>
+                        </div>
+
+                        <button 
+                            onClick={() => fetchData(pagination.next)}
+                            disabled={!pagination.next}
+                            className="px-8 py-4 glass-card border-white/5 enabled:hover:border-accent-purple/30 disabled:opacity-20 disabled:cursor-not-allowed transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 group"
+                        >
+                            <span>Next Core</span>
+                            <ArrowLeft size={16} className="rotate-180 group-enabled:group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Subject Creation Modal */}

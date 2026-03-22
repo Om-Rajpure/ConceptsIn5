@@ -1,4 +1,35 @@
+# ─── Python ──────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ─── Virtual Environment ─────────────────
+venv/
+env/
+.env
+
+# ─── Django ──────────────────────────────
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.log
+
+# ─── IDE ─────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── OS ──────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Node (Frontend) ─────────────────────
 node_modules/
 dist/
 build/
-.env
+.env.local
+.env.production

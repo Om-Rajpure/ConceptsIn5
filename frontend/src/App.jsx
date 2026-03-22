@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { 
   Linkedin, 
   Youtube, 
@@ -16,6 +17,8 @@ import NotesPage from './pages/NotesPage';
 import VideoPage from './pages/VideoPage';
 import SearchPage from './pages/SearchPage';
 import AboutPage from './pages/AboutPage';
+import NotFound from './pages/NotFound';
+import ScrollToTop from './components/ScrollToTop';
 
 // Admin Pages
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,9 +31,10 @@ import AdminNoteManager from './pages/admin/AdminNoteManager';
 export default function App() {
   return (
     <Router>
+      <Toaster position="top-right" />
       <Layout>
         <Navbar />
-        
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/category/:id" element={<CategoryPage />} />
@@ -48,6 +52,9 @@ export default function App() {
               <Route path="/om/videos" element={<AdminVideoManager />} />
               <Route path="/om/notes" element={<AdminNoteManager />} />
           </Route>
+
+          {/* Catch-all 404 Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         {/* Global Footer (Common to all pages) */}

@@ -17,6 +17,7 @@ import {
     ChevronDown
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const AdminVideoManager = () => {
     const [videos, setVideos] = useState([]);
@@ -26,6 +27,8 @@ const AdminVideoManager = () => {
     const [showSubjectModal, setShowSubjectModal] = useState(false);
     const [showSubCategoryModal, setShowSubCategoryModal] = useState(false);
     const [editingVideo, setEditingVideo] = useState(null);
+    const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
+    const [filters, setFilters] = useState({ subject: '', is_important: '' });
 
     // Subject/SubCategory Modal State
     const [categories, setCategories] = useState([]);
@@ -60,18 +63,37 @@ const AdminVideoManager = () => {
             setShowAddForm(true);
         }
         fetchData();
-    }, [location]);
+    }, [location, filters]);
 
-    const fetchData = async () => {
+    const fetchData = async (url = '/api/admin/videos/') => {
+        setLoading(true);
         try {
+            // Build filter string
+            let filterString = '';
+            if (filters.subject) filterString += `&subject=${filters.subject}`;
+            if (filters.is_important !== '') filterString += `&is_important=${filters.is_important}`;
+            
+            const finalUrl = url.includes('?') ? `${url}${filterString}` : `${url}?${filterString.replace('&', '')}`;
+
             const [vResponse, sResponse] = await Promise.all([
-                axios.get('/api/admin/videos/'),
-                axios.get('/api/public/subjects/')
+                axios.get(finalUrl),
+                axios.get('/api/public/subjects/?limit=1000') // Fetch all subjects for dropdown
             ]);
-            setVideos(vResponse.data.results || vResponse.data);
+            
+            if (vResponse.data.results) {
+                setVideos(vResponse.data.results);
+                setPagination({
+                    next: vResponse.data.next,
+                    previous: vResponse.data.previous,
+                    count: vResponse.data.count
+                });
+            } else {
+                setVideos(vResponse.data);
+            }
             setSubjects(sResponse.data.results || sResponse.data);
         } catch (error) {
             console.error('Failed to fetch data', error);
+            toast.error('Failed to sync with database');
         } finally {
             setLoading(false);
         }
@@ -99,7 +121,7 @@ const AdminVideoManager = () => {
     const handleAddSubject = async (e) => {
         e.preventDefault();
         if (!newSubject.name || !newSubject.subcategory) {
-            alert('Please fill all required fields');
+            toast.error('Please fill all required fields');
             return;
         }
         setModalLoading(true);
@@ -117,9 +139,10 @@ const AdminVideoManager = () => {
             // Reset and close modal
             setNewSubject({ name: '', category: '', subcategory: '' });
             setShowSubjectModal(false);
+            toast.success('Subject created successfully');
         } catch (error) {
             console.error('Failed to add subject', error);
-            alert(error.response?.data?.error || 'Failed to add subject');
+            toast.error(error.response?.data?.error || 'Failed to add subject');
         } finally {
             setModalLoading(false);
         }
@@ -128,7 +151,7 @@ const AdminVideoManager = () => {
     const handleAddSubCategory = async (e) => {
         e.preventDefault();
         if (!newSubCategoryName || !newSubject.category) {
-            alert('Name and category are required');
+            toast.error('Name and category are required');
             return;
         }
         setModalLoading(true);
@@ -146,9 +169,10 @@ const AdminVideoManager = () => {
             // Reset and close modal
             setNewSubCategoryName('');
             setShowSubCategoryModal(false);
+            toast.success('Sub-category added');
         } catch (error) {
             console.error('Failed to add subcategory', error);
-            alert(error.response?.data?.error || 'Failed to add sub-category');
+            toast.error(error.response?.data?.error || 'Failed to add sub-category');
         } finally {
             setModalLoading(false);
         }
@@ -158,8 +182,10 @@ const AdminVideoManager = () => {
         try {
             await axios.patch(`/api/admin/videos/${id}/`, { [field]: !value });
             setVideos(videos.map(v => v.id === id ? { ...v, [field]: !value } : v));
+            toast.success(`${field.replace('is_', '')} status updated`);
         } catch (error) {
             console.error('Toggle failed', error);
+            toast.error('Failed to update status');
         }
     };
 
@@ -168,8 +194,10 @@ const AdminVideoManager = () => {
         try {
             await axios.delete(`/api/admin/videos/${id}/`);
             setVideos(videos.filter(v => v.id !== id));
+            toast.success('Module deleted successfully');
         } catch (error) {
             console.error('Delete failed', error);
+            toast.error('Failed to delete module');
         }
     };
 
@@ -199,8 +227,9 @@ const AdminVideoManager = () => {
                 ...formData,
                 thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
             });
+            toast.success('Thumbnail generated');
         } else {
-            alert('Invalid YouTube URL format');
+            toast.error('Invalid YouTube URL format');
         }
     };
 
@@ -221,9 +250,10 @@ const AdminVideoManager = () => {
                 important_topics: '', duration: '', thumbnail: '',
                 is_published: true, is_verified: false
             });
+            toast.success(editingVideo ? 'Module updated' : 'Module deployed');
         } catch (error) {
             console.error('Save failed', error);
-            alert('Failed to save video. Possible duplicate YouTube ID or invalid data.');
+            toast.error('Failed to save video. Possible duplicate YouTube ID or invalid data.');
         }
     };
 
@@ -265,6 +295,35 @@ const AdminVideoManager = () => {
                         <Plus size={18} /> Deploy New Module
                     </button>
                 </header>
+
+                {/* Filters */}
+                <div className="mb-8 flex flex-wrap gap-4 items-center">
+                    <div className="flex-1 min-w-[200px] relative group">
+                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-accent-blue transition-colors" size={16} />
+                        <select 
+                            value={filters.subject}
+                            onChange={(e) => setFilters({...filters, subject: e.target.value})}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white appearance-none outline-none focus:border-accent-blue/50 transition-all"
+                        >
+                            <option value="" className="bg-dark">All Subjects</option>
+                            {subjects.map(s => <option key={s.id} value={s.id} className="bg-dark">{s.name}</option>)}
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
+                        <button 
+                            onClick={() => setFilters({...filters, is_important: ''})}
+                            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filters.is_important === '' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-white'}`}
+                        >
+                            All
+                        </button>
+                        <button 
+                            onClick={() => setFilters({...filters, is_important: 'true'})}
+                            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filters.is_important === 'true' ? 'bg-accent-blue/20 text-accent-blue border border-accent-blue/30' : 'text-gray-500 hover:text-white'}`}
+                        >
+                            Important
+                        </button>
+                    </div>
+                </div>
 
             {/* Video List */}
             <div className="grid gap-6">
@@ -328,6 +387,29 @@ const AdminVideoManager = () => {
                     </motion.div>
                 ))}
             </div>
+
+            {/* Pagination Controls */}
+            {!loading && (pagination.next || pagination.previous) && (
+                <div className="mt-12 flex items-center justify-center gap-4">
+                    <button 
+                        onClick={() => fetch(pagination.previous)}
+                        disabled={!pagination.previous}
+                        className="px-6 py-3 glass-card border-white/5 enabled:hover:border-accent-blue/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                    >
+                        <ArrowLeft size={14} /> Previous
+                    </button>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 px-4">
+                        Database Page <span className="text-white">{(videos.length > 0) ? Math.ceil(pagination.count / 6) : 0}</span>
+                    </span>
+                    <button 
+                        onClick={() => fetchData(pagination.next)}
+                        disabled={!pagination.next}
+                        className="px-6 py-3 glass-card border-white/5 enabled:hover:border-accent-blue/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                    >
+                        Next <ArrowLeft size={14} className="rotate-180" />
+                    </button>
+                </div>
+            )}
             
             {/* Closing the container div */}
             </div>

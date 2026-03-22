@@ -20,6 +20,10 @@ import {
 } from 'lucide-react';
 import { globalSearch } from '../utils/search';
 import GlassCard from '../components/GlassCard';
+import SkeletonCard from '../components/SkeletonCard';
+import ErrorState from '../components/ErrorState';
+import EmptyState from '../components/EmptyState';
+import toast from 'react-hot-toast';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -40,49 +44,67 @@ export default function NotesPage() {
   const [videos, setVideos] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(null);
+   const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchData();
-  }, []);
+  }, [selectedCategory, selectedSubcategory, selectedSubject, selectedType]);
 
-  const fetchData = async () => {
+   const fetchData = async (url = '/api/public/notes/') => {
     setLoading(true);
+    if (!url.includes('page=')) setError(null); // Only reset error on fresh load, not pagination
     try {
+      // Build filter string
+      let filterString = '';
+      if (selectedCategory !== "All") filterString += `&subject__subcategory__category=${selectedCategory}`;
+      if (selectedSubcategory !== "All") filterString += `&subject__subcategory=${selectedSubcategory}`;
+      if (selectedSubject !== "All") filterString += `&subject=${selectedSubject}`;
+      if (selectedType !== "All") filterString += `&type=${selectedType}`;
+
+      const finalUrl = url.includes('?') ? `${url}${filterString}` : `${url}?${filterString.replace('&', '')}`;
+
       const [nRes, sRes, vRes, cRes, scRes] = await Promise.all([
-        axios.get('/api/public/notes/'),
-        axios.get('/api/public/subjects/'),
-        axios.get('/api/public/videos/'),
-        axios.get('/api/public/categories/'),
-        axios.get('/api/public/subcategories/')
+        axios.get(finalUrl),
+        axios.get('/api/public/subjects/?limit=1000'),
+        axios.get('/api/public/videos/?limit=1000'),
+        axios.get('/api/public/categories/?limit=1000'),
+        axios.get('/api/public/subcategories/?limit=1000')
       ]);
 
-      // Map API data to UI structure if needed
-      const mappedNotes = (nRes.data.results || nRes.data).map(note => ({
+      const noteData = nRes.data.results || nRes.data;
+      const mappedNotes = (Array.isArray(noteData) ? noteData : []).map(note => ({
         ...note,
         subjectId: note.subject,
         videoId: note.video,
-        description: note.content.substring(0, 150) + '...'
+        description: (note.content || '').substring(0, 150) + '...'
       }));
+
+      setPagination({
+        next: nRes.data.next,
+        previous: nRes.data.previous,
+        count: nRes.data.count || mappedNotes.length
+      });
 
       const mappedSubjects = (sRes.data.results || sRes.data).map(s => ({
         ...s,
-        title: s.name // globalSearch expects title
-      }));
-
-      const mappedVideos = (vRes.data.results || vRes.data).map(v => ({
-        ...v,
-        title: v.title // already title? Let's check serializer
+        title: s.name
       }));
 
       setNotes(mappedNotes);
       setAllSubjects(mappedSubjects);
-      setVideos(mappedVideos);
+      setVideos(vRes.data.results || vRes.data);
       setCategories(cRes.data.results || cRes.data);
       setSubcategories(scRes.data.results || scRes.data);
-    } catch (error) {
-      console.error("Critical failure in neural data link:", error);
+    } catch (err) {
+      console.error("Critical failure in neural data link:", err);
+      if (notes.length > 0) {
+        toast.error("Failed to sync latest data ripples.");
+      } else {
+        setError('Global notes repository offline. System sync required.');
+      }
     } finally {
       setLoading(false);
     }
@@ -121,20 +143,8 @@ export default function NotesPage() {
       baseNotes = searchResults.notes;
     }
     
-    // Further filter by other dropdowns
-    return baseNotes.filter(note => {
-      const subject = allSubjects.find(s => s.id === note.subjectId);
-      if (!subject) return false;
-
-      const subcat = subcategories.find(sc => sc.id === subject.subcategory);
-      const matchesCategory = selectedCategory === "All" || subcat?.category === parseInt(selectedCategory);
-      const matchesSubcategory = selectedSubcategory === "All" || subject.subcategory === parseInt(selectedSubcategory);
-      const matchesSubject = selectedSubject === "All" || note.subjectId === parseInt(selectedSubject);
-      const matchesType = selectedType === "All" || note.type === selectedType;
-
-      return matchesCategory && matchesSubcategory && matchesSubject && matchesType;
-    });
-  }, [searchQuery, selectedCategory, selectedSubcategory, selectedSubject, selectedType, notes, allSubjects, subcategories, videos, loading]);
+    return baseNotes;
+  }, [searchQuery, notes, allSubjects, videos, loading]);
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -144,16 +154,11 @@ export default function NotesPage() {
     setSelectedType("All");
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-dark">
-        <div className="flex flex-col items-center gap-6">
-          <Loader2 className="w-12 h-12 text-accent-purple animate-spin" />
-          <p className="text-gray-500 font-black uppercase tracking-[0.4em] text-xs">Synchronizing Neural Link...</p>
-        </div>
-      </div>
-    );
+  if (error) {
+    return <ErrorState message={error} onRetry={() => fetchData()} />;
   }
+
+  // Removed full-page loader to allow for section-specific skeleton UI
 
   return (
     <div className="min-h-screen pb-32 relative overflow-hidden bg-dark">
@@ -273,7 +278,11 @@ export default function NotesPage() {
           </div>
 
           <AnimatePresence mode="popLayout">
-            {filteredNotes.length > 0 ? (
+            {loading ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            ) : filteredNotes.length > 0 ? (
               <motion.div 
                 layout
                 className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -283,27 +292,52 @@ export default function NotesPage() {
                 ))}
               </motion.div>
             ) : (
-              <motion.div 
-                {...fadeInUp}
-                className="py-32 text-center glass-card border-dashed border-white/10"
-              >
-                <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-8 border border-white/5">
-                  <Layers className="text-gray-600" size={32} />
-                </div>
-                <h3 className="text-3xl font-black mb-4 italic">No Data Packets Found</h3>
-                <p className="text-gray-400 max-w-md mx-auto mb-10">
-                  Our search agents couldn't find any results matching your current filters. 
-                  Try adjusting your query or resetting the system.
-                </p>
-                <button 
-                   onClick={clearFilters}
-                   className="px-8 py-4 bg-accent-blue text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all"
-                >
-                  Reset All Filters
-                </button>
-              </motion.div>
+              <EmptyState 
+                type="search"
+                title="Neural Pulse Flatlined"
+                message="No knowledge fragments match your current filter parameters. Try expanding your search horizons."
+                action={
+                  <button 
+                    onClick={clearFilters}
+                    className="px-8 py-3 bg-accent-cyan/10 border border-accent-cyan/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-accent-cyan hover:bg-accent-cyan hover:text-white transition-all flex items-center gap-2"
+                  >
+                    Reset Synchronization
+                  </button>
+                }
+              />
             )}
           </AnimatePresence>
+
+          {/* Pagination */}
+          {!loading && (pagination.next || pagination.previous) && (
+            <div className="mt-20 flex items-center justify-center gap-6">
+              <button 
+                onClick={() => fetchData(pagination.previous)}
+                disabled={!pagination.previous}
+                className="px-8 py-4 glass-card border-white/5 enabled:hover:border-accent-blue/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 group"
+              >
+                <ChevronRight className="rotate-180 w-4 h-4 group-enabled:group-hover:-translate-x-1 transition-transform" /> 
+                <span>Previous Wave</span>
+              </button>
+              
+              <div className="flex items-center gap-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-blue shadow-[0_0_10px_rgba(0,240,255,0.5)]"></span>
+                <span className="text-xs font-black uppercase tracking-[0.3em] text-gray-500">
+                  Data Segment <span className="text-white">{Math.ceil(pagination.count / 6)}</span>
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-purple shadow-[0_0_10px_rgba(123,97,255,0.5)]"></span>
+              </div>
+
+              <button 
+                onClick={() => fetchData(pagination.next)}
+                disabled={!pagination.next}
+                className="px-8 py-4 glass-card border-white/5 enabled:hover:border-accent-purple/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 group"
+              >
+                <span>Next Wave</span>
+                <ChevronRight className="w-4 h-4 group-enabled:group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </div>

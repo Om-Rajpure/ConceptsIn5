@@ -21,6 +21,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GlassCard from '../components/GlassCard';
 import ScrollDots from '../components/ScrollDots';
+import SkeletonCard, { SkeletonSubject } from '../components/SkeletonCard';
+import ErrorState from '../components/ErrorState';
+import EmptyState from '../components/EmptyState';
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -123,35 +126,39 @@ export default function SubjectPage() {
   const [subject, setSubject] = useState(null);
   const [subjectVideos, setSubjectVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [roadmapIndex, setRoadmapIndex] = useState(0);
   const roadmapRef = useRef(null);
   const videoRefs = useRef({});
 
+  const fetchSubjectData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [sResponse, vResponse] = await Promise.all([
+        axios.get(`/api/public/subjects/${slug}/`),
+        axios.get(`/api/public/videos/?subject__slug=${slug}`)
+      ]);
+      
+      const sData = sResponse.data;
+      const vData = vResponse.data.results || vResponse.data;
+      
+      setSubject({
+        ...sData,
+        title: sData.name,
+        roadmap: sData.description ? sData.description.split('.').filter(s => s.trim().length > 0) : [],
+        importantTopics: sData.description ? sData.description.split(' ').slice(0, 5) : [] 
+      });
+      setSubjectVideos(vData.sort((a, b) => a.id - b.id));
+    } catch (err) {
+      console.error('Failed to fetch subject details', err);
+      setError('Neural roadmap extraction failed. Sync with subject core lost.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchSubjectData = async () => {
-      setLoading(true);
-      try {
-        const [sResponse, vResponse] = await Promise.all([
-          axios.get(`/api/public/subjects/${slug}/`),
-          axios.get(`/api/public/videos/?subject__slug=${slug}`)
-        ]);
-        
-        const sData = sResponse.data;
-        const vData = vResponse.data.results || vResponse.data;
-        
-        setSubject({
-          ...sData,
-          title: sData.name,
-          roadmap: sData.description ? sData.description.split('.').filter(s => s.trim().length > 0) : [],
-          importantTopics: sData.description ? sData.description.split(' ').slice(0, 5) : [] 
-        });
-        setSubjectVideos(vData.sort((a, b) => a.id - b.id));
-      } catch (error) {
-        console.error('Failed to fetch subject details', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchSubjectData();
   }, [slug]);
 
@@ -168,7 +175,7 @@ export default function SubjectPage() {
   }, [lastWatchedId, subjectVideos]);
 
   const totalDuration = useMemo(() => {
-    const sum = subjectVideos.reduce((acc, v) => acc + (parseInt(v.duration) || 0), 0);
+    const sum = (subjectVideos || []).reduce((acc, v) => acc + (parseInt(v.duration) || 0), 0);
     return `~${sum} mins`;
   }, [subjectVideos]);
 
@@ -187,15 +194,28 @@ export default function SubjectPage() {
     setIndex(Math.min(index, itemCount - 1));
   };
 
-  if (loading) {
+  if (error) {
+    return <ErrorState message={error} onRetry={fetchSubjectData} />;
+  }
+
+  // Removed full-page loader to allow for section-specific skeleton UI
+
+  if (!loading && (!subjectVideos || subjectVideos.length === 0)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark">
-         <div className="w-12 h-12 border-4 border-accent-blue border-t-white rounded-full animate-spin"></div>
-      </div>
+      <EmptyState 
+        title="Roadmap Offline"
+        message="No transmission modules found for this subject roadmap. Stand by for deployment."
+        action={
+          <Link to="/" className="px-8 py-3 bg-accent-blue/10 border border-accent-blue/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-accent-blue hover:bg-accent-blue hover:text-white transition-all">
+            Return to Command Center
+          </Link>
+        }
+      />
     );
   }
 
-  if (!subject) {
+  // Only show "Not Found" if we are finished loading and still have no subject
+  if (!loading && !subject) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
         <div className="text-center">
@@ -234,7 +254,7 @@ export default function SubjectPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-5xl md:text-8xl font-black mb-8 leading-tight tracking-tighter italic"
               >
-                {subject.title}
+                {loading ? <div className="h-16 md:h-24 bg-white/10 rounded-2xl w-full animate-pulse"></div> : subject.title}
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, x: -30 }}
@@ -242,7 +262,12 @@ export default function SubjectPage() {
                 transition={{ delay: 0.2 }}
                 className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed mb-10"
               >
-                {subject.description}
+                {loading ? (
+                  <div className="space-y-3">
+                    <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
+                    <div className="h-4 bg-white/5 rounded-full w-3/4 animate-pulse"></div>
+                  </div>
+                ) : subject.description}
               </motion.p>
             </div>
 
@@ -276,7 +301,7 @@ export default function SubjectPage() {
             <button 
               onClick={() => scrollToVideo(subjectVideos[0]?.id)}
               className="px-10 py-5 bg-accent-blue rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
-              disabled={subjectVideos.length === 0}
+              disabled={!subjectVideos || subjectVideos.length === 0}
             >
               Start Course <ArrowRight className="w-5 h-5" />
             </button>
@@ -309,25 +334,33 @@ export default function SubjectPage() {
                 >
                 <div className="hidden lg:block absolute left-[23px] top-4 bottom-4 w-[2px] bg-gradient-to-b from-accent-purple via-accent-blue to-accent-cyan opacity-20" />
                 
-                {subject.roadmap.map((step, i) => (
-                  <motion.div key={i} className="relative lg:pb-12 group cursor-default flex-shrink-0">
-                    <div className="flex items-center gap-6">
-                      <div className="relative z-10 w-5 h-5 rounded-full bg-dark border-2 border-accent-purple transition-all duration-300 group-hover:bg-accent-purple">
-                        <div className="absolute inset-0 bg-accent-purple rounded-full animate-ping opacity-0 group-hover:opacity-30" />
-                      </div>
-                      <div className="flex-1 whitespace-nowrap lg:whitespace-normal">
-                        <div className="text-[9px] font-black text-gray-500 tracking-[0.2em] mb-1 group-hover:text-accent-purple transition-colors uppercase">Step {String(i + 1).padStart(2, '0')}</div>
-                        <h4 className="font-bold text-gray-300 group-hover:text-white transition-all text-xs lg:text-sm uppercase tracking-wide line-clamp-2">
-                          {step}
-                        </h4>
-                      </div>
+                {loading ? (
+                  [...Array(4)].map((_, i) => (
+                    <div key={i} className="mb-4">
+                      <SkeletonSubject />
                     </div>
-                  </motion.div>
-                ))}
+                  ))
+                ) : (
+                  subject.roadmap.map((step, i) => (
+                    <motion.div key={i} className="relative lg:pb-12 group cursor-default flex-shrink-0">
+                      <div className="flex items-center gap-6">
+                        <div className="relative z-10 w-5 h-5 rounded-full bg-dark border-2 border-accent-purple transition-all duration-300 group-hover:bg-accent-purple">
+                          <div className="absolute inset-0 bg-accent-purple rounded-full animate-ping opacity-0 group-hover:opacity-30" />
+                        </div>
+                        <div className="flex-1 whitespace-nowrap lg:whitespace-normal">
+                          <div className="text-[9px] font-black text-gray-500 tracking-[0.2em] mb-1 group-hover:text-accent-purple transition-colors uppercase">Step {String(i + 1).padStart(2, '0')}</div>
+                          <h4 className="font-bold text-gray-300 group-hover:text-white transition-all text-xs lg:text-sm uppercase tracking-wide line-clamp-2">
+                            {step}
+                          </h4>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
                 </div>
                 <div className="absolute top-0 right-0 bottom-6 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none lg:hidden" />
               </div>
-              <ScrollDots count={subject.roadmap.length} activeIndex={roadmapIndex} color="purple" />
+              <ScrollDots count={subject?.roadmap?.length || 0} activeIndex={roadmapIndex} color="purple" />
             </div>
           </aside>
 
@@ -338,7 +371,7 @@ export default function SubjectPage() {
                  <h3 className="text-xl font-black uppercase tracking-widest text-white italic">Exam Essentials</h3>
               </div>
               <div className="flex flex-wrap gap-4">
-                {subject.importantTopics.map((topic, i) => (
+                {(subject?.importantTopics || []).map((topic, i) => (
                   <motion.div key={i} className="px-6 py-3 border border-accent-cyan/20 glass-card bg-accent-cyan/[0.03] text-accent-cyan text-xs font-black uppercase tracking-widest rounded-xl transition-all cursor-default">
                     {topic}
                   </motion.div>
@@ -354,17 +387,21 @@ export default function SubjectPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {subjectVideos.map((video, i) => (
-                  <div key={video.id} ref={el => videoRefs.current[video.id] = el} className="flex h-full">
-                    <VideoCard 
-                      video={video} 
-                      subject={subject} 
-                      isActive={video.id === parseInt(lastWatchedId)}
-                      isFirst={i === 0}
-                      lastWatchedId={lastWatchedId}
-                    />
-                  </div>
-                ))}
+                {loading ? (
+                  [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
+                ) : (
+                  subjectVideos.map((video, i) => (
+                    <div key={video.id} ref={el => videoRefs.current[video.id] = el} className="flex h-full">
+                      <VideoCard 
+                        video={video} 
+                        subject={subject} 
+                        isActive={video.id === parseInt(lastWatchedId)}
+                        isFirst={i === 0}
+                        lastWatchedId={lastWatchedId}
+                      />
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </main>
