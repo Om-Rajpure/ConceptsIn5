@@ -67,3 +67,22 @@ def process_description(description):
                 roadmap.append(topic)
                 
     return quick_summary, roadmap
+
+def generate_roadmap(video):
+    """
+    Generates a roadmap for a video.
+    Prioritizes video.topic_flow (comma-separated).
+    Falls back to processing video.description.
+    """
+    if video.topic_flow:
+        topics = [
+            topic.strip()
+            for topic in video.topic_flow.split(",")
+            if topic.strip()
+        ]
+    else:
+        _, topics = process_description(video.description)
+    
+    video.roadmap = topics
+    video.save()
+    return topics

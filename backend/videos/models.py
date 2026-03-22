@@ -80,6 +80,7 @@ class Video(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     quick_summary = models.TextField(blank=True)
     roadmap = models.JSONField(default=list, blank=True)
+    topic_flow = models.TextField(blank=True, help_text="Comma-separated topics (overrides description auto-generation)")
 
     # Extra control fields (not stored in DB but used in logic)
     # Actually, we might want to store them temporarily or handle them in the serializer/view

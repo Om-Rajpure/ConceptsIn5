@@ -207,7 +207,12 @@ export default function VideoPage() {
                      </div>
                    ))
                  ) : (
-                   <div className="text-gray-500 italic">No roadmap items available.</div>
+                   <div className="flex flex-col items-center justify-center py-12 glass-card border-white/5 bg-white/[0.02]">
+                      <div className="w-12 h-12 rounded-full bg-gray-800/50 flex items-center justify-center mb-4">
+                        <BookOpen size={20} className="text-gray-500" />
+                      </div>
+                      <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">No roadmap available for this module</p>
+                   </div>
                  )}
                </div>
             </motion.section>

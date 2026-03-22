@@ -11,7 +11,7 @@ from .serializers import (
     VideoSerializer, PublicVideoSerializer, NoteSerializer
 )
 from .utils.youtube_utils import extract_video_id, get_thumbnail, get_embed_url
-from .utils.description_processor import process_description
+from .utils.description_processor import process_description, generate_roadmap
 from rest_framework.exceptions import ValidationError
 
 # Public ViewSets
@@ -62,41 +62,45 @@ class AdminVideoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         description = self.request.data.get('description', '')
-        summary, roadmap = process_description(description)
+        summary, _ = process_description(description)
         
         youtube_url = self.request.data.get('youtube_url')
         if youtube_url:
             video_id = extract_video_id(youtube_url)
             if not video_id:
                 raise ValidationError({"youtube_url": "Invalid YouTube URL"})
-            serializer.save(
+            instance = serializer.save(
                 youtube_id=video_id,
                 thumbnail=get_thumbnail(video_id),
                 video_url=get_embed_url(video_id),
-                quick_summary=summary,
-                roadmap=roadmap
+                quick_summary=summary
             )
         else:
-            serializer.save(quick_summary=summary, roadmap=roadmap)
+            instance = serializer.save(quick_summary=summary)
+        
+        # Always generate roadmap using fallback logic
+        generate_roadmap(instance)
 
     def perform_update(self, serializer):
         description = self.request.data.get('description', '')
-        summary, roadmap = process_description(description)
+        summary, _ = process_description(description)
         
         youtube_url = self.request.data.get('youtube_url')
         if youtube_url:
             video_id = extract_video_id(youtube_url)
             if not video_id:
                 raise ValidationError({"youtube_url": "Invalid YouTube URL"})
-            serializer.save(
+            instance = serializer.save(
                 youtube_id=video_id,
                 thumbnail=get_thumbnail(video_id),
                 video_url=get_embed_url(video_id),
-                quick_summary=summary,
-                roadmap=roadmap
+                quick_summary=summary
             )
         else:
-            serializer.save(quick_summary=summary, roadmap=roadmap)
+            instance = serializer.save(quick_summary=summary)
+            
+        # Always re-generate roadmap using fallback logic
+        generate_roadmap(instance)
 
 class AdminNoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all().select_related('video', 'subject')
