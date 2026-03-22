@@ -134,13 +134,9 @@ export default function VideoPage() {
               <Sparkles size={12} /> High-Density Module
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-black mb-6 italic tracking-tighter leading-tight uppercase">
+            <h1 className="text-3xl md:text-4xl font-black mb-6 italic tracking-tighter leading-tight uppercase">
               {video.title}
             </h1>
-            
-            <p className="text-gray-400 text-lg font-light leading-relaxed mb-8">
-              {video.description}
-            </p>
 
             <div className="grid grid-cols-2 gap-4 mb-10">
               <div className="glass-card p-4 border-white/5 bg-white/[0.02]">
@@ -188,23 +184,31 @@ export default function VideoPage() {
         <div className="grid lg:grid-cols-3 gap-12">
           {/* Left: Notes & Topics */}
           <div className="lg:col-span-2 space-y-12">
-            {/* Quick Summary */}
             <motion.section {...fadeInUp}>
                <h3 className="text-2xl font-black italic mb-6 glow-text tracking-tight uppercase underline decoration-accent-blue/30 underline-offset-8">Quick Summary</h3>
                <GlassCard className="bg-white/[0.01] border-white/5 font-light text-xl leading-relaxed text-gray-300 italic">
-                 "{context.notes.content?.split('.')[0] || video.description}."
+                 "{video.quick_summary || context.notes.content?.split('.')[0] || "No summary available."}"
                </GlassCard>
             </motion.section>
 
-            {/* Topics Covered */}
+            {/* Module Roadmap */}
             <motion.section {...fadeInUp}>
-               <h3 className="text-2xl font-black italic mb-6 glow-text tracking-tight uppercase">Topics Covered</h3>
-               <div className="flex flex-wrap gap-4">
-                 {video.topicsCovered.map((topic, i) => (
-                   <div key={i} className="px-6 py-3 border border-accent-blue/20 glass-card bg-accent-blue/[0.03] text-accent-blue text-xs font-black uppercase tracking-widest rounded-xl">
-                      {topic}
-                   </div>
-                 ))}
+               <h3 className="text-2xl font-black italic mb-6 glow-text tracking-tight uppercase">Module Roadmap</h3>
+               <div className="space-y-4">
+                 {video.roadmap && video.roadmap.length > 0 ? (
+                   video.roadmap.map((topic, index) => (
+                     <div key={index} className="flex gap-4 items-center glass-card p-4 border-white/5 bg-accent-blue/5">
+                       <div className="w-8 h-8 rounded-full bg-accent-blue/20 flex items-center justify-center text-accent-blue font-black text-xs">
+                         {index + 1}
+                       </div>
+                       <span className="text-gray-300 font-bold uppercase tracking-tight text-sm">
+                         {topic}
+                       </span>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="text-gray-500 italic">No roadmap items available.</div>
+                 )}
                </div>
             </motion.section>
 

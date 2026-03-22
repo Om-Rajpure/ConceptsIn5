@@ -11,6 +11,7 @@ from .serializers import (
     VideoSerializer, PublicVideoSerializer, NoteSerializer
 )
 from .utils.youtube_utils import extract_video_id, get_thumbnail, get_embed_url
+from .utils.description_processor import process_description
 from rest_framework.exceptions import ValidationError
 
 # Public ViewSets
@@ -60,6 +61,9 @@ class AdminVideoViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
     def perform_create(self, serializer):
+        description = self.request.data.get('description', '')
+        summary, roadmap = process_description(description)
+        
         youtube_url = self.request.data.get('youtube_url')
         if youtube_url:
             video_id = extract_video_id(youtube_url)
@@ -68,12 +72,17 @@ class AdminVideoViewSet(viewsets.ModelViewSet):
             serializer.save(
                 youtube_id=video_id,
                 thumbnail=get_thumbnail(video_id),
-                video_url=get_embed_url(video_id)
+                video_url=get_embed_url(video_id),
+                quick_summary=summary,
+                roadmap=roadmap
             )
         else:
-            serializer.save()
+            serializer.save(quick_summary=summary, roadmap=roadmap)
 
     def perform_update(self, serializer):
+        description = self.request.data.get('description', '')
+        summary, roadmap = process_description(description)
+        
         youtube_url = self.request.data.get('youtube_url')
         if youtube_url:
             video_id = extract_video_id(youtube_url)
@@ -82,10 +91,12 @@ class AdminVideoViewSet(viewsets.ModelViewSet):
             serializer.save(
                 youtube_id=video_id,
                 thumbnail=get_thumbnail(video_id),
-                video_url=get_embed_url(video_id)
+                video_url=get_embed_url(video_id),
+                quick_summary=summary,
+                roadmap=roadmap
             )
         else:
-            serializer.save()
+            serializer.save(quick_summary=summary, roadmap=roadmap)
 
 class AdminNoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all().select_related('video', 'subject')

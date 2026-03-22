@@ -16,12 +16,7 @@ class VideoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Video
-        fields = [
-            'id', 'title', 'description', 'youtube_id', 'youtube_url', 'video_url', 
-            'subject', 'type', 'important_topics', 'duration', 
-            'thumbnail', 'source', 'is_published', 'is_important', 'is_verified', 
-            'created_at', 'updated_at', 'notes'
-        ]
+        fields = '__all__'
 
 class PublicVideoSerializer(serializers.ModelSerializer):
     notes = NoteSerializer(many=True, read_only=True)
@@ -29,12 +24,7 @@ class PublicVideoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Video
-        fields = [
-            'id', 'title', 'description', 'youtube_id', 'youtube_url', 'video_url', 
-            'subject', 'type', 'important_topics', 'duration', 
-            'thumbnail', 'source', 'is_published', 'is_important', 'is_verified', 
-            'created_at', 'updated_at', 'notes'
-        ]
+        fields = '__all__'
 
 class SubCategorySerializer(serializers.ModelSerializer):
     subjects = SubjectSerializer(many=True, read_only=True)

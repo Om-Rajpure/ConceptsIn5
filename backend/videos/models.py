@@ -78,6 +78,8 @@ class Video(models.Model):
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    quick_summary = models.TextField(blank=True)
+    roadmap = models.JSONField(default=list, blank=True)
 
     # Extra control fields (not stored in DB but used in logic)
     # Actually, we might want to store them temporarily or handle them in the serializer/view
