@@ -41,6 +41,11 @@ const AdminNoteManager = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [noteToDelete, setNoteToDelete] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+
+    // Inline Sub-Category Creation State
+    const [isAddingSubCategory, setIsAddingSubCategory] = useState(false);
+    const [newSubCategoryName, setNewSubCategoryName] = useState('');
+    const [subCategoryLoading, setSubCategoryLoading] = useState(false);
     
     const [formData, setFormData] = useState({
         title: '',
@@ -187,6 +192,38 @@ const AdminNoteManager = () => {
         } catch (error) {
             console.error('Subject creation failed', error);
             toast.error(error.response?.data?.error || 'Failed to create subject sector.');
+        }
+    };
+
+    const handleCreateSubCategory = async (e) => {
+        if (e) e.preventDefault();
+        if (!newSubCategoryName.trim()) {
+            toast.error('Identity required for new sub-sector');
+            return;
+        }
+        
+        setSubCategoryLoading(true);
+        try {
+            const response = await axios.post('/api/admin/subcategories/', {
+                name: newSubCategoryName,
+                category: subjectFormData.category
+            });
+            const createdSC = response.data;
+            
+            // Update local state
+            setSubcategories(prev => [...prev, createdSC]);
+            // Auto-select
+            setSubjectFormData(prev => ({ ...prev, subcategory: createdSC.id }));
+            
+            // Reset
+            setNewSubCategoryName('');
+            setIsAddingSubCategory(false);
+            toast.success('Sub-sector synthesized');
+        } catch (error) {
+            console.error('Subcategory creation failed', error);
+            toast.error(error.response?.data?.error || 'Synthesis failure. Check coordinates.');
+        } finally {
+            setSubCategoryLoading(false);
         }
     };
 
@@ -569,18 +606,88 @@ const AdminNoteManager = () => {
                                         <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 ml-1">Sub-Sector</label>
                                         <select 
                                             value={subjectFormData.subcategory}
-                                            onChange={(e) => setSubjectFormData({...subjectFormData, subcategory: e.target.value})}
+                                            onChange={(e) => {
+                                                if (e.target.value === 'ADD_NEW') {
+                                                    setIsAddingSubCategory(true);
+                                                } else {
+                                                    setSubjectFormData({...subjectFormData, subcategory: e.target.value});
+                                                }
+                                            }}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-purple/50"
-                                            required
-                                            disabled={!subjectFormData.category}
+                                            required={!isAddingSubCategory}
+                                            disabled={!subjectFormData.category || isAddingSubCategory}
                                         >
                                             <option value="" disabled className="bg-dark">Select Subcategory</option>
                                             {subcategories.filter(sc => sc.category == subjectFormData.category).map(sc => (
                                                 <option key={sc.id} value={sc.id} className="bg-dark">{sc.name}</option>
                                             ))}
+                                            {subjectFormData.category && (
+                                                <option value="ADD_NEW" className="bg-dark text-accent-purple font-black">+ ADD NEW SUB-CATEGORY</option>
+                                            )}
                                         </select>
                                     </div>
                                 </div>
+
+                                {/* Inline Sub-Category Creation Card */}
+                                <AnimatePresence>
+                                    {isAddingSubCategory && (
+                                        <motion.div 
+                                            initial={{ height: 0, opacity: 0, y: -10 }}
+                                            animate={{ height: 'auto', opacity: 1, y: 0 }}
+                                            exit={{ height: 0, opacity: 0, y: -10 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="p-5 glass-card border-accent-purple/30 bg-accent-purple/5 rounded-2xl relative">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-accent-purple flex items-center gap-2">
+                                                        <PlusCircle size={14} /> New Sub-Sector Identity
+                                                    </span>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setIsAddingSubCategory(false)}
+                                                        className="text-gray-500 hover:text-white"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                                <input 
+                                                    autoFocus
+                                                    type="text" 
+                                                    placeholder="Enter Sub-Category Name"
+                                                    value={newSubCategoryName}
+                                                    onChange={(e) => setNewSubCategoryName(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            handleCreateSubCategory();
+                                                        }
+                                                        if (e.key === 'Escape') {
+                                                            setIsAddingSubCategory(false);
+                                                        }
+                                                    }}
+                                                    className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-white text-sm outline-none focus:border-accent-purple/50 mb-4"
+                                                />
+                                                <div className="flex gap-3">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setIsAddingSubCategory(false)}
+                                                        className="flex-1 py-2 glass-card border-white/10 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-all"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={handleCreateSubCategory}
+                                                        disabled={subCategoryLoading || !newSubCategoryName.trim()}
+                                                        className="flex-[2] py-2 bg-accent-purple rounded-lg text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent-purple/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                                                    >
+                                                        {subCategoryLoading ? "Synthesizing..." : "Create Identity"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 <button 
                                     type="submit"
