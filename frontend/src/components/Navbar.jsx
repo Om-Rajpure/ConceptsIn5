@@ -78,7 +78,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Search & Links */}
-        <div className="hidden md:flex gap-8 items-center flex-1 justify-center max-w-2xl px-8">
+        <div className="hidden md:flex gap-8 items-center flex-1 justify-end max-w-4xl px-8">
           {/* Search Bar */}
           <div className="relative w-full max-w-md group">
             <form onSubmit={handleSearch} className="relative">

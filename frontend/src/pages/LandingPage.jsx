@@ -44,10 +44,14 @@ export default function LandingPage() {
   const [catIndex, setCatIndex] = React.useState(0);
   const [socialIndex, setSocialIndex] = React.useState(0);
   const [videoIndex, setVideoIndex] = React.useState(0);
+  const [hudIndex, setHudIndex] = React.useState(0);
+  const [reelIndex, setReelIndex] = React.useState(0);
 
   const catRef = React.useRef(null);
   const socialRef = React.useRef(null);
   const videoRef = React.useRef(null);
+  const hudRef = React.useRef(null);
+  const reelRef = React.useRef(null);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -78,13 +82,50 @@ export default function LandingPage() {
     window.location.reload(); // Simple retry for Landing Page or re-fetch if logic allows
   };
 
-  const handleScroll = (ref, setIndex, itemCount) => {
+  const scrollTo = (ref, index) => {
     if (!ref.current) return;
-    const scrollLeft = ref.current.scrollLeft;
-    const width = ref.current.offsetWidth;
-    const index = Math.round(scrollLeft / (width * 0.8));
-    setIndex(Math.min(index, itemCount - 1));
+    const container = ref.current;
+    const cards = container.children;
+    if (cards[index]) {
+      cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
   };
+
+  // Intersection Observer to detect current card
+  React.useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.6
+    };
+
+    const observers = [
+      { ref: catRef, setIndex: setCatIndex },
+      { ref: socialRef, setIndex: setSocialIndex },
+      { ref: videoRef, setIndex: setVideoIndex },
+      { ref: hudRef, setIndex: setHudIndex },
+      { ref: reelRef, setIndex: setReelIndex }
+    ].map(({ ref, setIndex }) => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Array.from(ref.current.children).indexOf(entry.target);
+            if (index !== -1) setIndex(index);
+          }
+        });
+      }, options);
+
+      return { observer, ref };
+    });
+
+    observers.forEach(({ observer, ref }) => {
+      if (ref.current) {
+        Array.from(ref.current.children).forEach(child => observer.observe(child));
+      }
+    });
+
+    return () => observers.forEach(({ observer }) => observer.disconnect());
+  }, [loading, categories, reels, featuredVideos]);
 
   // Removed full-page loader to allow for section-specific skeleton UI
 
@@ -211,27 +252,26 @@ export default function LandingPage() {
       </section>
 
       {/* 2 Main Categories Section */}
-      <section id="categories" className="py-10 md:py-16 px-6 relative max-w-7xl mx-auto">
-        <motion.div {...fadeInUp} className="text-center mb-10 md:mb-16">
+      <section id="categories" className="py-10 md:py-16 px-0 relative max-w-7xl mx-auto overflow-hidden">
+        <motion.div {...fadeInUp} className="text-center mb-10 md:mb-16 px-6">
           <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text italic">Select Mission</h2>
           <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
-        <div className="relative group/scroll">
+        <div className="relative group/scroll px-4 md:px-0">
           <div 
             ref={catRef}
-            onScroll={() => handleScroll(catRef, setCatIndex, categories.length)}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
           >
             {loading ? (
               [...Array(4)].map((_, i) => (
-                <div key={i} className="min-w-[280px] md:min-w-0 snap-center">
+                <div key={i} className="min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0">
                   <SkeletonCard />
                 </div>
               ))
             ) : (
               categories.map((cat, i) => (
-                <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[280px] md:min-w-0 snap-center">
+                <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0">
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -262,28 +302,25 @@ export default function LandingPage() {
               ))
             )}
           </div>
-          {/* Edge Fade */}
-          <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
         </div>
-        <ScrollDots count={categories.length} activeIndex={catIndex} color="blue" />
+        <ScrollDots count={categories.length} activeIndex={catIndex} color="blue" onDotClick={(idx) => scrollTo(catRef, idx)} />
       </section>
 
       {/* 2.5 Social Presence Section */}
-      <section className="py-12 px-6 relative max-w-7xl mx-auto overflow-hidden">
+      <section className="py-12 px-0 relative max-w-7xl mx-auto overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-accent-purple/5 blur-[120px] rounded-full -z-10" />
         
-        <motion.div {...fadeInUp} className="text-center mb-10">
+        <motion.div {...fadeInUp} className="text-center mb-10 px-6">
           <h2 className="text-3xl md:text-5xl font-black mb-4 glow-text italic">Connect & Learn Beyond the Platform</h2>
           <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto text-center">
             Explore more content, updates, and learning resources across our social platforms.
           </p>
         </motion.div>
-
-        <div className="relative group/scroll">
+ 
+        <div className="relative group/scroll px-4 md:px-0">
           <div 
             ref={socialRef}
-            onScroll={() => handleScroll(socialRef, setSocialIndex, 3)}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
           >
             {[
               {
@@ -323,7 +360,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="group block min-w-[300px] md:min-w-0 snap-center"
+                className="group block min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0"
               >
                 <GlassCard 
                   glow 
@@ -348,11 +385,11 @@ export default function LandingPage() {
                         {social.platform}
                       </p>
                     </div>
-
+ 
                     <p className="text-gray-400 text-sm font-light leading-relaxed mb-8">
                       {social.desc}
                     </p>
-
+ 
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -365,15 +402,13 @@ export default function LandingPage() {
               </motion.a>
             ))}
           </div>
-          {/* Edge Fade */}
-          <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
         </div>
-        <ScrollDots count={3} activeIndex={socialIndex} color="purple" />
+        <ScrollDots count={3} activeIndex={socialIndex} color="purple" onDotClick={(idx) => scrollTo(socialRef, idx)} />
       </section>
 
       {/* 3 Featured Videos Section */}
-      <section className="py-10 md:py-16 px-6 relative bg-white/[0.01]">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-10 md:py-16 px-0 relative bg-white/[0.01] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
           <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 md:mb-16 text-center md:text-left">
             <div>
               <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text tracking-tighter italic">Start Learning</h2>
@@ -383,51 +418,48 @@ export default function LandingPage() {
               View All Content
             </Link>
           </motion.div>
-
-          <div className="relative group/scroll">
-            <div 
-              ref={videoRef}
-              onScroll={() => handleScroll(videoRef, setVideoIndex, featuredVideos.length)}
-              className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory pr-10 md:pr-0"
-            >
-              {loading ? (
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="min-w-[300px] md:min-w-0 snap-center">
-                    <SkeletonCard />
-                  </div>
-                ))
-              ) : (
-                featuredVideos.map((video, i) => (
-                  <Link key={i} to={`/video/${video.id}`} className="min-w-[300px] md:min-w-0 snap-center">
-                    <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
-                      <div className="relative aspect-video overflow-hidden rounded-t-2xl">
-                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                        <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
-                          <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
-                            <Play className="text-white fill-current ml-1" />
-                          </div>
-                        </div>
-                        <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
-                          <Clock size={12} className="text-accent-cyan" /> {video.duration}
-                        </div>
-                      </div>
-                      <div className="p-8">
-                        <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
-                        <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
-                          <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
-                          <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
-                        </div>
-                      </div>
-                    </GlassCard>
-                  </Link>
-                ))
-              )}
-            </div>
-            {/* Edge Fade */}
-            <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-dark to-transparent pointer-events-none md:hidden" />
-          </div>
-          <ScrollDots count={featuredVideos.length} activeIndex={videoIndex} color="blue" />
         </div>
+ 
+        <div className="relative group/scroll px-4 md:px-0 max-w-7xl mx-auto">
+          <div 
+            ref={videoRef}
+            className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+          >
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="min-w-[85%] md:min-w-[70%] lg:min-w-0 snap-center flex-shrink-0">
+                  <SkeletonCard />
+                </div>
+              ))
+            ) : (
+              featuredVideos.map((video, i) => (
+                <Link key={i} to={`/video/${video.id}`} className="min-w-[85%] md:min-w-[70%] lg:min-w-0 snap-center flex-shrink-0">
+                  <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
+                    <div className="relative aspect-video overflow-hidden rounded-t-2xl">
+                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-accent-blue group-hover:shadow-[0_0_30px_rgba(0,240,255,0.5)] transition-all duration-300">
+                          <Play className="text-white fill-current ml-1" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 right-4 px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[10px] font-black text-white flex items-center gap-1">
+                        <Clock size={12} className="text-accent-cyan" /> {video.duration}
+                      </div>
+                    </div>
+                    <div className="p-8">
+                      <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
+                      <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
+                        <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
+                        <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
+                      </div>
+                    </div>
+                  </GlassCard>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+        <ScrollDots count={featuredVideos.length} activeIndex={videoIndex} color="blue" onDotClick={(idx) => scrollTo(videoRef, idx)} />
       </section>
 
       {/* 4 Instagram Reels Section */}
@@ -443,10 +475,13 @@ export default function LandingPage() {
             </Link>
           </motion.div>
 
-          <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide">
+          <div 
+            ref={reelRef}
+            className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+          >
             {loading ? (
               [1, 2, 3, 4].map(i => (
-                <div key={i} className="min-w-[200px] md:min-w-[240px] aspect-[9/16] animate-pulse glass-card bg-white/5 opacity-50" />
+                <div key={i} className="min-w-[70%] md:min-w-[240px] aspect-[9/16] animate-pulse glass-card bg-white/5 opacity-50 snap-center flex-shrink-0" />
               ))
             ) : reels.length > 0 ? (
               reels.map((reel, i) => (
@@ -455,7 +490,7 @@ export default function LandingPage() {
                   target="_blank" 
                   rel="noopener noreferrer" 
                   key={i} 
-                  className="min-w-[200px] md:min-w-[240px] p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block"
+                  className="min-w-[70%] md:min-w-[240px] p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block snap-center flex-shrink-0"
                 >
                   <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
                   <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
@@ -472,32 +507,41 @@ export default function LandingPage() {
                 </div>
             )}
           </div>
+          <ScrollDots count={reels.length} activeIndex={reelIndex} color="purple" onDotClick={(idx) => scrollTo(reelRef, idx)} />
         </div>
       </section>
 
       {/* 5 How it Works Section */}
-      <section className="py-16 md:py-20 px-6 max-w-7xl mx-auto relative border-y border-white/5">
-        <motion.div {...fadeInUp} className="text-center mb-20">
+      <section className="py-16 md:py-20 px-0 max-w-7xl mx-auto relative border-y border-white/5 overflow-hidden">
+        <motion.div {...fadeInUp} className="text-center mb-20 px-6">
           <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text italic underline decoration-accent-purple/30 underline-offset-8">The HUD Logic</h2>
           <p className="text-gray-400 text-lg font-light">Download knowledge into your long-term memory in three steps.</p>
         </motion.div>
         
-        <div className="grid md:grid-cols-3 gap-10">
-          {[
-            { step: "MISSION 01", title: "Pick Category", desc: "Select your target subject from our high-precision database.", icon: <Target className="text-accent-blue" />, color: "blue" },
-            { step: "MISSION 02", title: "Watch & Ingest", desc: "Absorb core concepts via 5-minute high-octane video data.", icon: <Video className="text-accent-purple" />, color: "purple" },
-            { step: "MISSION 03", title: "Revise & Conquer", desc: "Secure your grades with lethal cheat sheets and notes.", icon: <CheckCircle2 className="text-accent-cyan" />, color: "blue" },
-          ].map((item, i) => (
-            <GlassCard key={i} glow neonColor={item.color} className="p-10 group bg-white/[0.01] hover:bg-white/[0.03] transition-all">
-              <div className="text-[10px] font-black text-accent-purple/60 mb-6 tracking-[0.3em] uppercase">{item.step}</div>
-              <div className="p-5 bg-white/5 rounded-2xl inline-block mb-6 border border-white/5 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all">
-                {item.icon}
+        <div className="relative group/scroll px-4 md:px-0">
+          <div 
+            ref={hudRef}
+            className="flex md:grid md:grid-cols-3 gap-6 md:gap-10 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+          >
+            {[
+              { step: "MISSION 01", title: "Pick Category", desc: "Select your target subject from our high-precision database.", icon: <Target className="text-accent-blue" />, color: "blue" },
+              { step: "MISSION 02", title: "Watch & Ingest", desc: "Absorb core concepts via 5-minute high-octane video data.", icon: <Video className="text-accent-purple" />, color: "purple" },
+              { step: "MISSION 03", title: "Revise & Conquer", desc: "Secure your grades with lethal cheat sheets and notes.", icon: <CheckCircle2 className="text-accent-cyan" />, color: "blue" },
+            ].map((item, i) => (
+              <div key={i} className="min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0 flex items-stretch">
+                <GlassCard glow neonColor={item.color} className="p-8 md:p-10 group bg-white/[0.01] hover:bg-white/[0.03] transition-all h-full w-full">
+                  <div className="text-[10px] font-black text-accent-purple/60 mb-6 tracking-[0.3em] uppercase">{item.step}</div>
+                  <div className="p-5 bg-white/5 rounded-2xl inline-block mb-6 border border-white/5 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-2xl font-black mb-4 transition-colors italic uppercase tracking-tighter">{item.title}</h3>
+                  <p className="text-gray-400 text-base leading-relaxed font-light">{item.desc}</p>
+                </GlassCard>
               </div>
-              <h3 className="text-2xl font-black mb-4 transition-colors italic uppercase tracking-tighter">{item.title}</h3>
-              <p className="text-gray-400 text-base leading-relaxed font-light">{item.desc}</p>
-            </GlassCard>
-          ))}
+            ))}
+          </div>
         </div>
+        <ScrollDots count={3} activeIndex={hudIndex} color="purple" onDotClick={(idx) => scrollTo(hudRef, idx)} />
       </section>
 
       {/* 6 Why ConceptsIn5 Section */}

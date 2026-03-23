@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
+import ScrollDots from '../components/ScrollDots';
 
 export default function AboutPage() {
   const fadeInUp = {
@@ -36,6 +38,42 @@ export default function AboutPage() {
       }
     }
   };
+
+  const [flowIndex, setFlowIndex] = React.useState(0);
+  const flowRef = React.useRef(null);
+
+  const scrollTo = (ref, index) => {
+    if (!ref.current) return;
+    const container = ref.current;
+    const cards = container.children;
+    if (cards[index]) {
+      cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
+
+  // Intersection Observer for Flow section
+  React.useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.6
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = Array.from(flowRef.current.children).indexOf(entry.target);
+          if (index !== -1) setFlowIndex(index);
+        }
+      });
+    }, options);
+
+    if (flowRef.current) {
+      Array.from(flowRef.current.children).forEach(child => observer.observe(child));
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="min-h-screen pb-20 md:pb-32 overflow-hidden">
@@ -182,24 +220,36 @@ export default function AboutPage() {
       </section>
 
       {/* 4. HOW IT WORKS */}
-      <section className="py-16 md:py-24 px-6">
+      <section className="py-16 md:py-24 px-0 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="text-center mb-16 md:mb-24">
+          <motion.div {...fadeInUp} className="text-center mb-16 md:mb-24 px-6">
             <h3 className="text-3xl md:text-4xl font-black italic tracking-tighter uppercase mb-4">The Mission Flow</h3>
             <p className="text-gray-500 text-[10px] md:text-sm font-black uppercase tracking-[0.2em]">Simple steps to mastery</p>
           </motion.div>
 
-          <div className="relative">
+          <div className="relative px-4 md:px-0">
             {/* Connecting line (Desktop) */}
-            <div className="hidden lg:block absolute top-1/2 left-0 w-full h-[2px] bg-gradient-to-r from-accent-blue via-accent-purple to-accent-cyan opacity-20 -translate-y-1/2" />
+            <div className="hidden lg:block absolute top-[45%] left-0 w-full h-[2px] bg-gradient-to-r from-accent-blue via-accent-purple to-accent-cyan opacity-20 -translate-y-1/2" />
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-              <StepItem number="01" title="Choose Category" icon={<Monitor />} />
-              <StepItem number="02" title="Pick Subject" icon={<BookOpen />} />
-              <StepItem number="03" title="Review Notes" icon={<Zap />} />
-              <StepItem number="04" title="Deploy Knowledge" icon={<Target />} />
+            <div 
+              ref={flowRef}
+              className="flex sm:grid sm:grid-cols-2 lg:grid lg:grid-cols-4 gap-8 md:gap-12 overflow-x-auto sm:overflow-visible pb-8 sm:pb-0 scrollbar-hide snap-x snap-mandatory px-4 sm:px-0 min-h-[300px] md:min-h-[350px] items-center"
+            >
+              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+                <StepItem number="01" title="Choose Category" icon={<Monitor />} />
+              </div>
+              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+                <StepItem number="02" title="Pick Subject" icon={<BookOpen />} />
+              </div>
+              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+                <StepItem number="03" title="Review Notes" icon={<Zap />} />
+              </div>
+              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+                <StepItem number="04" title="Deploy Knowledge" icon={<Target />} />
+              </div>
             </div>
           </div>
+          <ScrollDots count={4} activeIndex={flowIndex} color="blue" onDotClick={(idx) => scrollTo(flowRef, idx)} />
         </div>
       </section>
 

@@ -72,8 +72,8 @@ export default function CategoryPage() {
 
   // Removed full-page loader to allow for section-specific skeleton UI
 
-  // Only show "Not Found" if we are finished loading and still have no category
-  if (!loading && (!subjects || subjects.length === 0)) {
+  // Only show "Not Found" if we are finished loading and still have no subjects in groups
+  if (!loading && category && groupedSubjects.every(group => group.items.length === 0)) {
     return (
       <EmptyState 
         title="Sector Depleted"
@@ -98,27 +98,33 @@ export default function CategoryPage() {
             <Library className="w-4 h-4" /> Knowledge Hive Section
           </motion.div>
           
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-9xl font-black mb-8 italic tracking-tighter leading-none"
-          >
-            {loading ? <div className="h-20 md:h-32 bg-white/10 rounded-2xl w-3/4 mx-auto animate-pulse"></div> : category.name}
-          </motion.h1>
+          {loading ? (
+            <div className="h-20 md:h-32 bg-white/10 rounded-2xl w-3/4 mx-auto animate-pulse mb-8"></div>
+          ) : (
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-6xl md:text-9xl font-black mb-8 italic tracking-tighter leading-none"
+            >
+              {category.name}
+            </motion.h1>
+          )}
           
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed mb-12"
-          >
-            {loading ? (
-              <div className="space-y-3">
-                <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
-                <div className="h-4 bg-white/5 rounded-full w-5/6 mx-auto animate-pulse"></div>
-              </div>
-            ) : category.description}
-          </motion.p>
+          {loading ? (
+            <div className="space-y-3 mb-12">
+              <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
+              <div className="h-4 bg-white/5 rounded-full w-5/6 mx-auto animate-pulse"></div>
+            </div>
+          ) : (
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed mb-12"
+            >
+              {category.description}
+            </motion.p>
+          )}
 
           <div className="flex justify-center gap-8 text-xs font-black uppercase tracking-[0.3em] text-gray-500">
              <div className="flex items-center gap-2"><Sparkles size={14} className="text-accent-blue" /> Verified Content</div>
