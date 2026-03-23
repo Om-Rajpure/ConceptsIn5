@@ -157,13 +157,32 @@ export default function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Link
-                  to={link.href}
-                  className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
-                >
-                  {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
-                </Link>
+                {link.href.startsWith('/#') ? (
+                  <button
+                    onClick={() => {
+                      if (location.pathname === '/') {
+                        const el = document.getElementById(link.href.split('#')[1]);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      } else {
+                        navigate(link.href);
+                      }
+                      if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+                    }}
+                    className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
+                  >
+                    {link.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
+                  </button>
+                ) : (
+                  <Link
+                    to={link.href}
+                    onClick={() => { if (isMobileMenuOpen) setIsMobileMenuOpen(false); }}
+                    className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
+                  >
+                    {link.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
+                  </Link>
+                )}
               </motion.div>
             ))}
           </div>
@@ -214,9 +233,13 @@ export default function Navbar() {
                   {link.name}
                 </Link>
               ))}
-              <button className="mt-4 w-full py-4 bg-accent-purple rounded-xl font-bold">
+              <Link 
+                to="/notes" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="mt-4 w-full py-4 bg-accent-purple rounded-xl font-bold text-center block"
+              >
                 Start Learning
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}

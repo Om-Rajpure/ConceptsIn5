@@ -9,12 +9,18 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Immediate scroll to top
-    window.scrollTo(0, 0);
+    // Immediate scroll to top with smooth behavior
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
     
     // Fallback for some browsers/layouts that might need a tiny delay
     const timeout = setTimeout(() => {
-      window.scrollTo(0, 0);
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
     }, 0);
 
     return () => clearTimeout(timeout);

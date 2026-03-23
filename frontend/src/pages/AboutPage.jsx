@@ -63,9 +63,9 @@ export default function AboutPage() {
               ConceptsIn5 is a high-octane educational platform designed to help students master complex engineering topics in 5-minute mission packets.
             </p>
             <div className="flex flex-wrap gap-6">
-              <Link to="/notes" className="px-10 py-5 bg-accent-blue rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all">
+              <a href="https://github.com/Om-Rajpure" target="_blank" className="px-10 py-5 bg-accent-blue rounded-2xl font-black text-white text-lg flex items-center gap-3 shadow-[0_10px_30px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all">
                 Explore Repository <ArrowRight className="w-5 h-5" />
-              </Link>
+              </a>
             </div>
           </motion.div>
 
@@ -84,7 +84,7 @@ export default function AboutPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent opacity-60" />
               
               {/* HUD Elements overlay on image */}
-              <div className="absolute top-4 right-4 md:top-6 md:right-6 flex flex-col gap-2">
+              <div className="absolute top-4 right-4 md:bottom-6 md:right-6 flex flex-col gap-2">
                 <div className="px-2 md:px-3 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[8px] md:text-[9px] font-black text-white uppercase tracking-widest">
                   Status: Online
                 </div>

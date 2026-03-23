@@ -14,7 +14,9 @@ import {
     ArrowLeft,
     Clock,
     Tag,
-    ChevronDown
+    ChevronDown,
+    PlusCircle,
+    X
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -46,6 +48,11 @@ const AdminVideoManager = () => {
     });
     const [newSubCategoryName, setNewSubCategoryName] = useState('');
     const [modalLoading, setModalLoading] = useState(false);
+    
+    // Inline Sub-Category Creation State
+    const [isAddingSubCategory, setIsAddingSubCategory] = useState(false);
+    const [scLoading, setScLoading] = useState(false);
+    const [scName, setScName] = useState('');
     const location = useLocation();
     
     // Form State
@@ -181,6 +188,37 @@ const AdminVideoManager = () => {
             toast.error(error.response?.data?.error || 'Failed to add sub-category');
         } finally {
             setModalLoading(false);
+        }
+    };
+
+    const handleInlineSCAdd = async (e) => {
+        if (e) e.preventDefault();
+        if (!scName.trim() || !newSubject.category) {
+            toast.error('Identity and category required');
+            return;
+        }
+        setScLoading(true);
+        try {
+            const response = await axios.post('/api/admin/subcategories/', {
+                name: scName,
+                category: newSubject.category
+            });
+            const createdSC = response.data;
+            
+            // Update local state
+            setSubCategories(prev => [...prev, createdSC]);
+            // Auto-select
+            setNewSubject(prev => ({ ...prev, subcategory: createdSC.id }));
+            
+            // Reset
+            setScName('');
+            setIsAddingSubCategory(false);
+            toast.success('Sub-sector synthesized');
+        } catch (error) {
+            console.error('Subcategory creation failed', error);
+            toast.error(error.response?.data?.error || 'Synthesis failure.');
+        } finally {
+            setScLoading(false);
         }
     };
 
@@ -671,14 +709,20 @@ const AdminVideoManager = () => {
 
                                 <div>
                                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Sub-Category Anchor</label>
-                                    <div className="flex items-center gap-3">
-                                        <div className="relative flex-1">
-                                            <select 
+                                    <div className="flex flex-col gap-3">
+                                        <div className="relative w-full group">
+                                            <select
                                                 value={newSubject.subcategory}
-                                                onChange={(e) => setNewSubject({...newSubject, subcategory: e.target.value})}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-blue disabled:opacity-50"
-                                                required
-                                                disabled={!newSubject.category}
+                                                onChange={(e) => {
+                                                    if (e.target.value === 'ADD_NEW') {
+                                                        setIsAddingSubCategory(true);
+                                                    } else {
+                                                        setNewSubject({...newSubject, subcategory: e.target.value});
+                                                    }
+                                                }}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white appearance-none outline-none focus:border-accent-blue transition-all disabled:opacity-50"
+                                                required={!isAddingSubCategory}
+                                                disabled={!newSubject.category || isAddingSubCategory}
                                             >
                                                 <option value="" disabled className="bg-dark">Select Sub-Category</option>
                                                 {(() => {
@@ -696,22 +740,81 @@ const AdminVideoManager = () => {
                                                         .filter(sc => sc.category === parseInt(newSubject.category))
                                                         .map(sc => <option key={sc.id} value={sc.id} className="bg-dark">{sc.name}</option>);
                                                 })()}
+                                                {newSubject.category && (
+                                                    <option value="ADD_NEW" className="bg-dark text-accent-cyan font-black">+ ADD NEW SUB-CATEGORY</option>
+                                                )}
                                             </select>
                                             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
                                         </div>
-                                        <button 
-                                            type="button"
-                                            onClick={() => setShowSubCategoryModal(true)}
-                                            disabled={!newSubject.category}
-                                            className="px-4 py-4 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-blue hover:text-white transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed"
-                                        >
-                                            + Add
-                                        </button>
+
+                                        {/* Inline Sub-Category Creation Card */}
+                                        <AnimatePresence>
+                                            {isAddingSubCategory && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0, scale: 0.95 }}
+                                                    animate={{ height: 'auto', opacity: 1, scale: 1 }}
+                                                    exit={{ height: 0, opacity: 0, scale: 0.95 }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="p-5 glass-card border-accent-cyan/30 bg-accent-cyan/5 rounded-2xl mb-4">
+                                                        <div className="flex justify-between items-center mb-4">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-accent-cyan flex items-center gap-2">
+                                                                <PlusCircle size={14} /> New Sub-Sector
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsAddingSubCategory(false)}
+                                                                className="text-gray-500 hover:text-white"
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
+                                                        </div>
+                                                        <input
+                                                            autoFocus
+                                                            type="text"
+                                                            placeholder="Sub-Category Name"
+                                                            value={scName}
+                                                            onChange={(e) => setScName(e.target.value)}
+                                                            onKeyDown={async (e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    // We can't call handleAddSubCategory directly as it expects a form event
+                                                                    // But we can extract the logic or just trigger the button click
+                                                                    if (scName.trim()) {
+                                                                        const fakeEvent = { preventDefault: () => {} };
+                                                                        await handleInlineSCAdd(fakeEvent);
+                                                                    }
+                                                                }
+                                                                if (e.key === 'Escape') setIsAddingSubCategory(false);
+                                                            }}
+                                                            className="w-full bg-dark/50 border border-white/10 rounded-xl py-3 px-4 text-white text-sm outline-none focus:border-accent-cyan/50 mb-4"
+                                                        />
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsAddingSubCategory(false)}
+                                                                className="flex-1 py-2 glass-card border-white/5 text-[10px] font-black uppercase"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleInlineSCAdd}
+                                                                disabled={scLoading || !scName.trim()}
+                                                                className="flex-2 py-2 bg-accent-cyan text-dark rounded-lg text-[10px] font-black uppercase tracking-widest px-4"
+                                                            >
+                                                                {scLoading ? "Saving..." : "Create"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
 
                                 <div className="flex gap-4 pt-4">
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={() => setShowSubjectModal(false)}
                                         className="flex-1 py-4 glass-card border-white/5 text-gray-400 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all rounded-xl"

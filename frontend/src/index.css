@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  scroll-behavior: smooth;
+}
+
 :root {
   color-scheme: dark;
   --neon-blue: #00F0FF;

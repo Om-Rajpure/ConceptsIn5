@@ -231,9 +231,9 @@ export default function CategoryPage() {
              Our AI search agents are constantly scanning for new subjects. 
              If you need a specific module, request it in the command center.
            </p>
-           <button className="px-12 py-5 bg-white text-dark rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-[0_10px_40px_rgba(255,255,255,0.2)]">
+           <Link to="/about" className="inline-block px-12 py-5 bg-white text-dark rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-[0_10px_40px_rgba(255,255,255,0.2)]">
              Request Subject
-           </button>
+           </Link>
         </GlassCard>
       </section>
     </div>

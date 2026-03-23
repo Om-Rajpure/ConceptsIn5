@@ -5,7 +5,9 @@ import {
   Youtube, 
   Instagram,
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  Target,
+  Github
 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Layout from './components/Layout';
@@ -76,17 +78,17 @@ export default function App() {
             <div>
               <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">Navigation</h4>
               <div className="flex flex-col gap-4 text-gray-500 text-base">
-                <a href="#" className="hover:text-accent-blue transition-colors">Subjects</a>
-                <a href="#" className="hover:text-accent-blue transition-colors">AI Tools</a>
-                <a href="#" className="hover:text-accent-blue transition-colors">Study Guides</a>
+                <Link to="/category/semester" className="hover:text-accent-blue transition-colors">Subjects</Link>
+                <Link to="/#features" className="hover:text-accent-blue transition-colors">AI Tools</Link>
+                <Link to="/notes" className="hover:text-accent-blue transition-colors">Study Guides</Link>
               </div>
             </div>
             <div>
               <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">System</h4>
               <div className="flex flex-col gap-4 text-gray-500 text-base">
-                <a href="#" className="hover:text-accent-purple transition-colors">Status</a>
-                <a href="#" className="hover:text-accent-purple transition-colors">Support</a>
-                <a href="#" className="hover:text-accent-purple transition-colors">Contact</a>
+                <Link to="/about" className="hover:text-accent-purple transition-colors">Status</Link>
+                <Link to="/about" className="hover:text-accent-purple transition-colors">Support</Link>
+                <Link to="/about" className="hover:text-accent-purple transition-colors">Contact</Link>
               </div>
             </div>
           </div>
@@ -95,15 +97,18 @@ export default function App() {
             <div className="text-sm text-gray-600 font-medium uppercase tracking-[0.2em]">
               © 2026 ConceptsIn5. Initializing Success.
             </div>
-            <div className="flex gap-10 text-gray-500 items-center">
-              <a href="https://youtube.com/@conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors">
-                <Youtube className="w-5 h-5" />
-              </a>
+            <div className="flex gap-8 justify-center lg:justify-start grayscale hover:grayscale-0 transition-all items-center">
               <a href="https://instagram.com/conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition-colors">
-                <Instagram className="w-5 h-5" />
+                <Instagram size={24} />
               </a>
-              <a href="https://linkedin.com/in/om-rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-accent-blue transition-colors">
-                <Linkedin className="w-5 h-5" />
+              <a href="https://youtube.com/@conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors">
+                <Youtube size={24} />
+              </a>
+              <a href="https://linkedin.com/in/om-rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">
+                <Linkedin size={24} />
+              </a>
+              <a href="https://github.com/Om-Rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <Github size={24} />
               </a>
               <Link to="/om/login" className="hover:text-accent-purple transition-colors p-2 glass-card border-white/5 border">
                  <Lock className="w-4 h-4" />

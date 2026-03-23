@@ -100,9 +100,23 @@ function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
           </p>
 
           <div className="mt-auto grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white">
-              <Download size={14} className="text-accent-cyan" /> PDF
-            </button>
+            {video.pdf_file ? (
+              <a 
+                href={video.pdf_file} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white"
+              >
+                <Download size={14} className="text-accent-cyan" /> PDF
+              </a>
+            ) : (
+              <Link 
+                to={`/video/${video.id}`}
+                className="flex items-center justify-center gap-2 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all text-gray-300 hover:text-white"
+              >
+                <BookOpen size={14} className="text-accent-cyan" /> View
+              </Link>
+            )}
             <Link to={`/video/${video.id}`} className="flex items-center justify-center gap-2 py-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-purple hover:text-white transition-all text-accent-purple">
               <Play size={14} /> Video
             </Link>

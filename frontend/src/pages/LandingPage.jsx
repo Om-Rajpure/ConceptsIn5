@@ -16,7 +16,10 @@ import {
   Award,
   Users,
   ChevronRight,
-  Target
+  Target,
+  Github,
+  PlusCircle,
+  X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -123,13 +126,15 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center lg:justify-start">
-              <motion.button 
-                whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(0, 240, 255, 0.4)" }}
-                whileTap={{ scale: 0.95 }}
-                className="group px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-accent-blue to-accent-purple rounded-2xl font-black text-white text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_10px_40px_rgba(123,97,255,0.2)]"
-              >
-                Start Learning <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-              </motion.button>
+              <Link to="/notes" className="contents">
+                <motion.button 
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(0, 240, 255, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="group px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-accent-blue to-accent-purple rounded-2xl font-black text-white text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_10px_40px_rgba(123,97,255,0.2)] w-full sm:w-auto"
+                >
+                  Start Learning <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+              </Link>
               <motion.button 
                 whileHover={{ backgroundColor: "rgba(255,255,255,0.1)", scale: 1.02 }}
                 onClick={() => document.getElementById('categories').scrollIntoView({ behavior: 'smooth' })}
@@ -374,9 +379,9 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text tracking-tighter italic">Start Learning</h2>
               <p className="text-gray-400 text-base md:text-lg font-light">High-density engineering concepts in 5-minute packets.</p>
             </div>
-            <button className="px-8 py-3 glass-card border-white/10 text-xs font-black uppercase tracking-widest text-accent-cyan hover:text-white transition-colors">
+            <Link to="/notes" className="px-8 py-3 glass-card border-white/10 text-xs font-black uppercase tracking-widest text-accent-cyan hover:text-white transition-colors">
               View All Content
-            </button>
+            </Link>
           </motion.div>
 
           <div className="relative group/scroll">
@@ -583,10 +588,19 @@ export default function LandingPage() {
               your learning time. We strip away the filler and give you the pure signal. 
               High efficiency learning for the modern age.
             </motion.p>
-            <div className="flex gap-8 justify-center lg:justify-start grayscale hover:grayscale-0 transition-all">
-              <Instagram className="cursor-pointer hover:text-accent-purple transition-colors" />
-              <Youtube className="cursor-pointer hover:text-red-500 transition-colors" />
-              <Linkedin className="cursor-pointer hover:text-accent-blue transition-colors" />
+            <div className="flex gap-8 justify-center lg:justify-start grayscale hover:grayscale-0 transition-all items-center">
+              <a href="https://instagram.com/conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition-colors">
+                <Instagram size={24} />
+              </a>
+              <a href="https://youtube.com/@conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-red-500 transition-colors">
+                <Youtube size={24} />
+              </a>
+              <a href="https://linkedin.com/in/om-rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">
+                <Linkedin size={24} />
+              </a>
+              <a href="https://github.com/Om-Rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <Github size={24} />
+              </a>
             </div>
           </div>
         </GlassCard>
@@ -606,13 +620,15 @@ export default function LandingPage() {
             <span className="text-gradient">Smarter</span> Today
           </motion.h2>
           
-          <motion.button 
-            whileHover={{ scale: 1.1, boxShadow: "0 0 50px rgba(123, 97, 255, 0.6)" }}
-            whileTap={{ scale: 0.9 }}
-            className="px-16 py-8 bg-white text-dark rounded-[2.5rem] font-black text-2xl shadow-2xl transition-all"
-          >
-            Get Started
-          </motion.button>
+          <Link to="/om/login" className="contents">
+            <motion.button 
+              whileHover={{ scale: 1.1, boxShadow: "0 0 50px rgba(123, 97, 255, 0.6)" }}
+              whileTap={{ scale: 0.9 }}
+              className="px-16 py-8 bg-white text-dark rounded-[2.5rem] font-black text-2xl shadow-2xl transition-all"
+            >
+              Get Started
+            </motion.button>
+          </Link>
         </div>
       </section>
     </div>
