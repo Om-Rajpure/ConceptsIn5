@@ -35,6 +35,7 @@ const fadeInUp = {
 export default function LandingPage() {
   const [categories, setCategories] = React.useState([]);
   const [featuredVideos, setFeaturedVideos] = React.useState([]);
+  const [reels, setReels] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [catIndex, setCatIndex] = React.useState(0);
@@ -50,12 +51,14 @@ export default function LandingPage() {
       setLoading(true);
       setError(null);
       try {
-        const [cResponse, vResponse] = await Promise.all([
+        const [cResponse, vResponse, rResponse] = await Promise.all([
           axios.get('/api/public/categories/'),
-          axios.get('/api/public/videos/?is_important=true')
+          axios.get('/api/public/videos/?is_important=true'),
+          axios.get('/api/public/reels/')
         ]);
         setCategories(cResponse.data.results || cResponse.data);
         setFeaturedVideos((vResponse.data.results || vResponse.data).slice(0, 3));
+        setReels((rResponse.data.results || rResponse.data).slice(0, 4));
       } catch (err) {
         console.error('Failed to fetch landing page data', err);
         setError('Synchronizing with the main neural core failed. System disruption detected.');
@@ -82,11 +85,6 @@ export default function LandingPage() {
 
   // Removed full-page loader to allow for section-specific skeleton UI
 
-  const reels = [
-    { id: 1, title: "Quick CSS Tip", thumbnail: "https://img.youtube.com/vi/reels1/maxresdefault.jpg" },
-    { id: 2, title: "JS One-Liner", thumbnail: "https://img.youtube.com/vi/reels2/maxresdefault.jpg" },
-    { id: 3, title: "Git Cheat Sheet", thumbnail: "https://img.youtube.com/vi/reels3/maxresdefault.jpg" }
-  ];
 
   if (error) {
     return <ErrorState message={error} onRetry={() => window.location.reload()} />;
@@ -430,24 +428,44 @@ export default function LandingPage() {
       {/* 4 Instagram Reels Section */}
       <section className="py-16 md:py-20 px-6 relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="flex items-center gap-4 mb-12">
-            <h2 className="text-3xl font-black glow-text italic">Quick Concepts ⚡</h2>
-            <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent" />
+          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12">
+            <div>
+              <h2 className="text-3xl font-black glow-text italic">Quick Concepts ⚡</h2>
+              <p className="text-gray-400 text-sm font-medium mt-2">Explosive 60-second learning bursts</p>
+            </div>
+            <Link to="/reels" className="px-8 py-3 glass-card border-white/10 text-[10px] font-black uppercase tracking-widest text-accent-purple hover:text-white transition-colors">
+              Explore All Reels
+            </Link>
           </motion.div>
 
           <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide">
-            {/* Using mock thumbnails for reels */}
-            {reels.map((reel, i) => (
-              <GlassCard key={i} className="min-w-[200px] md:min-w-[240px] p-0 border-white/5 group relative aspect-[9/16] overflow-hidden">
-                <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
-                  <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 group-hover:bg-accent-purple transition-all">
-                    <Zap size={20} className="text-white fill-current" />
+            {loading ? (
+              [1, 2, 3, 4].map(i => (
+                <div key={i} className="min-w-[200px] md:min-w-[240px] aspect-[9/16] animate-pulse glass-card bg-white/5 opacity-50" />
+              ))
+            ) : reels.length > 0 ? (
+              reels.map((reel, i) => (
+                <a 
+                  href={reel.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  key={i} 
+                  className="min-w-[200px] md:min-w-[240px] p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block"
+                >
+                  <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
+                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 group-hover:bg-accent-purple transition-all shadow-[0_0_20px_rgba(123,97,255,0.3)]">
+                      <Zap size={20} className="text-white fill-current" />
+                    </div>
+                    <h4 className="font-black text-sm text-white group-hover:text-accent-purple transition-colors uppercase tracking-widest italic leading-tight line-clamp-2">{reel.title}</h4>
                   </div>
-                  <h4 className="font-black text-sm text-white group-hover:text-accent-purple transition-colors uppercase tracking-widest italic">{reel.title}</h4>
+                </a>
+              ))
+            ) : (
+                <div className="w-full py-12 text-center glass-card border-dashed border-white/10">
+                    <span className="text-gray-500 font-black uppercase tracking-widest text-xs">No active transmissions detected</span>
                 </div>
-              </GlassCard>
-            ))}
+            )}
           </div>
         </div>
       </section>

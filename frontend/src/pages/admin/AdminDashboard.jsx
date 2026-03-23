@@ -10,13 +10,14 @@ import {
     LogOut,
     Eye,
     TrendingUp,
-    LayoutDashboard
+    LayoutDashboard,
+    Play
 } from 'lucide-react';
 import { useAdmin } from '../../utils/AdminContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({ total_videos: 0, total_subjects: 0, total_notes: 0 });
+    const [stats, setStats] = useState({ total_videos: 0, total_subjects: 0, total_notes: 0, total_reels: 0 });
     const { logout, user } = useAdmin();
     const navigate = useNavigate();
 
@@ -97,6 +98,12 @@ const AdminDashboard = () => {
                     icon={<FileText className="text-accent-cyan" />} 
                     color="blue"
                 />
+                <StatCard 
+                    label="Nexus Reels" 
+                    value={stats.total_reels} 
+                    icon={<Play className="text-accent-blue" />} 
+                    color="cyan"
+                />
             </div>
 
             {/* Quick Actions */}
@@ -119,11 +126,18 @@ const AdminDashboard = () => {
                     color="purple"
                 />
                 <ActionCard 
+                    href="/om/reels" 
+                    title="Manage Reels" 
+                    desc="Quick concept short-form content" 
+                    icon={<Play size={24} />}
+                    color="cyan"
+                />
+                <ActionCard 
                     href="#" 
                     title="System Logs" 
                     desc="Monitor API and server status" 
                     icon={<Settings size={24} />}
-                    color="cyan"
+                    color="blue"
                 />
                 <div 
                    onClick={() => navigate('/om/videos?add=true')}

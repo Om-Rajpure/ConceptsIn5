@@ -17,6 +17,7 @@ import NotesPage from './pages/NotesPage';
 import VideoPage from './pages/VideoPage';
 import SearchPage from './pages/SearchPage';
 import AboutPage from './pages/AboutPage';
+import ReelsPage from './pages/ReelsPage';
 import NotFound from './pages/NotFound';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -26,6 +27,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminVideoManager from './pages/admin/AdminVideoManager';
 import AdminNoteManager from './pages/admin/AdminNoteManager';
+import AdminReelManager from './pages/admin/AdminReelManager';
 
 
 export default function App() {
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="/video/:id" element={<VideoPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/reels" element={<ReelsPage />} />
 
           {/* Admin Routes */}
           <Route path="/om/login" element={<AdminLogin />} />
@@ -51,6 +54,7 @@ export default function App() {
               <Route path="/om" element={<AdminDashboard />} />
               <Route path="/om/videos" element={<AdminVideoManager />} />
               <Route path="/om/notes" element={<AdminNoteManager />} />
+              <Route path="/om/reels" element={<AdminReelManager />} />
           </Route>
 
           {/* Catch-all 404 Route */}

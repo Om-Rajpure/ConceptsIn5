@@ -5,10 +5,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Category, SubCategory, Subject, Video, Note
+from .models import Category, SubCategory, Subject, Video, Note, Reel
 from .serializers import (
     CategorySerializer, SubCategorySerializer, SubjectSerializer, 
-    VideoSerializer, PublicVideoSerializer, NoteSerializer
+    VideoSerializer, PublicVideoSerializer, NoteSerializer, ReelSerializer
 )
 from .utils.youtube_utils import extract_video_id, get_thumbnail, get_embed_url
 from rest_framework.exceptions import ValidationError
@@ -70,6 +70,13 @@ class PublicNoteViewSet(viewsets.ReadOnlyModelViewSet):
         'subject__subcategory': ['exact'],
         'subject__subcategory__category': ['exact'],
     }
+
+
+# @method_decorator(cache_page(60 * 5), name='dispatch')
+class PublicReelViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Reel.objects.all().order_by("-created_at")
+    serializer_class = ReelSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 # ─── Admin ViewSets ──────────────────────────────────────────────────
@@ -174,6 +181,27 @@ class AdminNoteViewSet(viewsets.ModelViewSet):
         title = instance.title
         response = super().destroy(request, *args, **kwargs)
         logger.info(f"Admin deleted note: {title}")
+        return response
+
+
+class AdminReelViewSet(viewsets.ModelViewSet):
+    queryset = Reel.objects.all().order_by("-created_at")
+    serializer_class = ReelSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+
+    def perform_create(self, serializer):
+        serializer.save()
+        logger.info(f"Admin created reel: {serializer.instance.title}")
+
+    def perform_update(self, serializer):
+        serializer.save()
+        logger.info(f"Admin updated reel: {serializer.instance.title}")
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        title = instance.title
+        response = super().destroy(request, *args, **kwargs)
+        logger.info(f"Admin deleted reel: {title}")
         return response
 
 
@@ -291,10 +319,11 @@ class AdminDashboardStatsView(views.APIView):
                 'total_videos': Video.objects.count(),
                 'total_subjects': Subject.objects.count(),
                 'total_notes': Note.objects.count(),
+                'total_reels': Reel.objects.count(),
             })
         except Exception as e:
             logger.error(f"Error fetching dashboard stats: {e}", exc_info=True)
             return Response(
-                {'success': False, 'error': 'Failed to load dashboard statistics.'},
+                {'success': False, 'error': f'Failed to load dashboard statistics: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

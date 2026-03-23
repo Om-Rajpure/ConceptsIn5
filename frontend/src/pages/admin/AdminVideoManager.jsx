@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
 const AdminVideoManager = () => {
     const [videos, setVideos] = useState([]);
@@ -29,6 +30,11 @@ const AdminVideoManager = () => {
     const [editingVideo, setEditingVideo] = useState(null);
     const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
     const [filters, setFilters] = useState({ subject: '', is_important: '' });
+    
+    // Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [videoToDelete, setVideoToDelete] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // Subject/SubCategory Modal State
     const [categories, setCategories] = useState([]);
@@ -189,15 +195,25 @@ const AdminVideoManager = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure? This action is permanent.')) return;
+    const handleDelete = (video) => {
+        setVideoToDelete(video);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!videoToDelete) return;
+        setDeleteLoading(true);
         try {
-            await axios.delete(`/api/admin/videos/${id}/`);
-            setVideos(videos.filter(v => v.id !== id));
-            toast.success('Module deleted successfully');
+            await axios.delete(`/api/admin/videos/${videoToDelete.id}/`);
+            setVideos(videos.filter(v => v.id !== videoToDelete.id));
+            toast.success('Module purged from database');
+            setShowDeleteModal(false);
+            setVideoToDelete(null);
         } catch (error) {
             console.error('Delete failed', error);
-            toast.error('Failed to delete module');
+            toast.error('Terminal deletion failed. Secure connection lost.');
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -377,7 +393,7 @@ const AdminVideoManager = () => {
                                     <Edit2 size={16} />
                                 </button>
                                 <button 
-                                    onClick={() => handleDelete(video.id)}
+                                    onClick={() => handleDelete(video)}
                                     className="p-3 glass-card border-white/5 hover:border-red-500/40 text-gray-400 hover:text-red-500 transition-all rounded-xl"
                                 >
                                     <Trash2 size={16} />
@@ -782,6 +798,15 @@ const AdminVideoManager = () => {
                     </div>
                 )}
             </AnimatePresence>
+
+            <DeleteConfirmModal 
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                loading={deleteLoading}
+                title="Purge Module"
+                description={`Are you sure you want to permanently delete "${videoToDelete?.title}"? This deployment will be wiped from all sectors.`}
+            />
         </div>
     );
 };

@@ -8,9 +8,9 @@ def extract_video_id(url):
         return None
         
     patterns = [
-        r'(?:v=|\/|vi\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})',
+        r'shorts/([0-9A-Za-z_-]{11})',
         r'watch\?v=([0-9A-Za-z_-]{11})',
-        r'shorts\/([0-9A-Za-z_-]{11})'
+        r'(?:v=|\/|vi\/|youtu\.be\/|embed\/)([0-9A-Za-z_-]{11})',
     ]
 
     for pattern in patterns:

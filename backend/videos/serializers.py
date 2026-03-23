@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import re
 import bleach
-from .models import Category, SubCategory, Subject, Video, Note
+from .models import Category, SubCategory, Subject, Video, Note, Reel
 
 
 # ─── Sanitization Utility ───────────────────────────────────────────
@@ -154,4 +154,21 @@ class CategorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Category name cannot be empty.")
         if len(value) < 2:
             raise serializers.ValidationError("Category name must be at least 2 characters.")
+        return value
+
+# ─── Reel Serializer ───────────────────────────────────────────────
+class ReelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reel
+        fields = '__all__'
+
+    def validate_title(self, value):
+        value = clean_text(value)
+        if not value:
+            raise serializers.ValidationError("Title cannot be empty.")
+        return value
+
+    def validate_link(self, value):
+        if not value:
+            raise serializers.ValidationError("Link cannot be empty.")
         return value

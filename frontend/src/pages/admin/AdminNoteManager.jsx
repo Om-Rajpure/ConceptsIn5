@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 
 const AdminNoteManager = () => {
     const [notes, setNotes] = useState([]);
@@ -35,6 +36,11 @@ const AdminNoteManager = () => {
     const [editingNote, setEditingNote] = useState(null);
     const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
     const [filterSubject, setFilterSubject] = useState('');
+    
+    // Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [noteToDelete, setNoteToDelete] = useState(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     
     const [formData, setFormData] = useState({
         title: '',
@@ -106,20 +112,29 @@ const AdminNoteManager = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this note?')) return;
+    const handleDelete = (note) => {
+        setNoteToDelete(note);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!noteToDelete) return;
         
-        // Optimistic UI update
+        setDeleteLoading(true);
         const originalNotes = [...notes];
-        setNotes(notes.filter(n => n.id !== id));
+        setNotes(notes.filter(n => n.id !== noteToDelete.id));
 
         try {
-            await axios.delete(`/api/admin/notes/${id}/`);
+            await axios.delete(`/api/admin/notes/${noteToDelete.id}/`);
             toast.success('Intel purged successfully.');
+            setShowDeleteModal(false);
+            setNoteToDelete(null);
         } catch (error) {
             console.error('Delete failed', error);
             setNotes(originalNotes);
             toast.error('Intel deletion failed. Sector synchronized.');
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -425,7 +440,7 @@ const AdminNoteManager = () => {
                                             <Edit2 size={16} />
                                         </button>
                                         <button 
-                                            onClick={() => handleDelete(note.id)} 
+                                            onClick={() => handleDelete(note)} 
                                             className="p-3 bg-white/5 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all"
                                         >
                                             <Trash2 size={16} />
@@ -578,6 +593,15 @@ const AdminNoteManager = () => {
                     </div>
                 )}
             </AnimatePresence>
+
+            <DeleteConfirmModal 
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                loading={deleteLoading}
+                title="Wipe Intel"
+                description={`Confirm permanent deletion of "${noteToDelete?.title}" from the repository?`}
+            />
         </div>
     );
 };
