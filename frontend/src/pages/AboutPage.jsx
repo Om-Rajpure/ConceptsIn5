@@ -227,7 +227,7 @@ export default function AboutPage() {
             <p className="text-gray-500 text-[10px] md:text-sm font-black uppercase tracking-[0.2em]">Simple steps to mastery</p>
           </motion.div>
 
-          <div className="relative px-4 md:px-0">
+          <div className="relative">
             {/* Connecting line (Desktop) */}
             <div className="hidden lg:block absolute top-[45%] left-0 w-full h-[2px] bg-gradient-to-r from-accent-blue via-accent-purple to-accent-cyan opacity-20 -translate-y-1/2" />
             
@@ -235,16 +235,16 @@ export default function AboutPage() {
               ref={flowRef}
               className="flex sm:grid sm:grid-cols-2 lg:grid lg:grid-cols-4 gap-8 md:gap-12 overflow-x-auto sm:overflow-visible pb-8 sm:pb-0 scrollbar-hide snap-x snap-mandatory px-4 sm:px-0 min-h-[300px] md:min-h-[350px] items-center"
             >
-              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+              <div className="min-w-[85%] max-w-[90%] sm:min-w-0 snap-center flex-shrink-0">
                 <StepItem number="01" title="Choose Category" icon={<Monitor />} />
               </div>
-              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+              <div className="min-w-[85%] max-w-[90%] sm:min-w-0 snap-center flex-shrink-0">
                 <StepItem number="02" title="Pick Subject" icon={<BookOpen />} />
               </div>
-              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+              <div className="min-w-[85%] max-w-[90%] sm:min-w-0 snap-center flex-shrink-0">
                 <StepItem number="03" title="Review Notes" icon={<Zap />} />
               </div>
-              <div className="min-w-[85%] sm:min-w-0 snap-center flex-shrink-0">
+              <div className="min-w-[85%] max-w-[90%] sm:min-w-0 snap-center flex-shrink-0">
                 <StepItem number="04" title="Deploy Knowledge" icon={<Target />} />
               </div>
             </div>
@@ -359,7 +359,7 @@ function StepItem({ number, title, icon }) {
           {number}
         </div>
       </div>
-      <h4 className="text-sm font-black uppercase tracking-widest text-gray-300 group-hover:text-white transition-colors">
+      <h4 className="text-sm font-black uppercase tracking-widest text-gray-300 group-hover:text-white transition-colors break-words">
         {title}
       </h4>
     </motion.div>

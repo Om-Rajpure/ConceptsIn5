@@ -135,7 +135,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-hidden">
       {/* 1 Hero Section */}
       <section className="relative pt-16 md:pt-32 pb-12 md:pb-24 px-6 overflow-hidden min-h-[70vh] md:min-h-screen flex items-center">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
@@ -258,10 +258,10 @@ export default function LandingPage() {
           <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
-        <div className="relative group/scroll px-4 md:px-0">
+        <div className="relative group/scroll">
           <div 
             ref={catRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
           >
             {loading ? (
               [...Array(4)].map((_, i) => (
@@ -270,8 +270,8 @@ export default function LandingPage() {
                 </div>
               ))
             ) : (
-              categories.map((cat, i) => (
-                <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0">
+            categories.map((cat, i) => (
+                <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0">
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -279,24 +279,24 @@ export default function LandingPage() {
                     transition={{ delay: i * 0.1 }}
                     className="group h-full"
                   >
-                    <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
-                      <div className="relative aspect-video overflow-hidden">
-                        <img 
-                          src={cat.thumbnail || `/images/cat_${i}.png`} 
-                          alt={cat.name} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          onError={(e) => e.target.src = "/images/hero_bg.png"}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-                      </div>
-                      <div className="p-8 flex flex-col flex-1">
-                        <h3 className="text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight">{cat.name}</h3>
-                        <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2">{cat.description || "Knowledge module available for deployment."}</p>
-                        <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                          Initialize <ArrowRight size={14} />
-                        </div>
-                      </div>
-                    </GlassCard>
+    <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
+      <div className="relative aspect-video overflow-hidden">
+        <img 
+          src={cat.thumbnail || `/images/cat_${i}.png`} 
+          alt={cat.name} 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          onError={(e) => e.target.src = "/images/hero_bg.png"}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
+      </div>
+      <div className="p-6 sm:p-8 flex flex-col flex-1">
+        <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
+        <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
+        <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+          Initialize <ArrowRight size={14} />
+        </div>
+      </div>
+    </GlassCard>
                   </motion.div>
                 </Link>
               ))
@@ -317,10 +317,10 @@ export default function LandingPage() {
           </p>
         </motion.div>
  
-        <div className="relative group/scroll px-4 md:px-0">
+        <div className="relative group/scroll">
           <div 
             ref={socialRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
           >
             {[
               {
@@ -360,12 +360,12 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="group block min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0"
+                className="group block min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0"
               >
                 <GlassCard 
                   glow 
                   neonColor={social.color === "blue" ? "blue" : "purple"} 
-                  className="h-full border-white/5 group-hover:border-white/20 relative"
+                  className="h-full border-white/5 group-hover:border-white/20 relative p-6 sm:p-8"
                 >
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl -z-10" 
@@ -386,7 +386,7 @@ export default function LandingPage() {
                       </p>
                     </div>
  
-                    <p className="text-gray-400 text-sm font-light leading-relaxed mb-8">
+                    <p className="text-gray-400 text-sm font-light leading-relaxed mb-8 break-words">
                       {social.desc}
                     </p>
  
@@ -420,10 +420,10 @@ export default function LandingPage() {
           </motion.div>
         </div>
  
-        <div className="relative group/scroll px-4 md:px-0 max-w-7xl mx-auto">
+        <div className="relative group/scroll max-w-7xl mx-auto">
           <div 
             ref={videoRef}
-            className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+            className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
           >
             {loading ? (
               [...Array(3)].map((_, i) => (
@@ -433,8 +433,8 @@ export default function LandingPage() {
               ))
             ) : (
               featuredVideos.map((video, i) => (
-                <Link key={i} to={`/video/${video.id}`} className="min-w-[85%] md:min-w-[70%] lg:min-w-0 snap-center flex-shrink-0">
-                  <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500">
+                <Link key={i} to={`/video/${video.id}`} className="min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[70%] lg:min-w-0 snap-center flex-shrink-0">
+                  <GlassCard className="p-0 border-white/10 group bg-white/[0.02] hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-500 overflow-hidden">
                     <div className="relative aspect-video overflow-hidden rounded-t-2xl">
                       <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors flex items-center justify-center">
@@ -446,8 +446,8 @@ export default function LandingPage() {
                         <Clock size={12} className="text-accent-cyan" /> {video.duration}
                       </div>
                     </div>
-                    <div className="p-8">
-                      <h3 className="text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight">{video.title}</h3>
+                    <div className="p-6 sm:p-8">
+                      <h3 className="text-lg sm:text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight break-words">{video.title}</h3>
                       <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
                         <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
                         <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
@@ -477,7 +477,7 @@ export default function LandingPage() {
 
           <div 
             ref={reelRef}
-            className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+            className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
           >
             {loading ? (
               [1, 2, 3, 4].map(i => (
@@ -518,24 +518,24 @@ export default function LandingPage() {
           <p className="text-gray-400 text-lg font-light">Download knowledge into your long-term memory in three steps.</p>
         </motion.div>
         
-        <div className="relative group/scroll px-4 md:px-0">
+        <div className="relative group/scroll">
           <div 
             ref={hudRef}
-            className="flex md:grid md:grid-cols-3 gap-6 md:gap-10 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap"
+            className="flex md:grid md:grid-cols-3 gap-6 md:gap-10 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
           >
             {[
               { step: "MISSION 01", title: "Pick Category", desc: "Select your target subject from our high-precision database.", icon: <Target className="text-accent-blue" />, color: "blue" },
               { step: "MISSION 02", title: "Watch & Ingest", desc: "Absorb core concepts via 5-minute high-octane video data.", icon: <Video className="text-accent-purple" />, color: "purple" },
               { step: "MISSION 03", title: "Revise & Conquer", desc: "Secure your grades with lethal cheat sheets and notes.", icon: <CheckCircle2 className="text-accent-cyan" />, color: "blue" },
             ].map((item, i) => (
-              <div key={i} className="min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0 flex items-stretch">
-                <GlassCard glow neonColor={item.color} className="p-8 md:p-10 group bg-white/[0.01] hover:bg-white/[0.03] transition-all h-full w-full">
+              <div key={i} className="min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0 flex items-stretch">
+                <GlassCard glow neonColor={item.color} className="p-6 sm:p-10 group bg-white/[0.01] hover:bg-white/[0.03] transition-all h-full w-full">
                   <div className="text-[10px] font-black text-accent-purple/60 mb-6 tracking-[0.3em] uppercase">{item.step}</div>
                   <div className="p-5 bg-white/5 rounded-2xl inline-block mb-6 border border-white/5 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all">
                     {item.icon}
                   </div>
-                  <h3 className="text-2xl font-black mb-4 transition-colors italic uppercase tracking-tighter">{item.title}</h3>
-                  <p className="text-gray-400 text-base leading-relaxed font-light">{item.desc}</p>
+                  <h3 className="text-2xl font-black mb-4 transition-colors italic uppercase tracking-tighter break-words">{item.title}</h3>
+                  <p className="text-gray-400 text-base leading-relaxed font-light break-words">{item.desc}</p>
                 </GlassCard>
               </div>
             ))}
