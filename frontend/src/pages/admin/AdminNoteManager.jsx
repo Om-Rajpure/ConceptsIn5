@@ -241,7 +241,7 @@ const AdminNoteManager = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white pt-8 md:pt-16 pb-20 px-4 md:px-8">
+        <div className="min-h-screen bg-[#050505] text-white pt-24 md:pt-16 pb-20 px-4 md:px-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header Section */}
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">

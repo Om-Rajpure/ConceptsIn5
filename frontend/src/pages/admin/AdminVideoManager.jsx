@@ -329,7 +329,7 @@ const AdminVideoManager = () => {
 
     return (
         <div className="min-h-screen bg-dark text-white font-sans selection:bg-accent-blue/30 selection:text-accent-blue">
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-[20px] lg:pt-[60px] pb-20">
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-[80px] sm:pt-[20px] lg:pt-[60px] pb-20">
                 <header className="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                     <div className="flex items-center gap-4">
                         <Link to="/om" className="p-3 glass-card border-white/5 hover:border-accent-blue/30 text-gray-400 hover:text-white transition-all rounded-xl">
@@ -471,7 +471,7 @@ const AdminVideoManager = () => {
             {/* Modal Form */}
             <AnimatePresence>
                 {showAddForm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12">
+                    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-6 sm:p-12 pt-20 sm:pt-12">
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
