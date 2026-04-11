@@ -57,7 +57,21 @@ body {
   }
 
   .glow-text {
-    text-shadow: 0 0 20px rgba(123, 97, 255, 0.5);
+    text-shadow: 0 0 20px rgba(123,97,255,0.5);
+  }
+
+  /* Fluid Typography */
+  .text-hero {
+    @apply text-5xl md:text-7xl lg:text-9xl font-black mb-8 italic tracking-tighter leading-[0.9] md:leading-tight;
+  }
+  
+  .text-section-title {
+    @apply text-4xl md:text-6xl lg:text-7xl font-black italic glow-text tracking-tighter;
+  }
+
+  /* Global Container Spacing */
+  .section-container {
+    @apply max-w-7xl mx-auto px-6 md:px-12 lg:px-16;
   }
 }
 

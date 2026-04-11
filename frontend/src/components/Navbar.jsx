@@ -50,7 +50,6 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Notes', href: '/notes' },
-    { name: 'AI Tools', href: '/#features' },
     { name: 'About', href: '/about' },
   ];
 
@@ -62,36 +61,35 @@ export default function Navbar() {
           : 'bg-transparent border-transparent py-5'
       }`}
     >
-      {/* Animated Glowing Border Bottom (only when scrolled or hover) */}
+      {/* Animated Glowing Border Bottom */}
       <div className={`absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-purple to-transparent opacity-0 transition-opacity duration-500 ${isScrolled ? 'opacity-30' : ''}`} />
 
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        {/* Logo */}
-        <Link to="/">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-4 md:gap-8">
+        {/* Logo - Left */}
+        <Link to="/" className="flex-none">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl font-black tracking-tighter cursor-pointer group"
           >
-            <span className="text-gradient drop-shadow-[0_0_10px_rgba(123,97,255,0.3)]">ConceptsIn5</span>
+            <span className="text-gradient drop-shadow-[0_0_10px_rgba(123,97,255,0.3)] whitespace-nowrap">ConceptsIn5</span>
           </motion.div>
         </Link>
 
-        {/* Desktop Search & Links */}
-        <div className="hidden md:flex gap-8 items-center flex-1 justify-end max-w-4xl px-8">
-          {/* Search Bar */}
-          <div className="relative w-full max-w-md group">
+        {/* Search Bar - Center (Desktop) */}
+        <div className="hidden md:flex flex-1 justify-center max-w-xl mx-auto">
+          <div className="relative w-full group">
             <form onSubmit={handleSearch} className="relative">
               <input 
                 type="text"
                 placeholder="Search topics..."
-                className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs text-white placeholder:text-gray-500 focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/50 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-[11px] text-white placeholder:text-gray-500 focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/50 transition-all"
                 value={searchQuery}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-3.5 h-3.5 group-focus-within:text-accent-blue transition-colors" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 group-focus-within:text-accent-blue transition-colors" />
             </form>
 
             {/* Suggestions Dropdown */}
@@ -148,95 +146,79 @@ export default function Navbar() {
               )}
             </AnimatePresence>
           </div>
-
-          <div className="flex gap-6 shrink-0">
-            {navLinks.map((link, i) => (
-              <motion.div
-                key={link.name}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                {link.href.startsWith('/#') ? (
-                  <button
-                    onClick={() => {
-                      if (location.pathname === '/') {
-                        const el = document.getElementById(link.href.split('#')[1]);
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      } else {
-                        navigate(link.href);
-                      }
-                      if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-                    }}
-                    className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
-                  >
-                    {link.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
-                  </button>
-                ) : (
-                  <Link
-                    to={link.href}
-                    onClick={() => { if (isMobileMenuOpen) setIsMobileMenuOpen(false); }}
-                    className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors relative group"
-                  >
-                    {link.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
-                  </Link>
-                )}
-              </motion.div>
-            ))}
-          </div>
         </div>
 
-        {/* CTA Button placeholder or empty */}
-        <div className="hidden md:flex items-center gap-4">
-           {/* If you want a CTA button back, put it here */}
+        {/* Links - Right (Desktop) */}
+        <div className="hidden md:flex flex-none items-center gap-8 ml-auto">
+          {navLinks.map((link, i) => (
+            <motion.div
+              key={link.name}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Link
+                to={link.href}
+                className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors relative group whitespace-nowrap"
+              >
+                {link.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
+              </Link>
+            </motion.div>
+          ))}
         </div>
 
         {/* Mobile Toggle */}
-        <button 
-          className="md:hidden text-white p-2"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <div className="md:hidden flex items-center">
+          <button 
+            className="text-white p-2 focus:outline-none"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: -20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -20, height: 0 }}
             className="md:hidden bg-dark/95 backdrop-blur-2xl border-b border-white/10 overflow-hidden"
           >
-            <div className="flex flex-col gap-4 p-6">
+            <div className="flex flex-col gap-6 p-8">
               {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="relative mb-4">
+              <form onSubmit={handleSearch} className="relative">
                 <input 
                   type="text"
-                  placeholder="Search..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:border-accent-blue transition-all"
+                  placeholder="Scan topics..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-accent-blue transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
               </form>
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className="text-lg font-medium text-gray-300 hover:text-accent-purple transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              ))}
+
+              {/* Mobile Links */}
+              <div className="flex flex-col gap-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    className="text-lg font-black uppercase tracking-widest text-gray-300 hover:text-accent-purple transition-colors py-2 border-b border-white/5 last:border-0"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+
               <Link 
                 to="/notes" 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="mt-4 w-full py-4 bg-accent-purple rounded-xl font-bold text-center block"
+                className="w-full py-5 bg-gradient-to-r from-accent-blue to-accent-purple rounded-xl font-black text-white text-center uppercase tracking-widest text-sm shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
               >
                 Start Learning
               </Link>
@@ -245,5 +227,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </nav>
+
   );
 }

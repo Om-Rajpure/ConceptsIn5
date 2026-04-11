@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -46,7 +46,22 @@ export default function NotesPage() {
   const [subcategories, setSubcategories] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
-   const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
+    const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
+    const resultsRef = useRef(null);
+
+  useEffect(() => {
+    // fetchData() is already handled in the next effect or here if we want it once
+    // fetchData();
+    
+    // Auto-scroll to results after 2.5 seconds
+    const timer = setTimeout(() => {
+      if (resultsRef.current) {
+        resultsRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []); // Only run on mount
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -181,7 +196,7 @@ export default function NotesPage() {
           <motion.h1 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-9xl font-black mb-8 italic tracking-tighter leading-tight"
+            className="text-hero"
           >
             All <span className="text-gradient">Notes</span>
           </motion.h1>
@@ -198,7 +213,7 @@ export default function NotesPage() {
       </section>
 
       {/* 2. Search & Filter Bar */}
-      <section className="px-6 mb-20 sticky top-24 z-50">
+      <section className="px-6 mb-20 sticky top-24 z-50 section-container">
         <div className="max-w-7xl mx-auto">
           <GlassCard className="p-4 md:p-6 border-white/5 bg-dark/40 backdrop-blur-2xl">
             <div className="flex flex-col gap-6">
@@ -264,11 +279,14 @@ export default function NotesPage() {
       </section>
 
       {/* 3. Notes Grid */}
-      <section className="px-6 relative z-10">
+      <section className="px-6 relative z-10 section-container">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl font-black italic glow-text tracking-tighter">
+              <h2 
+                ref={resultsRef}
+                className="text-section-title"
+              >
                 {filteredNotes.length} Results Found
               </h2>
             </div>
@@ -285,7 +303,7 @@ export default function NotesPage() {
             ) : filteredNotes.length > 0 ? (
               <motion.div 
                 layout
-                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {filteredNotes.map((note) => (
                   <NoteCard key={note.id} note={note} allSubjects={allSubjects} videos={videos} />

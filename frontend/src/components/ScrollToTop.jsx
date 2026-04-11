@@ -9,6 +9,9 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // Disable scroll to top ONLY for "/notes" route
+    if (pathname === "/notes") return;
+
     // Immediate scroll to top with smooth behavior
     window.scrollTo({
       top: 0,

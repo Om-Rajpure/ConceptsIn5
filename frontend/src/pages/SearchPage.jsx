@@ -63,7 +63,7 @@ export default function SearchPage() {
           <motion.h1 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-8xl font-black mb-8 italic tracking-tighter leading-tight"
+            className="text-hero"
           >
             Search <span className="text-gradient">Results</span>
           </motion.h1>
@@ -79,7 +79,7 @@ export default function SearchPage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 space-y-32">
+      <div className="section-container space-y-32">
         {totalResults > 0 ? (
           <>
             {/* 1. Subjects Section */}
@@ -87,9 +87,9 @@ export default function SearchPage() {
               <section>
                 <div className="flex items-center gap-4 mb-12">
                   <Target className="text-accent-purple w-8 h-8" />
-                  <h2 className="text-3xl font-black italic uppercase tracking-tight">Subjects</h2>
+                  <h2 className="text-section-title">Subjects</h2>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {results.subjects.map(subject => (
                     <SubjectSearchCard key={subject.id} subject={subject} />
                   ))}
@@ -104,7 +104,7 @@ export default function SearchPage() {
                   <Video className="text-accent-blue w-8 h-8" />
                   <h2 className="text-3xl font-black italic uppercase tracking-tight">Videos</h2>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {results.videos.map(video => (
                     <VideoSearchCard key={video.id} video={video} />
                   ))}
@@ -119,7 +119,7 @@ export default function SearchPage() {
                   <BookOpen className="text-accent-cyan w-8 h-8" />
                   <h2 className="text-3xl font-black italic uppercase tracking-tight">Notes</h2>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {results.notes.map(note => (
                     <NoteSearchCard key={note.id} note={note} />
                   ))}

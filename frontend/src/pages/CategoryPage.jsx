@@ -104,7 +104,7 @@ export default function CategoryPage() {
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-6xl md:text-9xl font-black mb-8 italic tracking-tighter leading-none"
+              className="text-hero"
             >
               {category.name}
             </motion.h1>
@@ -134,7 +134,7 @@ export default function CategoryPage() {
       </section>
 
       {/* 2. Grouped Subjects Content */}
-      <div className="max-w-7xl mx-auto px-6 space-y-32">
+      <div className="section-container space-y-32 px-0">
         {loading ? (
           <section className="relative">
              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-b border-white/5 pb-10">
@@ -143,7 +143,7 @@ export default function CategoryPage() {
                  <div className="h-12 w-64 bg-white/10 rounded-xl animate-pulse"></div>
                </div>
              </div>
-             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
                {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
              </div>
           </section>
@@ -166,7 +166,7 @@ export default function CategoryPage() {
                   >
                     PHASE {String(groupIdx + 1).padStart(2, '0')}
                   </motion.div>
-                  <h2 className="text-4xl md:text-6xl font-black italic glow-text tracking-tighter">{group.name}</h2>
+                  <h2 className="text-section-title">{group.name}</h2>
                 </div>
                 <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
                   {group.items.length} Units Available
@@ -174,7 +174,7 @@ export default function CategoryPage() {
               </div>
 
               {/* Subjects Grid/Scroll */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 md:gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
                 {group.items.map((subject, subIdx) => (
                   <Link to={`/subject/${subject.slug}`} key={subject.id}>
                     <motion.div

@@ -156,7 +156,7 @@ export default function LandingPage() {
               Initializing Intelligence v2.0
             </motion.div>
             
-            <h1 className="text-3xl sm:text-4xl md:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tighter text-center lg:text-left">
+            <h1 className="text-hero text-center lg:text-left">
               From <span className="text-gradient">Confusion</span> <br />
               to Clarity in Mins
             </h1>
@@ -252,16 +252,16 @@ export default function LandingPage() {
       </section>
 
       {/* 2 Main Categories Section */}
-      <section id="categories" className="py-10 md:py-16 px-0 relative max-w-7xl mx-auto overflow-hidden">
+      <section id="categories" className="py-10 md:py-16 px-0 relative section-container overflow-hidden">
         <motion.div {...fadeInUp} className="text-center mb-10 md:mb-16 px-6">
-          <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text italic">Select Mission</h2>
+          <h2 className="text-section-title mb-4 md:mb-6">Select Mission</h2>
           <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
         <div className="relative group/scroll">
           <div 
             ref={catRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 snap-x snap-mandatory px-4 md:px-0"
           >
             {loading ? (
               [...Array(4)].map((_, i) => (
@@ -307,11 +307,11 @@ export default function LandingPage() {
       </section>
 
       {/* 2.5 Social Presence Section */}
-      <section className="py-12 px-0 relative max-w-7xl mx-auto overflow-hidden">
+      <section className="py-12 px-0 relative section-container overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-accent-purple/5 blur-[120px] rounded-full -z-10" />
         
         <motion.div {...fadeInUp} className="text-center mb-10 px-6">
-          <h2 className="text-3xl md:text-5xl font-black mb-4 glow-text italic">Connect & Learn Beyond the Platform</h2>
+          <h2 className="text-section-title mb-4">Connect & Learn Beyond the Platform</h2>
           <p className="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto text-center">
             Explore more content, updates, and learning resources across our social platforms.
           </p>
@@ -320,7 +320,7 @@ export default function LandingPage() {
         <div className="relative group/scroll">
           <div 
             ref={socialRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 snap-x snap-mandatory px-4 md:px-0"
           >
             {[
               {
@@ -408,10 +408,10 @@ export default function LandingPage() {
 
       {/* 3 Featured Videos Section */}
       <section className="py-10 md:py-16 px-0 relative bg-white/[0.01] overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 md:mb-16 text-center md:text-left">
+        <div className="section-container">
+          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 md:mb-16 text-center md:text-left px-0">
             <div>
-              <h2 className="text-3xl md:text-6xl font-black mb-4 md:mb-6 glow-text tracking-tighter italic">Start Learning</h2>
+              <h2 className="text-section-title mb-4 md:mb-6">Start Learning</h2>
               <p className="text-gray-400 text-base md:text-lg font-light">High-density engineering concepts in 5-minute packets.</p>
             </div>
             <Link to="/notes" className="px-8 py-3 glass-card border-white/10 text-xs font-black uppercase tracking-widest text-accent-cyan hover:text-white transition-colors">
@@ -423,7 +423,7 @@ export default function LandingPage() {
         <div className="relative group/scroll max-w-7xl mx-auto">
           <div 
             ref={videoRef}
-            className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 snap-x snap-mandatory px-4 md:px-0"
           >
             {loading ? (
               [...Array(3)].map((_, i) => (
@@ -463,11 +463,11 @@ export default function LandingPage() {
       </section>
 
       {/* 4 Instagram Reels Section */}
-      <section className="py-16 md:py-20 px-6 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12">
+      <section className="py-16 md:py-20 px-6 relative overflow-hidden section-container">
+        <div>
+          <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 px-0">
             <div>
-              <h2 className="text-3xl font-black glow-text italic">Quick Concepts ⚡</h2>
+              <h2 className="text-section-title">Quick Concepts ⚡</h2>
               <p className="text-gray-400 text-sm font-medium mt-2">Explosive 60-second learning bursts</p>
             </div>
             <Link to="/reels" className="px-8 py-3 glass-card border-white/10 text-[10px] font-black uppercase tracking-widest text-accent-purple hover:text-white transition-colors">
@@ -476,8 +476,7 @@ export default function LandingPage() {
           </motion.div>
 
           <div 
-            ref={reelRef}
-            className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"
           >
             {loading ? (
               [1, 2, 3, 4].map(i => (
@@ -490,7 +489,7 @@ export default function LandingPage() {
                   target="_blank" 
                   rel="noopener noreferrer" 
                   key={i} 
-                  className="min-w-[70%] md:min-w-[240px] p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block snap-center flex-shrink-0"
+                  className="w-full p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block"
                 >
                   <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
                   <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
@@ -507,14 +506,14 @@ export default function LandingPage() {
                 </div>
             )}
           </div>
-          <ScrollDots count={reels.length} activeIndex={reelIndex} color="purple" onDotClick={(idx) => scrollTo(reelRef, idx)} />
+
         </div>
       </section>
 
       {/* 5 How it Works Section */}
-      <section className="py-16 md:py-20 px-0 max-w-7xl mx-auto relative border-y border-white/5 overflow-hidden">
-        <motion.div {...fadeInUp} className="text-center mb-20 px-6">
-          <h2 className="text-4xl md:text-6xl font-black mb-6 glow-text italic underline decoration-accent-purple/30 underline-offset-8">The HUD Logic</h2>
+      <section className="py-16 md:py-20 px-0 relative border-y border-white/5 overflow-hidden section-container">
+        <motion.div {...fadeInUp} className="text-center mb-20 px-0">
+          <h2 className="text-hero underline decoration-accent-purple/30 underline-offset-8">The HUD Logic</h2>
           <p className="text-gray-400 text-lg font-light">Download knowledge into your long-term memory in three steps.</p>
         </motion.div>
         
