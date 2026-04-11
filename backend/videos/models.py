@@ -147,16 +147,10 @@ class Reel(models.Model):
     title = models.CharField(max_length=200)
     link = models.URLField(max_length=500)
     description = models.TextField(blank=True)
-    thumbnail = models.URLField(max_length=500, blank=True)
+    thumbnail = models.ImageField(upload_to='reel_thumbnails/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        from videos.utils.youtube_utils import extract_video_id, get_thumbnail
-        if self.link and not self.thumbnail:
-            video_id = extract_video_id(self.link)
-            if video_id:
-                self.thumbnail = get_thumbnail(video_id)
-        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.title

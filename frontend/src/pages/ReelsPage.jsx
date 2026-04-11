@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Zap, Play, ArrowLeft, Search, Database } from 'lucide-react';
+import { getYoutubeThumbnail } from '../utils/youtubeUtils';
 import { Link } from 'react-router-dom';
 import SkeletonCard from '../components/SkeletonCard';
 import ErrorState from '../components/ErrorState';
@@ -88,7 +89,7 @@ export default function ReelsPage() {
                                 className="group relative aspect-[9/16] rounded-2xl overflow-hidden border border-white/5 bg-dark shadow-2xl transition-all hover:border-accent-blue/30"
                             >
                                 <img 
-                                    src={reel.thumbnail} 
+                                    src={reel.thumbnail || getYoutubeThumbnail(reel.link)} 
                                     alt={reel.title}
                                     className="w-full h-full object-cover opacity-70 group-hover:opacity-40 transition-opacity duration-500 group-hover:scale-105 transition-transform"
                                 />

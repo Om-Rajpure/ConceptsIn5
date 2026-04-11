@@ -14,8 +14,10 @@ import {
     Database,
     Clock,
     Search,
-    PlusCircle
+    PlusCircle,
+    Image as ImageIcon
 } from 'lucide-react';
+import { extractVideoId, getYoutubeThumbnail } from '../../utils/youtubeUtils';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
@@ -32,6 +34,7 @@ const AdminReelManager = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [reelToDelete, setReelToDelete] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [thumbnailFile, setThumbnailFile] = useState(null);
     
     const [formData, setFormData] = useState({
         title: '',
@@ -70,20 +73,37 @@ const AdminReelManager = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleFileChange = (e) => {
+        setThumbnailFile(e.target.files[0]);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const loadingToast = toast.loading(editingReel ? 'Updating Nexus Reel...' : 'Initializing New Reel...');
         
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('link', formData.link);
+        data.append('description', formData.description);
+        if (thumbnailFile) {
+            data.append('thumbnail', thumbnailFile);
+        }
+
         try {
             if (editingReel) {
-                await axios.put(`/api/admin/reels/${editingReel.id}/`, formData);
+                await axios.put(`/api/admin/reels/${editingReel.id}/`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 toast.success('Reel updated successfully.', { id: loadingToast });
             } else {
-                await axios.post('/api/admin/reels/', formData);
+                await axios.post('/api/admin/reels/', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 toast.success('New Reel initialized.', { id: loadingToast });
             }
             setShowForm(false);
             setEditingReel(null);
+            setThumbnailFile(null);
             setFormData({ title: '', link: '', description: '' });
             fetchReels();
         } catch (error) {
@@ -213,6 +233,31 @@ const AdminReelManager = () => {
                                         ></textarea>
                                     </div>
 
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">Thumbnail (Optional)</label>
+                                        <div className="relative group/file">
+                                            <input 
+                                                type="file" 
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                                id="thumbnail-upload"
+                                            />
+                                            <label 
+                                                htmlFor="thumbnail-upload"
+                                                className="w-full bg-white/5 border border-white/10 border-dashed rounded-xl px-4 py-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-accent-blue/50 hover:bg-accent-blue/[0.02] transition-all"
+                                            >
+                                                <ImageIcon size={24} className="text-gray-500 group-hover/file:text-accent-blue transition-colors" />
+                                                <div className="text-center">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover/file:text-white transition-colors">
+                                                        {thumbnailFile ? thumbnailFile.name : 'Upload Custom Image'}
+                                                    </span>
+                                                    <p className="text-[8px] text-gray-600 mt-1 uppercase tracking-[0.2em]">Accepts JPG, PNG, WEBP</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
                                     <div className="pt-4 flex gap-4">
                                         <button 
                                             type="submit"
@@ -287,7 +332,7 @@ const AdminReelManager = () => {
                                             {/* Thumbnail Container */}
                                             <div className="absolute inset-0 z-0">
                                                 <img 
-                                                    src={reel.thumbnail || 'https://via.placeholder.com/400x711?text=No+Preview'} 
+                                                    src={reel.thumbnail || getYoutubeThumbnail(reel.link)} 
                                                     alt={reel.title}
                                                     className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 group-hover:scale-105 transition-transform"
                                                 />

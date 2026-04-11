@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status, views
+from rest_framework import viewsets, permissions, status, views, parsers
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
@@ -188,6 +188,7 @@ class AdminReelViewSet(viewsets.ModelViewSet):
     queryset = Reel.objects.all().order_by("-created_at")
     serializer_class = ReelSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
 
     def perform_create(self, serializer):
         serializer.save()
