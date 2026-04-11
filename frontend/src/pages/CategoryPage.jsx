@@ -18,10 +18,10 @@ import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 15 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
-  transition: { duration: 0.6 }
+  transition: { duration: 0.4, ease: "easeOut" }
 };
 
 export default function CategoryPage() {
@@ -83,13 +83,28 @@ export default function CategoryPage() {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-32 relative">
       {/* 1. Category Hero */}
-      <section className="relative pt-48 pb-32 px-6 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent-purple/10 blur-[150px] animate-pulse-glow" />
+      <section className="relative pt-48 pb-32 px-6 overflow-hidden min-h-[50vh] flex items-center">
+        {/* Background AI Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={
+              category?.name?.toLowerCase().includes('engineering') ? '/images/cat_engineering.png' :
+              category?.name?.toLowerCase().includes('coding') || category?.name?.toLowerCase().includes('programming') ? '/images/cat_coding.png' :
+              category?.name?.toLowerCase().includes('math') ? '/images/cat_math.png' :
+              '/images/cat_general.png'
+            } 
+            alt="Category Background" 
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
+        </div>
+
+        <div className="absolute top-1/4 left-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-accent-blue/10 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-accent-purple/10 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
         
-        <div className="max-w-7xl mx-auto relative z-10 text-center">
+        <div className="max-w-7xl mx-auto relative z-10 text-center w-full">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -173,56 +188,59 @@ export default function CategoryPage() {
                 </p>
               </div>
 
-              {/* Subjects Grid/Scroll */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-                {group.items.map((subject, subIdx) => (
-                  <Link to={`/subject/${subject.slug}`} key={subject.id}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: subIdx * 0.1 }}
-                      className="group"
-                    >
-                      <GlassCard className="p-0 border-white/5 bg-white/[0.01] hover:border-accent-blue/30 transition-all overflow-hidden flex flex-col h-full">
-                        <div className="relative aspect-video overflow-hidden">
-                          <img 
-                            src={subject.thumbnail || "/images/hero_bg.png"} 
-                            alt={subject.title} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-                          <div className="absolute inset-0 bg-accent-blue/5 group-hover:bg-accent-blue/10 transition-colors" />
-                          
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                             <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md border border-accent-blue/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.4)]">
-                               <Play className="text-white fill-current ml-1" />
-                             </div>
+              {/* Semester Subjects Scroll Container */}
+              <div className="semester-scroll-container">
+                <div className="semester-scroll-track px-4 md:px-0">
+                  {group.items.map((subject, subIdx) => (
+                    <Link to={`/subject/${subject.slug}`} key={subject.id} className="semester-card">
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: subIdx * 0.1 }}
+                        className="group h-full"
+                      >
+                        <GlassCard className="p-0 border-white/5 bg-white/[0.01] hover:border-accent-blue/30 transition-all overflow-hidden flex flex-col h-full">
+                          <div className="relative aspect-video overflow-hidden">
+                            <img 
+                              src={subject.thumbnail || "/images/hero_bg.png"} 
+                              alt={subject.title} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
+                            <div className="absolute inset-0 bg-accent-blue/5 group-hover:bg-accent-blue/10 transition-colors" />
+                            
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                               <div className="w-16 h-16 rounded-full bg-accent-blue/20 backdrop-blur-md border border-accent-blue/40 flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.4)]">
+                                 <Play className="text-white fill-current ml-1" />
+                               </div>
+                            </div>
+  
+                            <div className="absolute top-4 right-4 flex flex-col gap-2">
+                               <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
+                                 <Video size={10} className="text-accent-blue" /> {subject.videoCount}
+                               </div>
+                               <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
+                                 <Clock size={10} className="text-accent-cyan" /> {subject.duration}
+                               </div>
+                            </div>
                           </div>
-
-                          <div className="absolute top-4 right-4 flex flex-col gap-2">
-                             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-                               <Video size={10} className="text-accent-blue" /> {subject.videoCount}
-                             </div>
-                             <div className="px-2 py-1 bg-dark/80 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white flex items-center gap-1 uppercase tracking-widest">
-                               <Clock size={10} className="text-accent-cyan" /> {subject.duration}
-                             </div>
+  
+                          <div className="p-6 md:p-8 flex flex-col flex-1">
+                            <h3 className="text-xl md:text-2xl font-black mb-3 italic group-hover:text-accent-blue transition-colors line-clamp-1 uppercase tracking-tight">{subject.title}</h3>
+                            <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light line-clamp-2 mb-6">{subject.description}</p>
+                            
+                            <div className="mt-auto flex items-center justify-between text-accent-blue font-black text-[10px] uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all">
+                               <span>Initialize</span>
+                               <ChevronRight size={16} />
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="p-6 md:p-8 flex flex-col flex-1">
-                          <h3 className="text-xl md:text-2xl font-black mb-3 italic group-hover:text-accent-blue transition-colors line-clamp-1 uppercase tracking-tight">{subject.title}</h3>
-                          <p className="text-gray-400 text-xs md:text-sm leading-relaxed font-light line-clamp-2 mb-6">{subject.description}</p>
-                          
-                          <div className="mt-auto flex items-center justify-between text-accent-blue font-black text-[10px] uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all">
-                             <span>Initialize</span>
-                             <ChevronRight size={16} />
-                          </div>
-                        </div>
-                      </GlassCard>
-                    </motion.div>
-                  </Link>
-                ))}
+                        </GlassCard>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </motion.section>
           ))

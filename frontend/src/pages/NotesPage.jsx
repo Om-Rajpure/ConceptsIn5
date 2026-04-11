@@ -179,8 +179,8 @@ export default function NotesPage() {
     <div className="min-h-screen pb-32 relative overflow-hidden bg-dark">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full bg-grid opacity-10 -z-10" />
-      <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
-      <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-accent-purple/10 blur-[150px] animate-pulse-glow" />
+      <div className="absolute top-1/4 -left-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-accent-blue/10 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
+      <div className="absolute bottom-1/4 -right-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-accent-purple/10 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
 
       {/* 1. Hero Section */}
       <section className="pt-48 pb-20 px-6 relative z-10">

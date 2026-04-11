@@ -150,22 +150,32 @@ export default function Navbar() {
 
         {/* Links - Right (Desktop) */}
         <div className="hidden md:flex flex-none items-center gap-8 ml-auto">
-          {navLinks.map((link, i) => (
-            <motion.div
-              key={link.name}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Link
-                to={link.href}
-                className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors relative group whitespace-nowrap"
+          {navLinks.map((link, i) => {
+            const isActive = link.href === '/' 
+              ? location.pathname === '/' || location.pathname === '/home'
+              : location.pathname.startsWith(link.href);
+            
+            return (
+              <motion.div
+                key={link.name}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
               >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-accent-purple transition-all duration-300 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]" />
-              </Link>
-            </motion.div>
-          ))}
+                <Link
+                  to={link.href}
+                  className={`text-[11px] font-black uppercase tracking-[0.2em] transition-colors relative group whitespace-nowrap ${
+                    isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {link.name}
+                  <span className={`absolute -bottom-1 left-0 h-[2px] bg-accent-purple transition-all duration-300 ${
+                    isActive ? 'w-full shadow-[0_0_8px_#7B61FF]' : 'w-0 group-hover:w-full group-hover:shadow-[0_0_8px_#7B61FF]'
+                  }`} />
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Mobile Toggle */}
@@ -203,16 +213,24 @@ export default function Navbar() {
 
               {/* Mobile Links */}
               <div className="flex flex-col gap-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    to={link.href}
-                    className="text-lg font-black uppercase tracking-widest text-gray-300 hover:text-accent-purple transition-colors py-2 border-b border-white/5 last:border-0"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = link.href === '/' 
+                    ? location.pathname === '/' || location.pathname === '/home'
+                    : location.pathname.startsWith(link.href);
+                  
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.href}
+                      className={`text-lg font-black uppercase tracking-widest transition-colors py-2 border-b border-white/5 last:border-0 ${
+                        isActive ? 'text-accent-purple' : 'text-gray-300 hover:text-accent-purple'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
               </div>
 
               <Link 

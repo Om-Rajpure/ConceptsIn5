@@ -29,10 +29,10 @@ const cn = (...classes) => classes.filter(Boolean).join(' ');
 
 function VideoCard({ video, subject, isActive, isFirst, lastWatchedId }) {
   const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
+    initial: { opacity: 0, y: 15 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true },
-    transition: { duration: 0.6 }
+    transition: { duration: 0.4, ease: "easeOut" }
   };
 
   return (
@@ -248,6 +248,7 @@ export default function SubjectPage() {
             src="/images/subject_hero.png" 
             alt="Hero Background" 
             className="w-full h-full object-cover opacity-20"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
         </div>

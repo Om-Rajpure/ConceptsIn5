@@ -38,8 +38,17 @@ body {
 
 @layer components {
   .glass-card {
-    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl transition-all duration-500;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl transition-all duration-300;
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
+
+  @media (max-width: 768px) {
+    .glass-card {
+      @apply backdrop-blur-md;
+      box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.2);
+    }
   }
   
   .neon-border-blue {
@@ -83,8 +92,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; filter: blur(40px); }
-  50% { opacity: 1; filter: blur(60px); }
+  0%, 100% { opacity: 0.4; filter: blur(20px); }
+  50% { opacity: 0.8; filter: blur(35px); }
 }
 
 @keyframes energy-sweep {
@@ -94,10 +103,30 @@ body {
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 4s ease-in-out infinite;
+  will-change: opacity, filter;
+}
+
+.perf-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
 }
 
 .energy-sweep-parent {
@@ -155,4 +184,92 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--neon-purple);
+}
+
+/* Horizontal Scroll System */
+.scroll-container {
+  @apply w-full overflow-x-auto overflow-y-hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding-bottom: 5px;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-track {
+  @apply flex gap-6 w-max;
+}
+
+.card-scroll-item {
+  @apply flex-shrink-0;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+@media (min-width: 768px) {
+  .scroll-container {
+    @apply overflow-x-visible p-0;
+  }
+
+  .scroll-track {
+    @apply grid w-full;
+    display: grid !important; /* Ensure it overrides the flex on desktop */
+  }
+
+  .card-scroll-item {
+    @apply min-w-0 max-w-none flex-1;
+  }
+}
+
+.parent-container-overflow {
+  @apply w-full overflow-x-visible;
+}
+
+/* Base Image Styling Cleanup */
+.object-cover-rounded {
+  @apply w-full object-cover rounded-xl;
+  height: 180px;
+}
+/* Semester Subjects Scroll System */
+.semester-scroll-container {
+  @apply w-full overflow-x-auto overflow-y-hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 20px;
+}
+
+.semester-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.semester-scroll-track {
+  @apply flex gap-6 w-max;
+}
+
+.semester-card {
+  @apply flex-shrink-0;
+  min-width: 270px;
+  max-width: 300px;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .semester-scroll-container {
+    @apply overflow-x-visible p-0;
+    scroll-snap-type: none;
+  }
+
+  .semester-scroll-track {
+    @apply grid w-full;
+    grid-template-cols: repeat(auto-fill, minmax(300px, 1fr));
+    display: grid !important;
+    gap: 32px;
+  }
+
+  .semester-card {
+    @apply min-w-0 max-w-none flex-1;
+  }
 }

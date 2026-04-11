@@ -26,9 +26,9 @@ import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 15 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" }
+  transition: { duration: 0.4, ease: "easeOut" }
 };
 
 export default function VideoPage() {
@@ -104,7 +104,7 @@ export default function VideoPage() {
     <div className="min-h-screen pb-32 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-accent-blue/5 to-transparent -z-10" />
-      <div className="absolute top-1/4 -right-1/4 w-[600px] h-[600px] bg-accent-purple/5 blur-[150px] animate-pulse-glow" />
+      <div className="absolute top-1/4 -right-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-accent-purple/5 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
 
       <section className="pt-32 px-6 max-w-7xl mx-auto relative z-10">
         <Link to={loading || !subject?.slug ? "#" : `/subject/${subject.slug}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-accent-blue mb-8 transition-colors group px-4 py-2 glass-card border-white/5 text-[10px] font-black uppercase tracking-widest">

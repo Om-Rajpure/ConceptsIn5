@@ -29,10 +29,10 @@ import SkeletonCard from '../components/SkeletonCard';
 import ErrorState from '../components/ErrorState';
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
+  initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.8, ease: "easeOut" }
+  viewport: { once: true, margin: "-50px" },
+  transition: { duration: 0.5, ease: "easeOut" }
 };
 
 export default function LandingPage() {
@@ -138,8 +138,8 @@ export default function LandingPage() {
     <div className="relative overflow-x-hidden">
       {/* 1 Hero Section */}
       <section className="relative pt-16 md:pt-32 pb-12 md:pb-24 px-6 overflow-hidden min-h-[70vh] md:min-h-screen flex items-center">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-blue/10 blur-[150px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent-purple/10 blur-[150px] animate-pulse-glow" />
+        <div className="absolute top-1/4 left-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-accent-blue/10 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-accent-purple/10 blur-[80px] md:blur-[150px] animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
         
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
           <motion.div
@@ -192,7 +192,7 @@ export default function LandingPage() {
             transition={{ duration: 1, ease: "easeOut" }}
             className="relative max-w-[280px] md:max-w-none mx-auto lg:mx-0"
           >
-            <div className="absolute -inset-4 bg-gradient-to-tr from-accent-blue via-accent-purple to-accent-cyan rounded-[3rem] blur-3xl opacity-20 animate-pulse-glow" />
+            <div className="absolute -inset-4 bg-gradient-to-tr from-accent-blue via-accent-purple to-accent-cyan rounded-[3rem] blur-2xl md:blur-3xl opacity-10 md:opacity-20 animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
             
             {/* Custom AI-Human Fusion Image UI */}
             <div className="glass-card p-2 border-white/10 relative overflow-hidden group rounded-[2.5rem] shadow-2xl">
@@ -232,16 +232,18 @@ export default function LandingPage() {
 
               {/* Float Effect Elements */}
               <motion.div 
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ willChange: "transform" }}
                 className="absolute top-10 right-10 p-4 glass-card border-accent-blue/30 backdrop-blur-md"
               >
                 <Sparkles className="text-accent-blue" />
               </motion.div>
               
               <motion.div 
-                animate={{ y: [0, 15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 6, repeat: Infinity, delay: 1, ease: "easeInOut" }}
+                style={{ willChange: "transform" }}
                 className="absolute bottom-20 -left-10 p-4 glass-card border-accent-purple/30 backdrop-blur-md hidden lg:block"
               >
                 <div className="text-accent-purple font-black text-[10px] uppercase tracking-tighter italic">Powered by Clarity</div>
@@ -258,49 +260,56 @@ export default function LandingPage() {
           <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
-        <div className="relative group/scroll">
-          <div 
-            ref={catRef}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 snap-x snap-mandatory px-4 md:px-0"
-          >
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="min-w-[85%] md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0">
-                  <SkeletonCard />
-                </div>
-              ))
-            ) : (
-            categories.map((cat, i) => (
-                <Link to={`/category/${cat.slug || cat.id}`} key={cat.id} className="min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0">
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="group h-full"
+        <div className="relative group/scroll parent-container-overflow">
+          <div className="scroll-container">
+            <div 
+              ref={catRef}
+              className="scroll-track px-4 md:px-0"
+            >
+              {loading ? (
+                [...Array(4)].map((_, i) => (
+                  <div key={i} className="card-scroll-item">
+                    <SkeletonCard />
+                  </div>
+                ))
+              ) : (
+                categories.map((cat, i) => (
+                  <Link 
+                    to={`/category/${cat.slug || cat.id}`} 
+                    key={cat.id} 
+                    className="card-scroll-item"
                   >
-    <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
-      <div className="relative aspect-video overflow-hidden">
-        <img 
-          src={cat.thumbnail || `/images/cat_${i}.png`} 
-          alt={cat.name} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          onError={(e) => e.target.src = "/images/hero_bg.png"}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-      </div>
-      <div className="p-6 sm:p-8 flex flex-col flex-1">
-        <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
-        <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
-        <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-          Initialize <ArrowRight size={14} />
-        </div>
-      </div>
-    </GlassCard>
-                  </motion.div>
-                </Link>
-              ))
-            )}
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1 }}
+                      className="group h-full"
+                    >
+                      <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
+                        <div className="relative aspect-video overflow-hidden">
+                          <img 
+                            src={cat.thumbnail || `/images/cat_${i}.png`} 
+                            alt={cat.name} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            loading="lazy"
+                            onError={(e) => e.target.src = "/images/hero_bg.png"}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
+                        </div>
+                        <div className="p-6 sm:p-8 flex flex-col flex-1">
+                          <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
+                          <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
+                          <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                            Initialize <ArrowRight size={14} />
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </motion.div>
+                  </Link>
+                ))
+              )}
+            </div>
           </div>
         </div>
         <ScrollDots count={categories.length} activeIndex={catIndex} color="blue" onDotClick={(idx) => scrollTo(catRef, idx)} />
@@ -317,90 +326,92 @@ export default function LandingPage() {
           </p>
         </motion.div>
  
-        <div className="relative group/scroll">
-          <div 
-            ref={socialRef}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 snap-x snap-mandatory px-4 md:px-0"
-          >
-            {[
-              {
-                platform: "YouTube",
-                name: "ConceptsIn5",
-                desc: "Watch full concept explanations and structured learning videos",
-                icon: <Youtube className="w-8 h-8 text-red-500" />,
-                link: "https://www.youtube.com/@conceptsin5",
-                color: "red",
-                glowColor: "rgba(239, 68, 68, 0.4)"
-              },
-              {
-                platform: "Instagram",
-                name: "ConceptsIn5",
-                desc: "Quick reels and short-form concept breakdowns",
-                icon: <Instagram className="w-8 h-8 text-pink-500" />,
-                link: "https://www.instagram.com/conceptsin5",
-                color: "pink",
-                glowColor: "rgba(236, 72, 153, 0.4)"
-              },
-              {
-                platform: "LinkedIn",
-                name: "Om Rajpure",
-                desc: "Follow for professional updates and project insights",
-                icon: <Linkedin className="w-8 h-8 text-accent-blue" />,
-                link: "https://www.linkedin.com/in/om-rajpure",
-                color: "blue",
-                glowColor: "rgba(0, 240, 255, 0.4)"
-              }
-            ].map((social, i) => (
-              <motion.a 
-                href={social.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="group block min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0"
-              >
-                <GlassCard 
-                  glow 
-                  neonColor={social.color === "blue" ? "blue" : "purple"} 
-                  className="h-full border-white/5 group-hover:border-white/20 relative p-6 sm:p-8"
+        <div className="relative group/scroll parent-container-overflow">
+          <div className="scroll-container">
+            <div 
+              ref={socialRef}
+              className="scroll-track px-4 md:px-0"
+            >
+              {[
+                {
+                  platform: "YouTube",
+                  name: "ConceptsIn5",
+                  desc: "Watch full concept explanations and structured learning videos",
+                  icon: <Youtube className="w-8 h-8 text-red-500" />,
+                  link: "https://www.youtube.com/@conceptsin5",
+                  color: "red",
+                  glowColor: "rgba(239, 68, 68, 0.4)"
+                },
+                {
+                  platform: "Instagram",
+                  name: "ConceptsIn5",
+                  desc: "Quick reels and short-form concept breakdowns",
+                  icon: <Instagram className="w-8 h-8 text-pink-500" />,
+                  link: "https://www.instagram.com/conceptsin5",
+                  color: "pink",
+                  glowColor: "rgba(236, 72, 153, 0.4)"
+                },
+                {
+                  platform: "LinkedIn",
+                  name: "Om Rajpure",
+                  desc: "Follow for professional updates and project insights",
+                  icon: <Linkedin className="w-8 h-8 text-accent-blue" />,
+                  link: "https://www.linkedin.com/in/om-rajpure",
+                  color: "blue",
+                  glowColor: "rgba(0, 240, 255, 0.4)"
+                }
+              ].map((social, i) => (
+                <motion.a 
+                  href={social.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className="card-scroll-item group block"
                 >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl -z-10" 
-                    style={{ backgroundColor: social.glowColor }}
-                  />
-                  
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all">
-                      {social.icon}
-                    </div>
+                  <GlassCard 
+                    glow 
+                    neonColor={social.color === "blue" ? "blue" : "purple"} 
+                    className="h-full border-white/5 group-hover:border-white/20 relative p-6 sm:p-8"
+                  >
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity blur-2xl -z-10" 
+                      style={{ backgroundColor: social.glowColor }}
+                    />
                     
-                    <div className="mb-4">
-                      <h3 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-gradient">
-                        {social.name}
-                      </h3>
-                      <p className="text-accent-cyan text-xs font-black uppercase tracking-widest mt-1">
-                        {social.platform}
+                    <div className="flex flex-col items-center text-center">
+                      <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all">
+                        {social.icon}
+                      </div>
+                      
+                      <div className="mb-4">
+                        <h3 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-gradient">
+                          {social.name}
+                        </h3>
+                        <p className="text-accent-cyan text-xs font-black uppercase tracking-widest mt-1">
+                          {social.platform}
+                        </p>
+                      </div>
+   
+                      <p className="text-gray-400 text-sm font-light leading-relaxed mb-8 break-words">
+                        {social.desc}
                       </p>
+   
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="mt-auto px-8 py-3 rounded-xl border border-white/10 glass-card text-xs font-black uppercase tracking-widest group-hover:bg-white group-hover:text-dark transition-all"
+                      >
+                        Visit Profile
+                      </motion.div>
                     </div>
- 
-                    <p className="text-gray-400 text-sm font-light leading-relaxed mb-8 break-words">
-                      {social.desc}
-                    </p>
- 
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="mt-auto px-8 py-3 rounded-xl border border-white/10 glass-card text-xs font-black uppercase tracking-widest group-hover:bg-white group-hover:text-dark transition-all"
-                    >
-                      Visit Profile
-                    </motion.div>
-                  </div>
-                </GlassCard>
-              </motion.a>
-            ))}
+                  </GlassCard>
+                </motion.a>
+              ))}
+            </div>
           </div>
         </div>
         <ScrollDots count={3} activeIndex={socialIndex} color="purple" onDotClick={(idx) => scrollTo(socialRef, idx)} />
@@ -475,37 +486,50 @@ export default function LandingPage() {
             </Link>
           </motion.div>
 
-          <div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"
-          >
-            {loading ? (
-              [1, 2, 3, 4].map(i => (
-                <div key={i} className="min-w-[70%] md:min-w-[240px] aspect-[9/16] animate-pulse glass-card bg-white/5 opacity-50 snap-center flex-shrink-0" />
-              ))
-            ) : reels.length > 0 ? (
-              reels.map((reel, i) => (
-                <a 
-                  href={reel.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  key={i} 
-                  className="w-full p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block"
-                >
-                  <img src={reel.thumbnail} alt={reel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
-                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 group-hover:bg-accent-purple transition-all shadow-[0_0_20px_rgba(123,97,255,0.3)]">
-                      <Zap size={20} className="text-white fill-current" />
+        <div className="relative group/scroll parent-container-overflow">
+          <div className="scroll-container">
+            <div 
+              ref={reelRef}
+              className="scroll-track px-4 md:px-0"
+            >
+              {loading ? (
+                [1, 2, 3, 4].map(i => (
+                  <div key={i} className="card-scroll-item aspect-[9/16] animate-pulse glass-card bg-white/5 opacity-50 flex-shrink-0" />
+                ))
+              ) : reels.length > 0 ? (
+                reels.map((reel, i) => (
+                  <a 
+                    href={reel.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    key={i} 
+                    className="card-scroll-item p-0 border-white/5 group relative aspect-[9/16] overflow-hidden rounded-2xl block"
+                  >
+                    <img 
+                      src={reel.thumbnail || reel.thumbnail_url || "/images/hero_bg.png"} 
+                      alt={reel.title} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" 
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = "/images/hero_bg.png";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
+                      <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 group-hover:bg-accent-purple transition-all shadow-[0_0_20px_rgba(123,97,255,0.3)]">
+                        <Zap size={20} className="text-white fill-current" />
+                      </div>
+                      <h4 className="font-black text-sm text-white group-hover:text-accent-purple transition-colors uppercase tracking-widest italic leading-tight line-clamp-2">{reel.title}</h4>
                     </div>
-                    <h4 className="font-black text-sm text-white group-hover:text-accent-purple transition-colors uppercase tracking-widest italic leading-tight line-clamp-2">{reel.title}</h4>
+                  </a>
+                ))
+              ) : (
+                  <div className="w-full py-12 text-center glass-card border-dashed border-white/10">
+                      <span className="text-gray-500 font-black uppercase tracking-widest text-xs">No active transmissions detected</span>
                   </div>
-                </a>
-              ))
-            ) : (
-                <div className="w-full py-12 text-center glass-card border-dashed border-white/10">
-                    <span className="text-gray-500 font-black uppercase tracking-widest text-xs">No active transmissions detected</span>
-                </div>
-            )}
+              )}
+            </div>
           </div>
+        </div>
 
         </div>
       </section>

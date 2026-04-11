@@ -39,7 +39,7 @@ export default function ReelsPage() {
     return (
         <div className="min-h-screen bg-dark text-white pt-24 md:pt-32 px-6 md:px-12 pb-24 relative overflow-hidden">
             {/* Background Decor */}
-            <div className="absolute top-0 right-0 w-full h-[30vh] bg-gradient-to-b from-accent-purple/10 to-transparent -z-0" />
+            <div className="absolute top-0 right-0 w-full h-[30vh] bg-gradient-to-b from-accent-purple/10 to-transparent -z-0" style={{ willChange: "opacity" }} />
             
             <div className="max-w-7xl mx-auto relative z-10">
                 {/* Header */}
@@ -83,9 +83,10 @@ export default function ReelsPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 key={reel.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.3, delay: i * 0.05 }}
+                                style={{ willChange: "transform, opacity" }}
                                 className="group relative aspect-[9/16] rounded-2xl overflow-hidden border border-white/5 bg-dark shadow-2xl transition-all hover:border-accent-blue/30"
                             >
                                 <img 

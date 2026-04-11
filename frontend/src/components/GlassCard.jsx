@@ -15,10 +15,14 @@ export default function GlassCard({ children, className, glow = false, neonColor
 
   return (
     <motion.div
-      whileHover={{ y: -8, scale: 1.02 }}
+      whileHover={{ 
+        y: window.innerWidth < 768 ? -4 : -8, 
+        scale: window.innerWidth < 768 ? 1.01 : 1.02 
+      }}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
+      style={{ willChange: "transform, opacity" }}
       className={cn(
         "glass-card p-6 relative overflow-hidden group transition-all duration-500",
         "energy-sweep-parent hover:bg-white/[0.05]",
