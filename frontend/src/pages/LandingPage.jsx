@@ -331,7 +331,7 @@ export default function LandingPage() {
             <div className="scroll-container">
               <div 
                 ref={socialRef}
-                className="scroll-track md:px-0"
+                className="scroll-track md:grid-cols-3 md:px-0"
               >
                 {[
                   {
