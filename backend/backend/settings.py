@@ -17,17 +17,23 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env file
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+# ─── Environment Configuration ──────────────────────────────────────
+ENVIRONMENT = os.getenv("ENVIRONMENT", "local")
+
+if ENVIRONMENT == "production":
+    load_dotenv(os.path.join(BASE_DIR, '.env.production'))
+else:
+    load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # ─── Core Security ──────────────────────────────────────────────────
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-insecure-key-for-dev-only')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-replace-this-in-prod')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
+# ALLOWED_HOSTS supports multiple domains via environment variable (comma-separated)
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
@@ -81,12 +87,31 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ─── Database ────────────────────────────────────────────────────────
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Production RDS PostgreSQL vs Local SQLite
+# Switching logic: Use PostgreSQL if DB_NAME is provided in environment, otherwise fallback to SQLite.
+if os.getenv("DB_NAME"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',  # Recommended for AWS RDS
+            },
+            'CONN_MAX_AGE': 600,       # Persistent connections for AWS RDS performance
+        }
     }
-}
+else:
+    # Failsafe: Fallback to SQLite if credentials are missing (local development)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # ─── Password Validation ────────────────────────────────────────────
@@ -110,11 +135,11 @@ USE_TZ = True
 # ─── Static & Media Files ───────────────────────────────────────────
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # ─── Default Primary Key ────────────────────────────────────────────
@@ -127,19 +152,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in dev
 CORS_ALLOW_CREDENTIALS = True
 
+# Production domains from environment
+EXTRA_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-]
+] + [origin for origin in EXTRA_ORIGINS if origin]
 
+# CSRF Trusted Origins - Ensure https is used for production
+CSRF_TRUST_URLS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-]
+] + [url for url in CSRF_TRUST_URLS if url]
 
 
 # ─── Caching ────────────────────────────────────────────────────────
