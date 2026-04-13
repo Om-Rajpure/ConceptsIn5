@@ -245,7 +245,7 @@ export default function SubjectPage() {
       <section className="relative pt-48 pb-32 px-6 overflow-hidden min-h-[60vh] flex items-center">
         <div className="absolute inset-0 z-0">
           <img 
-            src="/images/subject_hero.png" 
+            src={subject?.category_background_image || "/images/subject_hero.png"} 
             alt="Hero Background" 
             className="w-full h-full object-cover opacity-20"
             loading="lazy"

@@ -27,6 +27,7 @@ import GlassCard from '../components/GlassCard';
 import ScrollDots from '../components/ScrollDots';
 import SkeletonCard from '../components/SkeletonCard';
 import ErrorState from '../components/ErrorState';
+import { getIcon } from '../utils/iconHelper';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -77,9 +78,7 @@ export default function LandingPage() {
   }, []);
 
   const handleRetry = () => {
-    // Re-triggering the fetch logic via a local function or by forcing a re-render if needed
-    // In this case, we can just call the same logic or use a dependency if we refactored it
-    window.location.reload(); // Simple retry for Landing Page or re-fetch if logic allows
+    window.location.reload();
   };
 
   const scrollTo = (ref, index) => {
@@ -91,7 +90,6 @@ export default function LandingPage() {
     }
   };
 
-  // Intersection Observer to detect current card
   React.useEffect(() => {
     const options = {
       root: null,
@@ -126,8 +124,6 @@ export default function LandingPage() {
 
     return () => observers.forEach(({ observer }) => observer.disconnect());
   }, [loading, categories, reels, featuredVideos]);
-
-  // Removed full-page loader to allow for section-specific skeleton UI
 
 
   if (error) {
@@ -194,26 +190,21 @@ export default function LandingPage() {
           >
             <div className="absolute -inset-4 bg-gradient-to-tr from-accent-blue via-accent-purple to-accent-cyan rounded-[3rem] blur-2xl md:blur-3xl opacity-10 md:opacity-20 animate-pulse-glow" style={{ willChange: "opacity, filter" }} />
             
-            {/* Custom AI-Human Fusion Image UI */}
             <div className="glass-card p-2 border-white/10 relative overflow-hidden group rounded-[2.5rem] shadow-2xl">
               <div className="relative aspect-[4/5] md:aspect-square overflow-hidden rounded-[2rem]">
-                {/* Real Human Side */}
                 <img 
                   src="/images/ai_human_hybrid.png" 
                   alt="Founder AI-Human Hybrid" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
                 
-                {/* AI Fusion Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/20 to-accent-purple/40 mix-blend-overlay" />
                 <div className="absolute inset-x-0 top-0 h-[1px] bg-white/20 blur-[1px] animate-glitch-line" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(0,240,255,0.3)_0%,transparent_70%)]" />
                 
-                {/* Futuristic HUD Elements */}
                 <div className="absolute inset-0 border-[0.5px] border-white/10 rounded-[2rem] pointer-events-none" />
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-accent-blue/5 backdrop-blur-[2px] border-l border-white/10" />
                 
-                {/* Circuit/Glow Detail */}
                 <div className="absolute top-1/2 right-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue to-transparent opacity-30" />
                 <div className="absolute top-0 right-1/4 w-[1px] h-full bg-gradient-to-b from-transparent via-accent-purple to-transparent opacity-30" />
                 
@@ -230,7 +221,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Float Effect Elements */}
               <motion.div 
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
@@ -273,41 +263,53 @@ export default function LandingPage() {
                   </div>
                 ))
               ) : (
-                categories.map((cat, i) => (
-                  <Link 
-                    to={`/category/${cat.slug || cat.id}`} 
-                    key={cat.id} 
-                    className="card-scroll-item"
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                      className="group h-full"
+                categories.map((cat, i) => {
+                  const Icon = getIcon(cat.icon);
+                  return (
+                    <Link 
+                      to={`/category/${cat.slug || cat.id}`} 
+                      key={cat.id} 
+                      className="card-scroll-item"
                     >
-                      <GlassCard glow neonColor={i % 2 === 0 ? "blue" : "purple"} className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40">
-                        <div className="relative aspect-video overflow-hidden">
-                          <img 
-                            src={cat.thumbnail || `/images/cat_${i}.png`} 
-                            alt={cat.name} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            loading="lazy"
-                            onError={(e) => e.target.src = "/images/hero_bg.png"}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
-                        </div>
-                        <div className="p-6 sm:p-8 flex flex-col flex-1">
-                          <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
-                          <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
-                          <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                            Initialize <ArrowRight size={14} />
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 }}
+                        className="group h-full"
+                      >
+                        <GlassCard 
+                           glow 
+                           neonColor={i % 2 === 0 ? "blue" : "purple"} 
+                           className="p-0 overflow-hidden h-full flex flex-col border-white/5 hover:border-accent-blue/40"
+                           style={{'--neon-glow': cat.theme_color}}
+                        >
+                          <div className="relative aspect-video overflow-hidden">
+                            <img 
+                              src={cat.background_image || `/images/cat_${i}.png`} 
+                              alt={cat.name} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              loading="lazy"
+                              onError={(e) => e.target.src = "/images/hero_bg.png"}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent" />
+                            
+                            <div className="absolute top-4 left-4 p-3 glass-card border-white/10 bg-dark/40 backdrop-blur-md rounded-xl text-white group-hover:scale-110 transition-transform">
+                               <Icon size={20} className="text-accent-blue" />
+                            </div>
                           </div>
-                        </div>
-                      </GlassCard>
-                    </motion.div>
-                  </Link>
-                ))
+                          <div className="p-6 sm:p-8 flex flex-col flex-1">
+                            <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
+                            <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                              Initialize <ArrowRight size={14} />
+                            </div>
+                          </div>
+                        </GlassCard>
+                      </motion.div>
+                    </Link>
+                  );
+                })
               )}
             </div>
           </div>
@@ -501,7 +503,7 @@ export default function LandingPage() {
               ) : reels.length > 0 ? (
                 reels.map((reel, i) => (
                   <a 
-                    href={reel.link} 
+                    href={reel.video_url} 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     key={i} 
@@ -512,9 +514,6 @@ export default function LandingPage() {
                       alt={reel.title} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" 
                       loading="lazy"
-                      onError={(e) => {
-                        e.target.src = "/images/hero_bg.png";
-                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-dark/90 via-transparent to-transparent flex flex-col justify-end p-6">
                       <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-4 group-hover:bg-accent-purple transition-all shadow-[0_0_20px_rgba(123,97,255,0.3)]">
@@ -532,7 +531,6 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-
         </div>
       </section>
 

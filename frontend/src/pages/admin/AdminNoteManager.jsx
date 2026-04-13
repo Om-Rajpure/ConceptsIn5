@@ -184,11 +184,11 @@ const AdminNoteManager = () => {
                 subcategory: subjectFormData.subcategory
             });
             const newSubject = response.data;
-            setSubjects([...subjects, newSubject]);
-            setFormData({ ...formData, subject: newSubject.id });
+            await fetchData(); // Full refetch of subjects/videos/notes
+            setFormData(prev => ({ ...prev, subject: newSubject.id }));
             setShowSubjectModal(false);
             setSubjectFormData({ name: '', category: '', subcategory: '' });
-            toast.success('Subject sector initialized');
+            toast.success('Subject sector initialized and synchronized');
         } catch (error) {
             console.error('Subject creation failed', error);
             toast.error(error.response?.data?.error || 'Failed to create subject sector.');
@@ -210,15 +210,16 @@ const AdminNoteManager = () => {
             });
             const createdSC = response.data;
             
-            // Update local state
-            setSubcategories(prev => [...prev, createdSC]);
+            // Refresh auxiliary data (Categories/Subcategories)
+            await fetchAuxiliaryData();
+            
             // Auto-select
             setSubjectFormData(prev => ({ ...prev, subcategory: createdSC.id }));
             
             // Reset
             setNewSubCategoryName('');
             setIsAddingSubCategory(false);
-            toast.success('Sub-sector synthesized');
+            toast.success('Sub-sector synthesized and synchronized');
         } catch (error) {
             console.error('Subcategory creation failed', error);
             toast.error(error.response?.data?.error || 'Synthesis failure. Check coordinates.');

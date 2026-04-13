@@ -2,8 +2,13 @@ from django.db import models
 from django.utils.text import slugify
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True, blank=True)
+    icon = models.CharField(max_length=50, blank=True)
+    background_image = models.ImageField(upload_to='categories/bg/', blank=True, null=True)
+    description = models.TextField(blank=True)
+    theme_color = models.CharField(max_length=20, blank=True) # Optional theme color
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -20,7 +25,11 @@ class Category(models.Model):
 class SubCategory(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
-    category = models.ForeignKey(Category, related_name='subcategories', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='all_subcategories', on_delete=models.CASCADE)
+    icon = models.CharField(max_length=50, blank=True)
+    background_image = models.ImageField(upload_to='subcategories/bg/', blank=True, null=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -38,7 +47,9 @@ class Subject(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField(blank=True)
-    subcategory = models.ForeignKey(SubCategory, related_name='subjects', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='subjects_manual', on_delete=models.CASCADE, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategory, related_name='subjects', on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -52,6 +63,7 @@ class Subject(models.Model):
         return self.name
 
 class Video(models.Model):
+    # ... (existing Video model remains unchanged)
     SOURCE_CHOICES = [
         ('youtube', 'YouTube'),
         ('instagram', 'Instagram'),
@@ -82,9 +94,6 @@ class Video(models.Model):
     roadmap = models.JSONField(default=list, blank=True)
     topic_flow = models.TextField(blank=True, help_text="Comma-separated topics (overrides description auto-generation)")
 
-    # Extra control fields (not stored in DB but used in logic)
-    # Actually, we might want to store them temporarily or handle them in the serializer/view
-    # For simplicity, let's keep them as boolean/url in DB if we want to track intent
     fetch_from_youtube = models.BooleanField(default=False)
     youtube_url_input = models.URLField(max_length=500, blank=True, null=True)
 
@@ -92,38 +101,36 @@ class Video(models.Model):
         from services.ai_service import generate_summary
         from videos.utils.description_processor import process_description
 
-        # Generate summary if missing
         if not self.quick_summary and self.description:
             summary = generate_summary(self.description)
-
             if not summary:
                 summary, _ = process_description(self.description)
-
             self.quick_summary = summary
         elif not self.quick_summary and not self.description:
             self.quick_summary = "No summary available"
 
-        # Generate roadmap
         if self.topic_flow:
-            topics = [
-                topic.strip()
-                for topic in self.topic_flow.split(",")
-                if topic.strip()
-            ]
+            topics = [topic.strip() for topic in self.topic_flow.split(",") if topic.strip()]
         elif self.description:
             _, topics = process_description(self.description)
         else:
             topics = []
-
         self.roadmap = topics
 
-        # Debug Logs
-        print("Saving video:", self.title)
-        print("Summary:", self.quick_summary)
-        print("Roadmap:", self.roadmap)
-        print("Description:", self.description)
-
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']
+
+class Reel(models.Model):
+    title = models.CharField(max_length=200)
+    video_url = models.URLField(max_length=500)
+    description = models.TextField(blank=True)
+    thumbnail = models.ImageField(upload_to='reels/thumbnails/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
@@ -142,21 +149,6 @@ class Note(models.Model):
 
     def __str__(self):
         return self.title
-
-class Reel(models.Model):
-    title = models.CharField(max_length=200)
-    link = models.URLField(max_length=500)
-    description = models.TextField(blank=True)
-    thumbnail = models.ImageField(upload_to='reel_thumbnails/', null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        ordering = ['-created_at']
 
 class FetchLog(models.Model):
     fetch_type = models.CharField(max_length=50, default='youtube')
