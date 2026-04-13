@@ -39,19 +39,19 @@ class NoteSerializer(serializers.ModelSerializer):
             value = clean_text(value)
         return value
 
-    def validate(self, data):
-        if not data.get('video') and not data.get('subject'):
-            raise serializers.ValidationError(
-                "A note must be linked to at least a video or a subject."
-            )
-        return data
-
 
 # ─── Subject Serializer ─────────────────────────────────────────────
 class SubjectSerializer(serializers.ModelSerializer):
+    category_background_image = serializers.SerializerMethodField()
+
     class Meta:
         model = Subject
-        fields = '__all__'
+        fields = ['id', 'name', 'slug', 'category', 'subcategory', 'category_background_image', 'created_at']
+
+    def get_category_background_image(self, obj):
+        if obj.category and obj.category.background_image:
+            return obj.category.background_image.url
+        return "/static/defaults/category-bg.jpg"
 
     def validate_name(self, value):
         value = clean_text(value)
@@ -113,7 +113,7 @@ class VideoSerializer(serializers.ModelSerializer):
         return value
 
 
-# ─── Public Video Serializer (Read-Only, no validation needed) ──────
+# ─── Public Video Serializer (Read-Only) ────────────────────────────
 class PublicVideoSerializer(serializers.ModelSerializer):
     notes = NoteSerializer(many=True, read_only=True)
     subject = SubjectSerializer(read_only=True)
@@ -126,10 +126,16 @@ class PublicVideoSerializer(serializers.ModelSerializer):
 # ─── SubCategory Serializer ─────────────────────────────────────────
 class SubCategorySerializer(serializers.ModelSerializer):
     subjects = SubjectSerializer(many=True, read_only=True)
+    background_image = serializers.SerializerMethodField()
 
     class Meta:
         model = SubCategory
-        fields = ['id', 'name', 'slug', 'category', 'subjects']
+        fields = ['id', 'name', 'slug', 'category', 'icon', 'background_image', 'description', 'subjects', 'created_at']
+
+    def get_background_image(self, obj):
+        if obj.background_image:
+            return obj.background_image.url
+        return "/static/defaults/category-bg.jpg"
 
     def validate_name(self, value):
         value = clean_text(value)
@@ -142,11 +148,17 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 # ─── Category Serializer ────────────────────────────────────────────
 class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubCategorySerializer(many=True, read_only=True)
+    subcategories = SubCategorySerializer(source='all_subcategories', many=True, read_only=True)
+    background_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'subcategories']
+        fields = ['id', 'name', 'slug', 'icon', 'background_image', 'description', 'subcategories', 'theme_color', 'created_at']
+
+    def get_background_image(self, obj):
+        if obj.background_image:
+            return obj.background_image.url
+        return "/static/defaults/category-bg.jpg"
 
     def validate_name(self, value):
         value = clean_text(value)
@@ -168,7 +180,7 @@ class ReelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Title cannot be empty.")
         return value
 
-    def validate_link(self, value):
+    def validate_video_url(self, value):
         if not value:
-            raise serializers.ValidationError("Link cannot be empty.")
+            raise serializers.ValidationError("Video URL cannot be empty.")
         return value

@@ -30,6 +30,9 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminVideoManager from './pages/admin/AdminVideoManager';
 import AdminNoteManager from './pages/admin/AdminNoteManager';
 import AdminReelManager from './pages/admin/AdminReelManager';
+import AdminCategoryManager from './pages/admin/AdminCategoryManager';
+import AdminSubCategoryManager from './pages/admin/AdminSubCategoryManager';
+import AdminSubjectManager from './pages/admin/AdminSubjectManager';
 
 
 export default function App() {
@@ -57,6 +60,9 @@ export default function App() {
               <Route path="/om/videos" element={<AdminVideoManager />} />
               <Route path="/om/notes" element={<AdminNoteManager />} />
               <Route path="/om/reels" element={<AdminReelManager />} />
+              <Route path="/om/categories" element={<AdminCategoryManager />} />
+              <Route path="/om/subcategories" element={<AdminSubCategoryManager />} />
+              <Route path="/om/subjects" element={<AdminSubjectManager />} />
           </Route>
 
           {/* Catch-all 404 Route */}

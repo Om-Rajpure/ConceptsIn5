@@ -11,13 +11,21 @@ import {
     Eye,
     TrendingUp,
     LayoutDashboard,
-    Play
+    Play,
+    Layers
 } from 'lucide-react';
 import { useAdmin } from '../../utils/AdminContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({ total_videos: 0, total_subjects: 0, total_notes: 0, total_reels: 0 });
+    const [stats, setStats] = useState({ 
+        total_videos: 0, 
+        total_subjects: 0, 
+        total_notes: 0, 
+        total_reels: 0,
+        total_categories: 0,
+        total_subcategories: 0
+    });
     const { logout, user } = useAdmin();
     const navigate = useNavigate();
 
@@ -42,10 +50,10 @@ const AdminDashboard = () => {
         <div className="min-h-screen bg-dark text-white pt-16 md:pt-20 px-6 md:px-12 pb-12 relative overflow-hidden">
             {/* Background Decor */}
             <div className="absolute top-0 right-0 w-full h-[30vh] bg-gradient-to-b from-accent-purple/5 to-transparent -z-0" />
+            
             {/* Admin Header */}
             <header className="flex flex-col md:flex-row justify-between items-start gap-8 mb-16 relative z-10">
                 <div className="flex flex-col gap-1 w-full md:w-auto">
-                    {/* Row 1: Logo + Brand */}
                     <div className="flex items-center gap-3 mb-1">
                         <div className="p-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20">
                             <LayoutDashboard className="text-accent-blue h-9 w-9 md:h-14 md:w-14" />
@@ -53,12 +61,10 @@ const AdminDashboard = () => {
                         <span className="text-2xl md:text-3xl font-black tracking-tighter text-gradient drop-shadow-[0_0_15px_rgba(0,240,255,0.2)]">ConceptsIn5</span>
                     </div>
                     
-                    {/* Row 2: Subtitle */}
                     <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase glow-text">
                         Control Center
                     </h1>
                     
-                    {/* Row 3: User Info */}
                     <p className="text-gray-500 text-[10px] md:text-xs mt-1 uppercase tracking-[0.2em] font-black flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                         Authorized Session: <span className="text-white">{user?.username}</span>
@@ -79,30 +85,36 @@ const AdminDashboard = () => {
             </header>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-16 relative z-10">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16 relative z-10">
                 <StatCard 
-                    label="Total Modules" 
+                    label="Modules" 
                     value={stats.total_videos} 
                     icon={<Video className="text-accent-blue" />} 
-                    color="cyan"
                 />
                 <StatCard 
-                    label="Active Subjects" 
-                    value={stats.total_subjects} 
-                    icon={<BookOpen className="text-accent-purple" />} 
-                    color="purple"
-                />
-                <StatCard 
-                    label="Study Documents" 
+                    label="Notes" 
                     value={stats.total_notes} 
                     icon={<FileText className="text-accent-cyan" />} 
-                    color="blue"
                 />
                 <StatCard 
                     label="Nexus Reels" 
                     value={stats.total_reels} 
                     icon={<Play className="text-accent-blue" />} 
-                    color="cyan"
+                />
+                <StatCard 
+                    label="Grids" 
+                    value={stats.total_categories} 
+                    icon={<LayoutDashboard className="text-accent-purple" />} 
+                />
+                <StatCard 
+                    label="Sub-Sectors" 
+                    value={stats.total_subcategories} 
+                    icon={<Layers className="text-accent-blue" />} 
+                />
+                <StatCard 
+                    label="Subjects" 
+                    value={stats.total_subjects} 
+                    icon={<BookOpen className="text-accent-purple" />} 
                 />
             </div>
 
@@ -110,7 +122,7 @@ const AdminDashboard = () => {
             <h3 className="text-xl font-black italic mb-8 opacity-60 uppercase tracking-widest flex items-center gap-2">
                 <TrendingUp size={20} className="text-accent-purple" /> Fast-Track Operations
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
                 <ActionCard 
                     href="/om/videos" 
                     title="Manage Videos" 
@@ -133,9 +145,30 @@ const AdminDashboard = () => {
                     color="cyan"
                 />
                 <ActionCard 
+                    href="/om/categories" 
+                    title="Categories" 
+                    desc="Manage primary grid sectors" 
+                    icon={<LayoutDashboard size={24} />}
+                    color="purple"
+                />
+                <ActionCard 
+                    href="/om/subcategories" 
+                    title="Sub-Sectors" 
+                    desc="Manage sub-sector classifications" 
+                    icon={<Layers size={24} />}
+                    color="blue"
+                />
+                <ActionCard 
+                    href="/om/subjects" 
+                    title="Subjects" 
+                    desc="Manage and link study subjects" 
+                    icon={<BookOpen size={24} />}
+                    color="cyan"
+                />
+                <ActionCard 
                     href="#" 
-                    title="System Logs" 
-                    desc="Monitor API and server status" 
+                    title="Settings" 
+                    desc="System overrides and config" 
                     icon={<Settings size={24} />}
                     color="blue"
                 />
@@ -149,19 +182,15 @@ const AdminDashboard = () => {
                     <span className="font-black uppercase tracking-widest text-xs">New Module</span>
                 </div>
             </div>
-
-            {/* Background Decor */}
-            <div className="absolute top-0 right-0 w-full h-[30vh] bg-gradient-to-b from-accent-purple/5 to-transparent -z-0" />
         </div>
     );
 };
 
-const StatCard = ({ label, value, icon, color }) => (
+const StatCard = ({ label, value, icon }) => (
     <motion.div 
         whileHover={{ y: -5 }}
         className="glass-card p-3 md:p-6 border-white/5 bg-white/[0.01]"
     >
-        {/* Mobile: single row — Icon | Number | Label */}
         <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-0">
             <div className="p-1.5 md:p-3 rounded-xl bg-white/5 border border-white/10 shrink-0">
                 {React.cloneElement(icon, { size: window.innerWidth < 768 ? 20 : 36 })}

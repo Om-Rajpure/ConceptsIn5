@@ -38,7 +38,7 @@ const AdminReelManager = () => {
     
     const [formData, setFormData] = useState({
         title: '',
-        link: '',
+        video_url: '',
         description: ''
     });
 
@@ -83,7 +83,7 @@ const AdminReelManager = () => {
         
         const data = new FormData();
         data.append('title', formData.title);
-        data.append('link', formData.link);
+        data.append('video_url', formData.video_url);
         data.append('description', formData.description);
         if (thumbnailFile) {
             data.append('thumbnail', thumbnailFile);
@@ -104,7 +104,7 @@ const AdminReelManager = () => {
             setShowForm(false);
             setEditingReel(null);
             setThumbnailFile(null);
-            setFormData({ title: '', link: '', description: '' });
+            setFormData({ title: '', video_url: '', description: '' });
             fetchReels();
         } catch (error) {
             console.error('Operation failed', error);
@@ -116,7 +116,7 @@ const AdminReelManager = () => {
         setEditingReel(reel);
         setFormData({
             title: reel.title,
-            link: reel.link,
+            video_url: reel.video_url,
             description: reel.description || ''
         });
         setShowForm(true);
@@ -163,7 +163,7 @@ const AdminReelManager = () => {
                     <button 
                         onClick={() => {
                             setEditingReel(null);
-                            setFormData({ title: '', link: '', description: '' });
+                            setFormData({ title: '', video_url: '', description: '' });
                             setShowForm(true);
                         }}
                         className="px-8 py-3 bg-accent-blue rounded-xl text-white font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-[0_10px_20px_rgba(0,240,255,0.2)] hover:shadow-[0_15px_30px_rgba(0,240,255,0.3)] hover:-translate-y-0.5 transition-all"
@@ -212,9 +212,9 @@ const AdminReelManager = () => {
                                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">Nexus Link (YouTube Shorts / Reel)</label>
                                         <input 
                                             type="url" 
-                                            name="link"
+                                            name="video_url"
                                             required
-                                            value={formData.link}
+                                            value={formData.video_url}
                                             onChange={handleInputChange}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent-blue/50 transition-all font-medium font-mono text-sm"
                                             placeholder="https://youtube.com/shorts/..."
@@ -332,7 +332,7 @@ const AdminReelManager = () => {
                                             {/* Thumbnail Container */}
                                             <div className="absolute inset-0 z-0">
                                                 <img 
-                                                    src={reel.thumbnail || getYoutubeThumbnail(reel.link)} 
+                                                    src={reel.thumbnail || getYoutubeThumbnail(reel.video_url)} 
                                                     alt={reel.title}
                                                     className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 group-hover:scale-105 transition-transform"
                                                 />
@@ -367,7 +367,7 @@ const AdminReelManager = () => {
                                             {/* Preview Overlay */}
                                             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <a 
-                                                    href={reel.link} 
+                                                    href={reel.video_url} 
                                                     target="_blank" 
                                                     rel="noopener noreferrer"
                                                     className="w-8 h-8 rounded-lg bg-accent-blue/80 backdrop-blur-sm flex items-center justify-center text-white"

@@ -86,16 +86,11 @@ export default function CategoryPage() {
     <div className="pb-32 relative">
       {/* 1. Category Hero */}
       <section className="relative pt-48 pb-32 px-6 overflow-hidden min-h-[50vh] flex items-center">
-        {/* Background AI Image */}
+        {/* Background Atmosphere */}
         <div className="absolute inset-0 z-0">
           <img 
-            src={
-              category?.name?.toLowerCase().includes('engineering') ? '/images/cat_engineering.png' :
-              category?.name?.toLowerCase().includes('coding') || category?.name?.toLowerCase().includes('programming') ? '/images/cat_coding.png' :
-              category?.name?.toLowerCase().includes('math') ? '/images/cat_math.png' :
-              '/images/cat_general.png'
-            } 
-            alt="Category Background" 
+            src={category?.background_image || '/static/defaults/category-bg.jpg'} 
+            alt="Category Atmosphere" 
             className="w-full h-full object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/80 to-transparent" />
