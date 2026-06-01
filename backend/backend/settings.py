@@ -14,11 +14,14 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+import sys
+
 # Optional production dependencies
 try:
     import dj_database_url
 except ImportError:
     dj_database_url = None
+    print("WARNING: dj_database_url is not installed. Database configuration might fall back to SQLite.", file=sys.stderr)
 
 try:
     import sentry_sdk
@@ -26,6 +29,7 @@ try:
 except ImportError:
     sentry_sdk = None
     DjangoIntegration = None
+    print("INFO: sentry_sdk is not installed. Sentry monitoring is disabled.", file=sys.stderr)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,7 +61,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-replace-this-
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
 # ALLOWED_HOSTS supports multiple domains via environment variable (comma-separated)
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+raw_hosts = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
+# Strip any outer brackets, quotes, or whitespace that could be copy-pasted in env vars
+raw_hosts = raw_hosts.strip("[]'\" ")
+ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(',') if host.strip()]
+
 
 
 # ─── Application Definition ─────────────────────────────────────────
@@ -112,14 +120,23 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ─── Database ────────────────────────────────────────────────────────
 
-# Production Avian/RDS PostgreSQL vs Local SQLite
+# Production Avian/RDS/Neon PostgreSQL vs Local SQLite
 DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    # Neon PostgreSQL requires sslmode=require in the connection URL itself.
+    # Append it to the query parameters if it is not already present.
+    if "sslmode=" not in DATABASE_URL:
+        if "?" in DATABASE_URL:
+            DATABASE_URL += "&sslmode=require"
+        else:
+            DATABASE_URL += "?sslmode=require"
+
 if DATABASE_URL and dj_database_url:
     DATABASES = {
         'default': dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=False,
         ),
         'sqlite': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -183,7 +200,8 @@ STATICFILES_DIRS = [
     STATIC_FILES_DIRS_FRONTEND,
 ] if STATIC_FILES_DIRS_FRONTEND.exists() else []
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use WhiteNoise's CompressedStaticFilesStorage to prevent crashes when manifest entries are missing
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
 # ─── Media Storage (Cloudinary for Production) ──────────────────────
@@ -205,8 +223,8 @@ if CLOUDINARY_CLOUD_NAME:
             'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
             'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
         }
-    except ImportError:
-        pass
+    except ImportError as e:
+        print(f"WARNING: Cloudinary is configured but integration libraries are missing: {e}", file=sys.stderr)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -223,22 +241,29 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in dev
 CORS_ALLOW_CREDENTIALS = True
 
 # Production domains from environment
-EXTRA_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+raw_cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+# Strip any outer brackets, quotes, or whitespace that could be copy-pasted in env vars
+raw_cors_origins = raw_cors_origins.strip("[]'\" ")
+EXTRA_ORIGINS = [origin.strip() for origin in raw_cors_origins.split(',') if origin.strip()]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-] + [origin for origin in EXTRA_ORIGINS if origin]
+] + EXTRA_ORIGINS
 
 # CSRF Trusted Origins - Ensure https is used for production
-CSRF_TRUST_URLS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+raw_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+# Strip any outer brackets, quotes, or whitespace that could be copy-pasted in env vars
+raw_csrf_origins = raw_csrf_origins.strip("[]'\" ")
+CSRF_TRUST_URLS = [url.strip() for url in raw_csrf_origins.split(',') if url.strip()]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-] + [url for url in CSRF_TRUST_URLS if url]
+] + CSRF_TRUST_URLS
+
 
 
 # ─── Caching ────────────────────────────────────────────────────────
@@ -259,14 +284,28 @@ CSRF_COOKIE_HTTPONLY = False         # Must be False so axios can read CSRF toke
 CSRF_COOKIE_SAMESITE = 'Lax'        # CSRF protection for CSRF cookie
 
 # Production HTTPS settings - enabled dynamically in non-debug mode
+IS_RENDER = os.getenv("RENDER", "false").lower() == "true"
+
+# Disable SECURE_SSL_REDIRECT on Render or in development to prevent infinite redirect loops
+if IS_RENDER or DEBUG:
+    SECURE_SSL_REDIRECT = False
+else:
+    SECURE_SSL_REDIRECT = True
+
+# Always trust Render's SSL terminating reverse proxy for HTTPS detection
+if IS_RENDER:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Set proxy SSL header generally if not debug and not already set
+    if not IS_RENDER:
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 
 # ─── Django REST Framework ───────────────────────────────────────────

@@ -20,9 +20,35 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.views.static import serve
+from django.http import JsonResponse
+from django.db import connections
+from django.db.utils import OperationalError
 import os
 
+def health_check(request):
+    status = {
+        "status": "healthy",
+        "database": "unknown",
+    }
+    status_code = 200
+    try:
+        # Check database connection
+        db_conn = connections['default']
+        db_conn.cursor()
+        status["database"] = "connected"
+    except OperationalError:
+        status["status"] = "unhealthy"
+        status["database"] = "disconnected"
+        status_code = 503
+    except Exception as e:
+        status["status"] = "unhealthy"
+        status["database"] = f"error: {str(e)}"
+        status_code = 503
+        
+    return JsonResponse(status, status=status_code)
+
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     path('django-admin/', admin.site.urls), # Rename default admin to avoid collision with custom /om
     path('api/', include('videos.urls')),
 
