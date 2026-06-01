@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://api.conceptsin5.com/api/$1"
+      "destination": "https://conceptsin5.onrender.com/api/$1"
     },
     {
       "source": "/((?!api/).*)",

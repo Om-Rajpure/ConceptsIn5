@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, 
@@ -44,7 +44,7 @@ const AdminCategoryManager = () => {
     const fetchCategories = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('/api/admin/categories/');
+            const response = await api.get('/api/admin/categories/');
             setCategories(response.data.results || response.data);
         } catch (error) {
             console.error('Failed to fetch categories', error);
@@ -66,12 +66,12 @@ const AdminCategoryManager = () => {
 
         try {
             if (editingCategory) {
-                await axios.put(`/api/admin/categories/${editingCategory.id}/`, data, {
+                await api.put(`/api/admin/categories/${editingCategory.id}/`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('Category protocol updated');
             } else {
-                await axios.post('/api/admin/categories/', data, {
+                await api.post('/api/admin/categories/', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('New category initialized');
@@ -95,7 +95,7 @@ const AdminCategoryManager = () => {
         if (!categoryToDelete) return;
         setDeleteLoading(true);
         try {
-            await axios.delete(`/api/admin/categories/${categoryToDelete.id}//`);
+            await api.delete(`/api/admin/categories/${categoryToDelete.id}//`);
             toast.success('Category purged from database');
             fetchCategories();
             setShowDeleteModal(false);

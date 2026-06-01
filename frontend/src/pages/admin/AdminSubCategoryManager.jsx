@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, 
@@ -46,7 +46,7 @@ const AdminSubCategoryManager = () => {
     const fetchSubCategories = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('/api/admin/subcategories/');
+            const response = await api.get('/api/admin/subcategories/');
             setSubcategories(response.data.results || response.data);
         } catch (error) {
             toast.error('Sector data retrieval failed');
@@ -57,7 +57,7 @@ const AdminSubCategoryManager = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('/api/admin/categories/');
+            const response = await api.get('/api/admin/categories/');
             setCategories(response.data.results || response.data);
         } catch (error) {
             console.error('Failed to fetch categories', error);
@@ -76,12 +76,12 @@ const AdminSubCategoryManager = () => {
 
         try {
             if (editingSubCategory) {
-                await axios.put(`/api/admin/subcategories/${editingSubCategory.id}/`, data, {
+                await api.put(`/api/admin/subcategories/${editingSubCategory.id}/`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('Sub-sector updated');
             } else {
-                await axios.post('/api/admin/subcategories/', data, {
+                await api.post('/api/admin/subcategories/', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('Sub-sector initialized');
@@ -105,7 +105,7 @@ const AdminSubCategoryManager = () => {
         if (!subCategoryToDelete) return;
         setDeleteLoading(true);
         try {
-            await axios.delete(`/api/admin/subcategories/${subCategoryToDelete.id}/`);
+            await api.delete(`/api/admin/subcategories/${subCategoryToDelete.id}/`);
             toast.success('Sub-sector purged');
             fetchSubCategories();
             setShowDeleteModal(false);

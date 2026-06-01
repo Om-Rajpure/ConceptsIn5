@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, 
@@ -89,8 +89,8 @@ const AdminVideoManager = () => {
             const finalUrl = url.includes('?') ? `${url}${filterString}` : `${url}?${filterString.replace('&', '')}`;
 
             const [vResponse, sResponse] = await Promise.all([
-                axios.get(finalUrl),
-                axios.get('/api/public/subjects/?limit=1000') // Fetch all subjects for dropdown
+                api.get(finalUrl),
+                api.get('/api/public/subjects/?limit=1000') // Fetch all subjects for dropdown
             ]);
             
             if (vResponse.data.results) {
@@ -115,8 +115,8 @@ const AdminVideoManager = () => {
     const fetchModalData = async () => {
         try {
             const [cResponse, scResponse] = await Promise.all([
-                axios.get('/api/public/categories/'),
-                axios.get('/api/public/subcategories/')
+                api.get('/api/public/categories/'),
+                api.get('/api/public/subcategories/')
             ]);
             setCategories(cResponse.data.results || cResponse.data);
             setSubCategories(scResponse.data.results || scResponse.data);
@@ -139,7 +139,7 @@ const AdminVideoManager = () => {
         }
         setModalLoading(true);
         try {
-            const response = await axios.post('/api/admin/subjects/', {
+            const response = await api.post('/api/admin/subjects/', {
                 name: newSubject.name,
                 subcategory: newSubject.subcategory
             });
@@ -169,7 +169,7 @@ const AdminVideoManager = () => {
         }
         setModalLoading(true);
         try {
-            const response = await axios.post('/api/admin/subcategories/', {
+            const response = await api.post('/api/admin/subcategories/', {
                 name: newSubCategoryName,
                 category: newSubject.category
             });
@@ -199,7 +199,7 @@ const AdminVideoManager = () => {
         }
         setScLoading(true);
         try {
-            const response = await axios.post('/api/admin/subcategories/', {
+            const response = await api.post('/api/admin/subcategories/', {
                 name: scName,
                 category: newSubject.category
             });
@@ -224,7 +224,7 @@ const AdminVideoManager = () => {
 
     const handleToggle = async (id, field, value) => {
         try {
-            await axios.patch(`/api/admin/videos/${id}/`, { [field]: !value });
+            await api.patch(`/api/admin/videos/${id}/`, { [field]: !value });
             setVideos(videos.map(v => v.id === id ? { ...v, [field]: !value } : v));
             toast.success(`${field.replace('is_', '')} status updated`);
         } catch (error) {
@@ -242,7 +242,7 @@ const AdminVideoManager = () => {
         if (!videoToDelete) return;
         setDeleteLoading(true);
         try {
-            await axios.delete(`/api/admin/videos/${videoToDelete.id}/`);
+            await api.delete(`/api/admin/videos/${videoToDelete.id}/`);
             setVideos(videos.filter(v => v.id !== videoToDelete.id));
             toast.success('Module purged from database');
             setShowDeleteModal(false);
@@ -291,9 +291,9 @@ const AdminVideoManager = () => {
         e.preventDefault();
         try {
             if (editingVideo) {
-                await axios.put(`/api/admin/videos/${editingVideo.id}/`, formData);
+                await api.put(`/api/admin/videos/${editingVideo.id}/`, formData);
             } else {
-                await axios.post('/api/admin/videos/', formData);
+                await api.post('/api/admin/videos/', formData);
             }
             fetchData();
             setShowAddForm(false);

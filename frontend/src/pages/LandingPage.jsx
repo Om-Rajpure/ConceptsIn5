@@ -22,7 +22,7 @@ import {
   X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import GlassCard from '../components/GlassCard';
 import ScrollDots from '../components/ScrollDots';
 import SkeletonCard from '../components/SkeletonCard';
@@ -60,9 +60,9 @@ export default function LandingPage() {
       setError(null);
       try {
         const [cResponse, vResponse, rResponse] = await Promise.all([
-          axios.get('/api/public/categories/'),
-          axios.get('/api/public/videos/?is_important=true'),
-          axios.get('/api/public/reels/')
+          api.get('/api/public/categories/'),
+          api.get('/api/public/videos/?is_important=true'),
+          api.get('/api/public/reels/')
         ]);
         setCategories(cResponse.data.results || cResponse.data);
         setFeaturedVideos((vResponse.data.results || vResponse.data).slice(0, 3));

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../api';
 import { 
   Search, 
   Filter, 
@@ -82,11 +82,11 @@ export default function NotesPage() {
       const finalUrl = url.includes('?') ? `${url}${filterString}` : `${url}?${filterString.replace('&', '')}`;
 
       const [nRes, sRes, vRes, cRes, scRes] = await Promise.all([
-        axios.get(finalUrl),
-        axios.get('/api/public/subjects/?limit=1000'),
-        axios.get('/api/public/videos/?limit=1000'),
-        axios.get('/api/public/categories/?limit=1000'),
-        axios.get('/api/public/subcategories/?limit=1000')
+        api.get(finalUrl),
+        api.get('/api/public/subjects/?limit=1000'),
+        api.get('/api/public/videos/?limit=1000'),
+        api.get('/api/public/categories/?limit=1000'),
+        api.get('/api/public/subcategories/?limit=1000')
       ]);
 
       const noteData = nRes.data.results || nRes.data;

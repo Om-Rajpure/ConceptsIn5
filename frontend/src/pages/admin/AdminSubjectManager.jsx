@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, 
@@ -51,9 +51,9 @@ const AdminSubjectManager = () => {
         setLoading(true);
         try {
             const [sRes, cRes, scRes] = await Promise.all([
-                axios.get('/api/admin/subjects/'),
-                axios.get('/api/admin/categories/'),
-                axios.get('/api/admin/subcategories/')
+                api.get('/api/admin/subjects/'),
+                api.get('/api/admin/categories/'),
+                api.get('/api/admin/subcategories/')
             ]);
             setSubjects(sRes.data.results || sRes.data);
             setCategories(cRes.data.results || cRes.data);
@@ -69,10 +69,10 @@ const AdminSubjectManager = () => {
         e.preventDefault();
         try {
             if (editingSubject) {
-                await axios.put(`/api/admin/subjects/${editingSubject.id}/`, formData);
+                await api.put(`/api/admin/subjects/${editingSubject.id}/`, formData);
                 toast.success('Subject coordinates updated');
             } else {
-                await axios.post('/api/admin/subjects/', formData);
+                await api.post('/api/admin/subjects/', formData);
                 toast.success('Subject sector established');
             }
             fetchData();
@@ -90,7 +90,7 @@ const AdminSubjectManager = () => {
         try {
             let res;
             if (type === 'category') {
-                res = await axios.post('/api/admin/categories/', { name: quickName });
+                res = await api.post('/api/admin/categories/', { name: quickName });
                 await fetchData(); // Refresh all lists
                 setFormData(prev => ({ ...prev, category: res.data.id }));
                 setShowQuickCat(false);
@@ -99,7 +99,7 @@ const AdminSubjectManager = () => {
                     toast.error('Parent category required');
                     return;
                 }
-                res = await axios.post('/api/admin/subcategories/', { 
+                res = await api.post('/api/admin/subcategories/', { 
                     name: quickName, 
                     category: formData.category 
                 });
@@ -121,7 +121,7 @@ const AdminSubjectManager = () => {
         if (!subjectToDelete) return;
         setDeleteLoading(true);
         try {
-            await axios.delete(`/api/admin/subjects/${subjectToDelete.id}/`);
+            await api.delete(`/api/admin/subjects/${subjectToDelete.id}/`);
             toast.success('Subject purged');
             fetchData();
             setShowDeleteModal(false);

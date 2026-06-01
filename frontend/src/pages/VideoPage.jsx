@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -42,12 +42,12 @@ export default function VideoPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/api/public/videos/${id}/`);
+      const response = await api.get(`/api/public/videos/${id}/`);
       const videoData = response.data;
       const subjectData = videoData.subject;
       
       // Fetch all videos for this subject roadmap using subject__slug filter
-      const vResponse = await axios.get(`/api/public/videos/?subject__slug=${subjectData.slug}`);
+      const vResponse = await api.get(`/api/public/videos/?subject__slug=${subjectData.slug}`);
       const subjectVideos = vResponse.data.results || vResponse.data;
       
       const sortedVideos = subjectVideos.sort((a, b) => a.id - b.id);

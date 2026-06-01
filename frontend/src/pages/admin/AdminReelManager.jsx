@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, 
@@ -49,7 +49,7 @@ const AdminReelManager = () => {
     const fetchReels = async (url = '/api/admin/reels/') => {
         setLoading(true);
         try {
-            const response = await axios.get(url);
+            const response = await api.get(url);
             if (response.data.results) {
                 setReels(response.data.results);
                 setPagination({
@@ -91,12 +91,12 @@ const AdminReelManager = () => {
 
         try {
             if (editingReel) {
-                await axios.put(`/api/admin/reels/${editingReel.id}/`, data, {
+                await api.put(`/api/admin/reels/${editingReel.id}/`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('Reel updated successfully.', { id: loadingToast });
             } else {
-                await axios.post('/api/admin/reels/', data, {
+                await api.post('/api/admin/reels/', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 toast.success('New Reel initialized.', { id: loadingToast });
@@ -132,7 +132,7 @@ const AdminReelManager = () => {
         
         setDeleteLoading(true);
         try {
-            await axios.delete(`/api/admin/reels/${reelToDelete.id}/`);
+            await api.delete(`/api/admin/reels/${reelToDelete.id}/`);
             toast.success('Nexus unit terminated.');
             setShowDeleteModal(false);
             setReelToDelete(null);
