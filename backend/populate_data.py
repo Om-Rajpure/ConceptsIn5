@@ -51,6 +51,18 @@ def populate():
         tags='SQL, Database'
     )
 
+    # Admin User Configuration
+    from django.contrib.auth.models import User
+    admin_user = os.getenv("CMS_ADMIN_USERNAME", "om")
+    admin_pass = os.getenv("CMS_ADMIN_PASSWORD", "0m@123")
+    
+    user, created = User.objects.get_or_create(username=admin_user)
+    user.is_staff = True
+    user.is_superuser = True
+    user.set_password(admin_pass)
+    user.save()
+    print(f"CMS Admin user '{admin_user}' verified/updated.")
+
     print("Data populated successfully.")
 
 if __name__ == '__main__':

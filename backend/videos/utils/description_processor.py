@@ -67,5 +67,3 @@ def process_description(description):
                 roadmap.append(topic)
                 
     return quick_summary, roadmap
-
-    return quick_summary, roadmap

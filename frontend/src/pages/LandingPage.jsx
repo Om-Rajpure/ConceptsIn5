@@ -244,21 +244,21 @@ export default function LandingPage() {
       </section>
 
       {/* 2 Main Categories Section */}
-      <section id="categories" className="py-10 md:py-16 px-0 relative section-container overflow-hidden">
+      <section id="categories" className="py-10 md:py-20 px-0 relative categories-grid-container overflow-hidden">
         <motion.div {...fadeInUp} className="text-center mb-10 md:mb-16 px-6">
           <h2 className="text-section-title mb-4 md:mb-6">Select Mission</h2>
           <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
         </motion.div>
         
-        <div className="relative group/scroll parent-container-overflow">
-          <div className="scroll-container">
+        <div className="relative group/scroll px-6 md:px-0">
+          <div className="scroll-container overflow-visible">
             <div 
               ref={catRef}
-              className="scroll-track px-4 md:px-0"
+              className="scroll-track categories-grid"
             >
               {loading ? (
                 [...Array(4)].map((_, i) => (
-                  <div key={i} className="card-scroll-item">
+                  <div key={i} className="card-scroll-item h-full">
                     <SkeletonCard />
                   </div>
                 ))
@@ -269,7 +269,7 @@ export default function LandingPage() {
                     <Link 
                       to={`/category/${cat.slug || cat.id}`} 
                       key={cat.id} 
-                      className="card-scroll-item"
+                      className="card-scroll-item h-full block"
                     >
                       <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -302,7 +302,7 @@ export default function LandingPage() {
                             <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
                             <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
                             <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                              Initialize <ArrowRight size={14} />
+                               Initialize <ArrowRight size={14} />
                             </div>
                           </div>
                         </GlassCard>
@@ -314,7 +314,9 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        <ScrollDots count={categories.length} activeIndex={catIndex} color="blue" onDotClick={(idx) => scrollTo(catRef, idx)} />
+        <div className="md:hidden">
+          <ScrollDots count={categories.length} activeIndex={catIndex} color="blue" onDotClick={(idx) => scrollTo(catRef, idx)} />
+        </div>
       </section>
 
       {/* 2.5 Social Presence Section */}
@@ -687,7 +689,7 @@ export default function LandingPage() {
             <span className="text-gradient">Smarter</span> Today
           </motion.h2>
           
-          <Link to="/om/login" className="contents">
+          <Link to="/notes" className="contents">
             <motion.button 
               whileHover={{ scale: 1.1, boxShadow: "0 0 50px rgba(123, 97, 255, 0.6)" }}
               whileTap={{ scale: 0.9 }}

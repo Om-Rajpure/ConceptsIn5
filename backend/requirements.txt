@@ -1,18 +1,36 @@
+# ─── Core Django ───────────────────────────────────────────────
 django>=5.1.0
 djangorestframework
 django-cors-headers
 django-filter
 python-dotenv
+
+# ─── Database ──────────────────────────────────────────────────
+psycopg2-binary
+dj-database-url          # Parse DATABASE_URL for Avian/Render
+
+# ─── Production Server & Static Files ─────────────────────────
+gunicorn
+whitenoise
+
+# ─── Security & Rate Limiting ──────────────────────────────────
+django-ratelimit
+
+# ─── YouTube API ───────────────────────────────────────────────
 google-api-python-client
 isodate
+
+# ─── Input Sanitization ────────────────────────────────────────
 bleach
+
+# ─── AI / NLP Summarization ────────────────────────────────────
 sumy
 nltk
 requests
 
-# Production-ready tools for AWS
-gunicorn
-psycopg2-binary
-whitenoise
-django-storages
-boto3
+# ─── Media Storage (Cloudinary — required for Render ephemeral FS)
+cloudinary
+django-cloudinary-storage
+
+# ─── Error Tracking ────────────────────────────────────────────
+sentry-sdk[django]

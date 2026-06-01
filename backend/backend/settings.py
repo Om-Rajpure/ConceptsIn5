@@ -14,6 +14,19 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+# Optional production dependencies
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+except ImportError:
+    sentry_sdk = None
+    DjangoIntegration = None
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,6 +37,16 @@ if ENVIRONMENT == "production":
     load_dotenv(os.path.join(BASE_DIR, '.env.production'))
 else:
     load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Initialize Sentry if DSN is provided
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN and sentry_sdk:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()] if DjangoIntegration else [],
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+    )
 
 
 # ─── Core Security ──────────────────────────────────────────────────
@@ -87,9 +110,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ─── Database ────────────────────────────────────────────────────────
 
-# Production RDS PostgreSQL vs Local SQLite
-# Switching logic: Use PostgreSQL if DB_NAME is provided in environment, otherwise fallback to SQLite.
-if os.getenv("DB_NAME"):
+# Production Avian/RDS PostgreSQL vs Local SQLite
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and dj_database_url:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+elif os.getenv("DB_NAME"):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -99,9 +130,9 @@ if os.getenv("DB_NAME"):
             'HOST': os.getenv('DB_HOST'),
             'PORT': os.getenv('DB_PORT', '5432'),
             'OPTIONS': {
-                'sslmode': 'require',  # Recommended for AWS RDS
+                'sslmode': 'require',
             },
-            'CONN_MAX_AGE': 600,       # Persistent connections for AWS RDS performance
+            'CONN_MAX_AGE': 600,
         }
     }
 else:
@@ -137,6 +168,28 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ─── Media Storage (Cloudinary for Production) ──────────────────────
+CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
+if CLOUDINARY_CLOUD_NAME:
+    try:
+        import cloudinary
+        import cloudinary_storage
+        # django-cloudinary-storage requires it to be inserted before staticfiles
+        if 'cloudinary_storage' not in INSTALLED_APPS:
+            staticfiles_idx = INSTALLED_APPS.index('django.contrib.staticfiles')
+            INSTALLED_APPS.insert(staticfiles_idx, 'cloudinary_storage')
+        if 'cloudinary' not in INSTALLED_APPS:
+            INSTALLED_APPS.append('cloudinary')
+            
+        DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+        CLOUDINARY_STORAGE = {
+            'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+            'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+            'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+        }
+    except ImportError:
+        pass
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -188,13 +241,15 @@ SESSION_COOKIE_SAMESITE = 'Lax'     # CSRF protection for session cookie
 CSRF_COOKIE_HTTPONLY = False         # Must be False so axios can read CSRF token
 CSRF_COOKIE_SAMESITE = 'Lax'        # CSRF protection for CSRF cookie
 
-# Production-only (uncomment when deploying with HTTPS):
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_SSL_REDIRECT = True
-# SECURE_HSTS_SECONDS = 31536000
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
+# Production HTTPS settings - enabled dynamically in non-debug mode
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # ─── Django REST Framework ───────────────────────────────────────────
@@ -237,29 +292,38 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'file_error': {
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'errors.log',
-            'formatter': 'verbose',
-            'level': 'ERROR',
-        },
-        'file_info': {
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'actions.log',
-            'formatter': 'verbose',
-            'level': 'INFO',
-        },
     },
     'loggers': {
         'videos': {
-            'handlers': ['console', 'file_error', 'file_info'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'django': {
-            'handlers': ['console', 'file_error'],
-            'level': 'ERROR',
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': True,
         },
     },
 }
+
+# Add file-based logging only when developing locally
+if DEBUG and not os.getenv("RENDER"):
+    # Ensure logs directory exists
+    logs_dir = BASE_DIR / 'logs'
+    os.makedirs(logs_dir, exist_ok=True)
+    
+    LOGGING['handlers']['file_error'] = {
+        'class': 'logging.FileHandler',
+        'filename': logs_dir / 'errors.log',
+        'formatter': 'verbose',
+        'level': 'ERROR',
+    }
+    LOGGING['handlers']['file_info'] = {
+        'class': 'logging.FileHandler',
+        'filename': logs_dir / 'actions.log',
+        'formatter': 'verbose',
+        'level': 'INFO',
+    }
+    LOGGING['loggers']['videos']['handlers'].extend(['file_error', 'file_info'])
+    LOGGING['loggers']['django']['handlers'].append('file_error')

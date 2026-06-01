@@ -7,14 +7,31 @@ __pycache__/
 # ─── Virtual Environment ─────────────────
 venv/
 env/
+.venv/
+
+# ─── Secrets & Keys (NEVER COMMIT) ───────
 .env
+.env.local
+.env.production
+.env.development
+ .env
+*.pem
+*.key
+*.p12
+*.pfx
 
 # ─── Django ──────────────────────────────
 db.sqlite3
 db.sqlite3-journal
-media/
-staticfiles/
-*.log
+backend/media/
+backend/staticfiles/
+backend/logs/
+backend/error.log
+
+# ─── Debug & Test Scripts ────────────────
+backend/debug_*.py
+backend/test_*.py
+backend/debug_traceback.html
 
 # ─── IDE ─────────────────────────────────
 .vscode/
@@ -28,8 +45,6 @@ staticfiles/
 Thumbs.db
 
 # ─── Node (Frontend) ─────────────────────
-node_modules/
-dist/
-build/
-.env.local
-.env.production
+frontend/node_modules/
+frontend/dist/
+frontend/build/

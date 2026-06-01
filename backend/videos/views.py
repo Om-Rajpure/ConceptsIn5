@@ -2,8 +2,18 @@ from rest_framework import viewsets, permissions, status, views, parsers
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.cache import cache_page
+try:
+    from ratelimit.decorators import ratelimit
+except ImportError:
+    # Resilient fallback mock decorator if django-ratelimit is not installed locally
+    def ratelimit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+
+from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, SubCategory, Subject, Video, Note, Reel
 from .serializers import (
@@ -15,6 +25,10 @@ from rest_framework.exceptions import ValidationError
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def health_check(request):
+    return JsonResponse({'status': 'healthy', 'service': 'conceptsin5-api'})
 
 
 # ─── Public ViewSets (Read-Only) ─────────────────────────────────────
@@ -272,7 +286,7 @@ class AdminCategoryViewSet(viewsets.ModelViewSet):
 
 # ─── Auth Views ──────────────────────────────────────────────────────
 
-@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='post')
 class LoginView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -309,6 +323,7 @@ class LogoutView(views.APIView):
         return Response({'success': True, 'detail': 'Logged out successfully'})
 
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class UserStatusView(views.APIView):
     def get(self, request):
         if request.user.is_authenticated:

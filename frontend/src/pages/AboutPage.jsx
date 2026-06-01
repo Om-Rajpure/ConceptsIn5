@@ -67,6 +67,9 @@ export default function AboutPage() {
         }
       });
     }, options);
+    
+
+
 
     if (flowRef.current) {
       Array.from(flowRef.current.children).forEach(child => observer.observe(child));

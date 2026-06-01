@@ -1,9 +1,12 @@
 import re
+import logging
 from googleapiclient.discovery import build
 from django.conf import settings
 from django.utils import timezone
 import isodate
 from datetime import datetime, timezone as dt_timezone
+
+logger = logging.getLogger(__name__)
 
 class YouTubeService:
     def __init__(self):
@@ -63,7 +66,7 @@ class YouTubeService:
                 'youtube_id': video_id
             }
         except Exception as e:
-            print(f"Error fetching YouTube metadata: {e}")
+            logger.error(f"Error fetching YouTube metadata: {e}", exc_info=True)
             return None
 
     def fetch_latest_videos(self, max_results=10, published_after=None):
@@ -86,7 +89,7 @@ class YouTubeService:
             response = request.execute()
             return response.get('items', [])
         except Exception as e:
-            print(f"Error fetching channel videos: {e}")
+            logger.error(f"Error fetching channel videos: {e}", exc_info=True)
             return []
 
     def fetch_video_durations(self, video_ids):
@@ -112,7 +115,7 @@ class YouTubeService:
                 durations[vid] = self.convert_duration(iso_duration)
             return durations
         except Exception as e:
-            print(f"Error fetching video durations: {e}")
+            logger.error(f"Error fetching video durations: {e}", exc_info=True)
             return {}
 
     def clean_description(self, description):
@@ -217,7 +220,7 @@ class YouTubeService:
                 stats['new_added'] += 1
                 
             except Exception as e:
-                print(f"Error processing video in pipeline: {e}")
+                logger.error(f"Error processing video in pipeline: {e}", exc_info=True)
                 stats['errors'] += 1
 
         # Step 8: Update FetchLog
