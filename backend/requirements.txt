@@ -12,6 +12,7 @@ dj-database-url          # Parse DATABASE_URL for Avian/Render
 # ─── Production Server & Static Files ─────────────────────────
 gunicorn
 whitenoise
+Pillow==10.3.0
 
 # ─── Security & Rate Limiting ──────────────────────────────────
 django-ratelimit
