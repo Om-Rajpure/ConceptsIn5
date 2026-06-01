@@ -118,7 +118,11 @@ if DATABASE_URL and dj_database_url:
             DATABASE_URL,
             conn_max_age=600,
             ssl_require=True,
-        )
+        ),
+        'sqlite': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
 elif os.getenv("DB_NAME"):
     DATABASES = {
@@ -133,6 +137,10 @@ elif os.getenv("DB_NAME"):
                 'sslmode': 'require',
             },
             'CONN_MAX_AGE': 600,
+        },
+        'sqlite': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
 else:
@@ -143,6 +151,7 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+
 
 
 # ─── Password Validation ────────────────────────────────────────────
