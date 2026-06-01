@@ -120,7 +120,7 @@ class PublicVideoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Video
-        fields = '__all__'
+        exclude = ['fetch_from_youtube', 'youtube_url_input']
 
 
 # ─── SubCategory Serializer ─────────────────────────────────────────

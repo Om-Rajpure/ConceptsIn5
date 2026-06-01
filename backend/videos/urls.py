@@ -5,7 +5,8 @@ from .views import (
     PublicVideoViewSet, PublicNoteViewSet, PublicReelViewSet,
     AdminVideoViewSet, AdminNoteViewSet, AdminSubjectViewSet, AdminSubCategoryViewSet,
     AdminCategoryViewSet, AdminReelViewSet,
-    LoginView, LogoutView, UserStatusView, AdminDashboardStatsView
+    LoginView, LogoutView, UserStatusView, AdminDashboardStatsView,
+    health_check
 )
 
 router = DefaultRouter()
@@ -31,6 +32,7 @@ admin_router.register(r'subcategories', AdminSubCategoryViewSet, basename='admin
 admin_router.register(r'reels', AdminReelViewSet, basename='admin-reel')
 
 urlpatterns = [
+    path('health/', health_check, name='health-check'),
     path('public/', include(public_router.urls)),
     path('admin/', include(admin_router.urls)),
     path('auth/login/', LoginView.as_view(), name='api-login'),

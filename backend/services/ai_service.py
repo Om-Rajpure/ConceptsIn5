@@ -24,5 +24,7 @@ def generate_summary(description):
         return summary.strip()
 
     except Exception as e:
-        print(f"Error generating summary: {e}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error generating summary: {e}", exc_info=True)
         return ""

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /om/
+Disallow: /om/login
+Disallow: /django-admin/
+
+Sitemap: https://conceptsin5.com/sitemap.xml

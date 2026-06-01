@@ -124,6 +124,12 @@ class Video(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['is_published']),
+            models.Index(fields=['is_important']),
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['subject', 'is_published']),
+        ]
 
 class Reel(models.Model):
     title = models.CharField(max_length=200)
@@ -137,6 +143,9 @@ class Reel(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+        ]
 
 class Note(models.Model):
     title = models.CharField(max_length=255)
