@@ -89,10 +89,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
+TEMPLATES_DIR_FRONTEND = BASE_DIR.parent / 'frontend' / 'dist'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR_FRONTEND] if TEMPLATES_DIR_FRONTEND.exists() else [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -104,6 +105,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
@@ -173,10 +175,16 @@ USE_TZ = True
 
 
 # ─── Static & Media Files ───────────────────────────────────────────
-
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATIC_FILES_DIRS_FRONTEND = BASE_DIR.parent / 'frontend' / 'dist'
+STATICFILES_DIRS = [
+    STATIC_FILES_DIRS_FRONTEND,
+] if STATIC_FILES_DIRS_FRONTEND.exists() else []
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # ─── Media Storage (Cloudinary for Production) ──────────────────────
 CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
