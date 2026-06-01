@@ -2,8 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://conceptsin5.onrender.com/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://conceptsin5.onrender.com/api/:path*"
     },
     {
       "source": "/((?!api/).*)",

@@ -2,9 +2,11 @@ import axios from 'axios';
 
 // Central axios instance — all API calls go through here.
 // In production (Vercel), VITE_API_URL = https://conceptsin5.onrender.com
-// In development, falls back to empty string so Vite's local proxy takes over.
+// Falls back to absolute Render URL so calls never go to the Vercel domain.
+const API_URL = import.meta.env.VITE_API_URL || 'https://conceptsin5.onrender.com';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '',
+  baseURL: API_URL,
   withCredentials: true,
 });
 
