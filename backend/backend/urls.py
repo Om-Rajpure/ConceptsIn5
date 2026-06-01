@@ -19,13 +19,28 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.views.static import serve
+import os
 
 urlpatterns = [
     path('django-admin/', admin.site.urls), # Rename default admin to avoid collision with custom /om
     path('api/', include('videos.urls')),
+
+    # Serve built frontend assets directly from root paths
+    path('assets/<path:path>', serve, {
+        'document_root': os.path.join(settings.BASE_DIR.parent, 'frontend', 'dist', 'assets'),
+    }),
+    path('images/<path:path>', serve, {
+        'document_root': os.path.join(settings.BASE_DIR.parent, 'frontend', 'dist', 'images'),
+    }),
+    path('favicon.png', serve, {
+        'document_root': os.path.join(settings.BASE_DIR.parent, 'frontend', 'dist'),
+        'path': 'favicon.png',
+    }),
 
     path('', TemplateView.as_view(template_name='index.html')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
