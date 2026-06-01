@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Plus, 
@@ -79,9 +79,9 @@ const AdminNoteManager = () => {
             }
 
             const [nResponse, vResponse, sResponse] = await Promise.all([
-                axios.get(finalUrl),
-                axios.get('/api/admin/videos/?limit=1000'),
-                axios.get('/api/admin/subjects/?limit=1000')
+                api.get(finalUrl),
+                api.get('/api/admin/videos/?limit=1000'),
+                api.get('/api/admin/subjects/?limit=1000')
             ]);
             
             if (nResponse.data.results) {
@@ -107,8 +107,8 @@ const AdminNoteManager = () => {
     const fetchAuxiliaryData = async () => {
         try {
             const [cResponse, scResponse] = await Promise.all([
-                axios.get('/api/admin/categories/'),
-                axios.get('/api/admin/subcategories/')
+                api.get('/api/admin/categories/'),
+                api.get('/api/admin/subcategories/')
             ]);
             setCategories(cResponse.data.results || cResponse.data);
             setSubcategories(scResponse.data.results || scResponse.data);
@@ -130,7 +130,7 @@ const AdminNoteManager = () => {
         setNotes(notes.filter(n => n.id !== noteToDelete.id));
 
         try {
-            await axios.delete(`/api/admin/notes/${noteToDelete.id}/`);
+            await api.delete(`/api/admin/notes/${noteToDelete.id}/`);
             toast.success('Intel purged successfully.');
             setShowDeleteModal(false);
             setNoteToDelete(null);
@@ -157,11 +157,11 @@ const AdminNoteManager = () => {
 
         try {
             if (editingNote) {
-                await axios.put(`/api/admin/notes/${editingNote.id}/`, data, {
+                await api.put(`/api/admin/notes/${editingNote.id}/`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                await axios.post('/api/admin/notes/', data, {
+                await api.post('/api/admin/notes/', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             }
@@ -179,7 +179,7 @@ const AdminNoteManager = () => {
     const handleSubjectSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/admin/subjects/', {
+            const response = await api.post('/api/admin/subjects/', {
                 name: subjectFormData.name,
                 subcategory: subjectFormData.subcategory
             });
@@ -204,7 +204,7 @@ const AdminNoteManager = () => {
         
         setSubCategoryLoading(true);
         try {
-            const response = await axios.post('/api/admin/subcategories/', {
+            const response = await api.post('/api/admin/subcategories/', {
                 name: newSubCategoryName,
                 category: subjectFormData.category
             });

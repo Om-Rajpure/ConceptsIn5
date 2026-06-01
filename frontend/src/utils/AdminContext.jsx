@@ -1,32 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from './api';
 
 const AdminContext = createContext();
-
-// Configure axios defaults
-axios.defaults.withCredentials = true;
-// Removing baseURL because we use Vite proxy in dev
-// axios.defaults.baseURL = 'http://localhost:8000'; 
-
-// Add a request interceptor to include the CSRF token if it exists in cookies
-axios.interceptors.request.use((config) => {
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    if (cookieValue) {
-        config.headers['X-CSRFToken'] = cookieValue;
-    }
-    return config;
-});
 
 export const AdminProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -34,7 +9,7 @@ export const AdminProvider = ({ children }) => {
 
     const checkStatus = async () => {
         try {
-            const response = await axios.get('/api/auth/status/');
+            const response = await api.get('/api/auth/status/');
             if (response.data.is_authenticated && response.data.is_staff) {
                 setUser({ username: response.data.username });
             } else {
@@ -53,7 +28,7 @@ export const AdminProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const response = await axios.post('/api/auth/login/', { username, password });
+            const response = await api.post('/api/auth/login/', { username, password });
             setUser({ username: response.data.username });
             return { success: true };
         } catch (error) {
@@ -63,7 +38,7 @@ export const AdminProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await axios.post('/api/auth/logout/');
+            await api.post('/api/auth/logout/');
             setUser(null);
         } catch (error) {
             console.error('Logout failed', error);

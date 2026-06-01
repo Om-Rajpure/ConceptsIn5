@@ -18,7 +18,7 @@ import {
   Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import GlassCard from '../components/GlassCard';
 import ScrollDots from '../components/ScrollDots';
 import SkeletonCard, { SkeletonSubject } from '../components/SkeletonCard';
@@ -150,8 +150,8 @@ export default function SubjectPage() {
     setError(null);
     try {
       const [sResponse, vResponse] = await Promise.all([
-        axios.get(`/api/public/subjects/${slug}/`),
-        axios.get(`/api/public/videos/?subject__slug=${slug}`)
+        api.get(`/api/public/subjects/${slug}/`),
+        api.get(`/api/public/videos/?subject__slug=${slug}`)
       ]);
       
       const sData = sResponse.data;

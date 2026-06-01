@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion } from 'framer-motion';
 import { 
     Video, 
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await axios.get('/api/admin/stats/');
+                const response = await api.get('/api/admin/stats/');
                 setStats(response.data);
             } catch (error) {
                 console.error('Failed to fetch stats', error);

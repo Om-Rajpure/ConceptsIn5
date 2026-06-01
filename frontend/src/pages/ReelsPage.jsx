@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { motion } from 'framer-motion';
 import { Zap, Play, ArrowLeft, Search, Database } from 'lucide-react';
 import { getYoutubeThumbnail } from '../utils/youtubeUtils';
@@ -17,7 +17,7 @@ export default function ReelsPage() {
         const fetchReels = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('/api/public/reels/');
+                const response = await api.get('/api/public/reels/');
                 setReels(response.data.results || response.data);
             } catch (err) {
                 console.error('Failed to fetch reels', err);

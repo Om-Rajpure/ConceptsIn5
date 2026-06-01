@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -35,7 +35,7 @@ export default function CategoryPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/api/public/categories/${id}/`);
+      const response = await api.get(`/api/public/categories/${id}/`);
       const data = response.data;
       setCategory(data);
       
