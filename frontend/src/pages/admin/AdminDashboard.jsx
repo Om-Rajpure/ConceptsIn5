@@ -43,7 +43,7 @@ const AdminDashboard = () => {
 
     const handleLogout = async () => {
         await logout();
-        navigate('/om/login');
+        navigate('/admin-portal/login');
     };
 
     return (
@@ -124,42 +124,42 @@ const AdminDashboard = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
                 <ActionCard 
-                    href="/om/videos" 
+                    href="/admin-portal/videos" 
                     title="Manage Videos" 
                     desc="Edit, add or sync YouTube content" 
                     icon={<Video size={24} />}
                     color="blue"
                 />
                 <ActionCard 
-                    href="/om/notes" 
+                    href="/admin-portal/notes" 
                     title="Manage Notes" 
                     desc="Construct rich text study guides" 
                     icon={<FileText size={24} />}
                     color="purple"
                 />
                 <ActionCard 
-                    href="/om/reels" 
+                    href="/admin-portal/reels" 
                     title="Manage Reels" 
                     desc="Quick concept short-form content" 
                     icon={<Play size={24} />}
                     color="cyan"
                 />
                 <ActionCard 
-                    href="/om/categories" 
+                    href="/admin-portal/categories" 
                     title="Categories" 
                     desc="Manage primary grid sectors" 
                     icon={<LayoutDashboard size={24} />}
                     color="purple"
                 />
                 <ActionCard 
-                    href="/om/subcategories" 
+                    href="/admin-portal/subcategories" 
                     title="Sub-Sectors" 
                     desc="Manage sub-sector classifications" 
                     icon={<Layers size={24} />}
                     color="blue"
                 />
                 <ActionCard 
-                    href="/om/subjects" 
+                    href="/admin-portal/subjects" 
                     title="Subjects" 
                     desc="Manage and link study subjects" 
                     icon={<BookOpen size={24} />}
@@ -173,7 +173,7 @@ const AdminDashboard = () => {
                     color="blue"
                 />
                 <div 
-                   onClick={() => navigate('/om/videos?add=true')}
+                   onClick={() => navigate('/admin-portal/videos?add=true')}
                    className="glass-card p-8 border-accent-blue/30 bg-accent-blue/[0.02] border-dashed hover:border-solid hover:bg-accent-blue/5 cursor-pointer flex flex-col items-center justify-center text-center group transition-all"
                 >
                     <div className="w-12 h-12 rounded-full bg-accent-blue/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">

@@ -151,7 +151,7 @@ const AdminReelManager = () => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                     <div>
-                        <Link to="/om" className="flex items-center gap-2 text-accent-blue hover:text-white transition-colors mb-4 group font-black uppercase tracking-widest text-[10px]">
+                        <Link to="/admin-portal" className="flex items-center gap-2 text-accent-blue hover:text-white transition-colors mb-4 group font-black uppercase tracking-widest text-[10px]">
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to Dashboard
                         </Link>
                         <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase glow-text">

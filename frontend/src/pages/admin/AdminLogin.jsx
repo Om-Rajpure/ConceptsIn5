@@ -18,7 +18,7 @@ const AdminLogin = () => {
         setError('');
         const result = await login(username, password);
         if (result.success) {
-            navigate('/om');
+            navigate('/admin-portal');
         } else {
             setError(result.message);
         }

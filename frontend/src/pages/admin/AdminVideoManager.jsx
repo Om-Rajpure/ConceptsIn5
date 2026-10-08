@@ -332,7 +332,7 @@ const AdminVideoManager = () => {
             <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-[80px] sm:pt-[20px] lg:pt-[60px] pb-20">
                 <header className="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <Link to="/om" className="p-3 glass-card border-white/5 hover:border-accent-blue/30 text-gray-400 hover:text-white transition-all rounded-xl">
+                        <Link to="/admin-portal" className="p-3 glass-card border-white/5 hover:border-accent-blue/30 text-gray-400 hover:text-white transition-all rounded-xl">
                             <ArrowLeft size={20} />
                         </Link>
                         <div>

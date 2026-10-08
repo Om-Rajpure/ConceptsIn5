@@ -14,7 +14,7 @@ const ProtectedRoute = () => {
     }
 
     if (!user) {
-        return <Navigate to="/om/login" replace />;
+        return <Navigate to="/admin-portal/login" replace />;
     }
 
     return <Outlet />;

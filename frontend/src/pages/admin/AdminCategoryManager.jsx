@@ -112,7 +112,7 @@ const AdminCategoryManager = () => {
                 {/* Header */}
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                     <div className="flex items-center gap-6">
-                        <Link to="/om" className="group p-4 glass-card border-white/5 hover:border-accent-purple/40 text-gray-400 hover:text-white transition-all duration-500">
+                        <Link to="/admin-portal" className="group p-4 glass-card border-white/5 hover:border-accent-purple/40 text-gray-400 hover:text-white transition-all duration-500">
                             <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                         </Link>
                         <div>
