@@ -8,17 +8,21 @@ __pycache__/
 venv/
 env/
 .venv/
+ENV/
 
-# ─── Secrets & Keys (NEVER COMMIT) ───────
+# ─── Secrets & Credentials (CRITICAL) ────
 .env
-.env.local
-.env.production
-.env.development
- .env
+.env.*
+!.env.example
 *.pem
 *.key
 *.p12
 *.pfx
+*.pkcs12
+*.cert
+*.crt
+id_rsa*
+id_ed25519*
 
 # ─── Django ──────────────────────────────
 db.sqlite3
@@ -26,14 +30,16 @@ db.sqlite3-journal
 backend/media/
 backend/staticfiles/
 backend/logs/
-backend/error.log
+backend/*.log
+*.log
 
-# ─── Debug & Test Scripts ────────────────
+# ─── Debug & Scratch Scripts ─────────────
 backend/debug_*.py
 backend/test_*.py
 backend/debug_traceback.html
+scratch/
 
-# ─── IDE ─────────────────────────────────
+# ─── IDE & Editors ───────────────────────
 .vscode/
 .idea/
 *.swp
@@ -43,8 +49,13 @@ backend/debug_traceback.html
 # ─── OS ──────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# ─── Node (Frontend) ─────────────────────
+# ─── Node & Frontend ─────────────────────
 frontend/node_modules/
 frontend/dist/
 frontend/build/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

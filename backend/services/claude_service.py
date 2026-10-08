@@ -3,10 +3,12 @@ ConceptsIn5 Claude AI Service
 Integrates with Anthropic Claude API (3.5 Haiku / Sonnet) to power:
 1. Context-Grounded Concept Tutor (Socratic explanations, simplification, examples, exam tips)
 2. Interactive Quick Quiz Generator (Diagnostic assessment based on verified notes)
+Includes telemetry, token observability, strict grounding, and graceful fallbacks.
 """
 
 import os
 import json
+import time
 import logging
 from django.conf import settings
 
@@ -81,27 +83,46 @@ Always respond in valid JSON matching this schema:
 
 
 def _get_anthropic_client():
-    """Initializes and returns the Anthropic client if API key is present."""
+    """Initializes and returns the Anthropic client with timeout if API key is present."""
     api_key = getattr(settings, 'ANTHROPIC_API_KEY', None) or os.getenv('ANTHROPIC_API_KEY')
     if not api_key:
         return None
     try:
         import anthropic
-        return anthropic.Anthropic(api_key=api_key)
+        # Set a reasonable 30-second timeout to prevent hung requests
+        return anthropic.Anthropic(api_key=api_key, timeout=30.0)
     except Exception as e:
         logger.error(f"Failed to initialize Anthropic client: {e}")
         return None
+
+
+def _clean_json_response(raw_text):
+    """Safely extracts JSON from code fences or surrounding text."""
+    text = raw_text.strip()
+    if text.startswith("```json"):
+        text = text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
+    elif text.startswith("```"):
+        text = text.split("```", 1)[1].rsplit("```", 1)[0].strip()
+    
+    # Locate outer brackets if surrounded by extraneous text
+    first_brace = text.find('{')
+    last_brace = text.rfind('}')
+    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+        text = text[first_brace:last_brace + 1]
+        
+    return json.loads(text)
 
 
 def ask_concept_tutor(context_data, user_question, action_type="custom"):
     """
     Asks the Claude Concept Tutor a question grounded in the current learning context.
     
-    :param context_data: dict containing title, subject, description, notes, roadmap, quick_summary
+    :param context_data: dict containing title, subject_name, topics, summary, notes_content
     :param user_question: str, the question or prompt from the student
     :param action_type: str, e.g. "simplify", "example", "exam_tip", "compare", "custom"
-    :return: dict with structured response
+    :return: dict with structured response and telemetry metadata
     """
+    start_time = time.time()
     client = _get_anthropic_client()
     model = getattr(settings, 'ANTHROPIC_MODEL', 'claude-3-5-haiku-20241022')
     max_tokens = getattr(settings, 'ANTHROPIC_MAX_TOKENS', 1024)
@@ -132,6 +153,9 @@ Please provide your structured response in JSON format.
         summary = context_data.get('summary', 'Core engineering principle.')
         notes = context_data.get('notes_content', '')
         
+        latency_ms = int((time.time() - start_time) * 1000)
+        logger.info(f"[AI Telemetry] Concept Tutor (Offline) | Topic: '{title}' | Action: '{action_type}' | Latency: {latency_ms}ms")
+        
         return {
             "answer": f"**{title}** focuses on {summary}\n\n{notes[:300]}...\n\n*(Note: Running in offline/development mode. Configure `ANTHROPIC_API_KEY` for live Claude 3.5 real-time answers.)*",
             "key_points": [
@@ -145,7 +169,8 @@ Please provide your structured response in JSON format.
                 f"How does {title} compare to alternative approaches?",
                 f"What is the most common mistake students make with {title}?"
             ],
-            "model_used": "offline-grounded-engine"
+            "model_used": "offline-grounded-engine",
+            "latency_ms": latency_ms
         }
 
     try:
@@ -160,37 +185,45 @@ Please provide your structured response in JSON format.
         )
         
         raw_text = response.content[0].text.strip()
+        data = _clean_json_response(raw_text)
         
-        # Parse JSON
-        if raw_text.startswith("```json"):
-            raw_text = raw_text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
-        elif raw_text.startswith("```"):
-            raw_text = raw_text.split("```", 1)[1].rsplit("```", 1)[0].strip()
-            
-        data = json.loads(raw_text)
+        latency_ms = int((time.time() - start_time) * 1000)
+        input_tokens = getattr(response.usage, 'input_tokens', 0)
+        output_tokens = getattr(response.usage, 'output_tokens', 0)
+        
+        logger.info(
+            f"[AI Telemetry] Concept Tutor Success | Model: {model} | Topic: '{context_data.get('title')}' | "
+            f"Action: '{action_type}' | Tokens: {input_tokens}in/{output_tokens}out | Latency: {latency_ms}ms"
+        )
+        
         data['model_used'] = model
+        data['latency_ms'] = latency_ms
         return data
 
     except json.JSONDecodeError:
-        logger.warning("Claude response was not valid JSON, returning formatted text.")
+        latency_ms = int((time.time() - start_time) * 1000)
+        logger.warning(f"[AI Telemetry] Claude response not strict JSON. Fallback formatting applied.")
         return {
             "answer": raw_text,
             "key_points": [],
             "example": "",
             "exam_tip": "",
             "follow_up_questions": [],
-            "model_used": model
+            "model_used": model,
+            "latency_ms": latency_ms
         }
     except Exception as e:
-        logger.error(f"Claude API tutor error: {e}", exc_info=True)
+        latency_ms = int((time.time() - start_time) * 1000)
+        logger.error(f"[AI Telemetry] Claude API error: {e} | Latency: {latency_ms}ms", exc_info=True)
         return {
             "answer": "The Concept Tutor is temporarily unavailable. Please try again in a few moments.",
             "key_points": [],
             "example": "",
             "exam_tip": "",
             "follow_up_questions": [],
-            "error": str(e),
-            "model_used": "error"
+            "error": "AI service temporarily unavailable.",
+            "model_used": "error",
+            "latency_ms": latency_ms
         }
 
 
@@ -198,6 +231,7 @@ def generate_quick_quiz(context_data):
     """
     Generates a 4-question diagnostic quiz grounded in the module context.
     """
+    start_time = time.time()
     client = _get_anthropic_client()
     model = getattr(settings, 'ANTHROPIC_MODEL', 'claude-3-5-haiku-20241022')
     max_tokens = getattr(settings, 'ANTHROPIC_MAX_TOKENS', 1200)
@@ -222,6 +256,9 @@ Respond ONLY in valid JSON.
 
     if not client:
         title = context_data.get('title', 'Concept Assessment')
+        latency_ms = int((time.time() - start_time) * 1000)
+        logger.info(f"[AI Telemetry] Quick Quiz (Offline) | Topic: '{title}' | Latency: {latency_ms}ms")
+        
         return {
             "title": f"Quick Check: {title}",
             "questions": [
@@ -275,7 +312,8 @@ Respond ONLY in valid JSON.
                     ]
                 }
             ],
-            "model_used": "offline-diagnostic-engine"
+            "model_used": "offline-diagnostic-engine",
+            "latency_ms": latency_ms
         }
 
     try:
@@ -290,20 +328,28 @@ Respond ONLY in valid JSON.
         )
         
         raw_text = response.content[0].text.strip()
-        if raw_text.startswith("```json"):
-            raw_text = raw_text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
-        elif raw_text.startswith("```"):
-            raw_text = raw_text.split("```", 1)[1].rsplit("```", 1)[0].strip()
-            
-        data = json.loads(raw_text)
+        data = _clean_json_response(raw_text)
+        
+        latency_ms = int((time.time() - start_time) * 1000)
+        input_tokens = getattr(response.usage, 'input_tokens', 0)
+        output_tokens = getattr(response.usage, 'output_tokens', 0)
+        
+        logger.info(
+            f"[AI Telemetry] Quick Quiz Success | Model: {model} | Topic: '{context_data.get('title')}' | "
+            f"Tokens: {input_tokens}in/{output_tokens}out | Latency: {latency_ms}ms"
+        )
+        
         data['model_used'] = model
+        data['latency_ms'] = latency_ms
         return data
 
     except Exception as e:
-        logger.error(f"Claude API quiz generation error: {e}", exc_info=True)
+        latency_ms = int((time.time() - start_time) * 1000)
+        logger.error(f"[AI Telemetry] Claude API quiz error: {e} | Latency: {latency_ms}ms", exc_info=True)
         return {
             "title": f"Quiz: {context_data.get('title', 'Concept')}",
             "questions": [],
             "error": "Quiz generation is temporarily unavailable.",
-            "model_used": "error"
+            "model_used": "error",
+            "latency_ms": latency_ms
         }

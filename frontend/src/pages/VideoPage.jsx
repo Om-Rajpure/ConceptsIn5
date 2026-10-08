@@ -25,6 +25,7 @@ import SkeletonCard, { SkeletonSubject } from '../components/SkeletonCard';
 import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
 import ConceptTutor from '../components/ConceptTutor';
+import QuickQuiz from '../components/QuickQuiz';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 15 },
@@ -331,10 +332,15 @@ export default function VideoPage() {
           </aside>
         </div>
 
-        {/* AI Concept Tutor */}
+        {/* AI Concept Tutor & Quick Quiz */}
         {!loading && context?.video?.id && (
-          <section className="mt-16">
+          <section className="mt-16 space-y-12">
             <ConceptTutor
+              videoId={context.video.id}
+              conceptTitle={context.video.title}
+              subjectSlug={context.subject?.slug}
+            />
+            <QuickQuiz
               videoId={context.video.id}
               conceptTitle={context.video.title}
               subjectSlug={context.subject?.slug}
