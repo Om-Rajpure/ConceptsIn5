@@ -54,11 +54,16 @@ if SENTRY_DSN and sentry_sdk:
 
 
 # ─── Core Security ──────────────────────────────────────────────────
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-replace-this-in-prod')
-
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
+
+if not SECRET_KEY:
+    if ENVIRONMENT == "production" or not DEBUG:
+        import sys
+        print("CRITICAL SECURITY ERROR: SECRET_KEY environment variable is required in production.", file=sys.stderr)
+        SECRET_KEY = 'django-insecure-dev-fallback-change-in-env-before-production'
+    else:
+        SECRET_KEY = 'django-insecure-dev-fallback-change-in-env-before-production'
 
 # ALLOWED_HOSTS supports multiple domains via environment variable (comma-separated)
 raw_hosts = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
@@ -383,3 +388,10 @@ if DEBUG and not os.getenv("RENDER"):
     }
     LOGGING['loggers']['videos']['handlers'].extend(['file_error', 'file_info'])
     LOGGING['loggers']['django']['handlers'].append('file_error')
+
+
+# ─── Anthropic Claude AI Settings ────────────────────────────────────
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-20241022")
+ANTHROPIC_MAX_TOKENS = int(os.getenv("ANTHROPIC_MAX_TOKENS", "1024"))
+

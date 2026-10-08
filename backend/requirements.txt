@@ -24,7 +24,8 @@ isodate
 # ─── Input Sanitization ────────────────────────────────────────
 bleach
 
-# ─── AI / NLP Summarization ────────────────────────────────────
+# ─── AI / Claude Engine & NLP ──────────────────────────────────
+anthropic>=1.12.1
 sumy
 nltk
 requests
