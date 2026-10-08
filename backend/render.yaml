@@ -35,7 +35,7 @@ services:
       - key: GUNICORN_WORKERS
         value: "2"
       - key: PYTHON_VERSION
-        value: "3.11.0"
+        value: "3.11.9"
 
       # ─── Set these in Render Dashboard (never commit real values) ───
       # SECRET_KEY         → generate via: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
