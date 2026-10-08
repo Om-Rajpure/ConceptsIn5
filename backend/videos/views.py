@@ -357,3 +357,152 @@ class AdminDashboardStatsView(views.APIView):
                 {'success': False, 'error': f'Failed to load dashboard statistics: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+# ─── AI Endpoints (Claude-Powered) ───────────────────────────────────
+
+@method_decorator(ratelimit(key='ip', rate='30/m', method='POST', block=True), name='post')
+class ConceptTutorView(views.APIView):
+    """
+    Flagship Context-Grounded AI Concept Tutor.
+    Takes a question and concept identifier, retrieves validated server-side
+    learning context, and passes it to Claude for pedagogical explanation.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        import bleach
+        from services.claude_service import ask_concept_tutor
+
+        video_id = request.data.get('video_id')
+        note_id = request.data.get('note_id')
+        subject_slug = request.data.get('subject_slug')
+        raw_question = request.data.get('question', '').strip()
+        action_type = request.data.get('action_type', 'custom').strip()
+
+        if not raw_question and action_type == 'custom':
+            return Response(
+                {'success': False, 'error': 'Please provide a question or select an action.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Sanitize and enforce character limit
+        question = bleach.clean(raw_question)[:500]
+        if not question and action_type in ['simplify', 'example', 'exam_tip', 'compare', 'quiz_me']:
+            action_prompts = {
+                'simplify': 'Explain this concept in simple terms for a beginner.',
+                'example': 'Provide a practical real-world engineering example or code snippet.',
+                'exam_tip': 'What are the highest-yield points to remember for semester exams?',
+                'compare': 'Compare this concept with its closest related engineering concept.',
+                'quiz_me': 'Give me a quick conceptual question to test my understanding.'
+            }
+            question = action_prompts.get(action_type, 'Explain this concept.')
+
+        # Build context server-side
+        context_data = {
+            'title': 'General Technical Concept',
+            'subject_name': 'Engineering',
+            'topics': [],
+            'summary': '',
+            'notes_content': ''
+        }
+
+        if video_id:
+            try:
+                vid = Video.objects.select_related('subject').prefetch_related('notes').get(id=video_id)
+                context_data['title'] = vid.title
+                context_data['subject_name'] = vid.subject.name if vid.subject else 'Computer Science'
+                context_data['topics'] = vid.roadmap or [t.strip() for t in vid.important_topics.split(',') if t.strip()]
+                context_data['summary'] = vid.quick_summary or vid.description
+                if vid.notes.exists():
+                    context_data['notes_content'] = "\n".join([n.content for n in vid.notes.all()[:2]])
+            except (Video.DoesNotExist, ValueError):
+                pass
+        elif note_id:
+            try:
+                n = Note.objects.select_related('subject', 'video').get(id=note_id)
+                context_data['title'] = n.title
+                context_data['subject_name'] = n.subject.name if n.subject else 'Computer Science'
+                context_data['notes_content'] = n.content
+                if n.video:
+                    context_data['summary'] = n.video.quick_summary or n.video.description
+                    context_data['topics'] = n.video.roadmap
+            except (Note.DoesNotExist, ValueError):
+                pass
+        elif subject_slug:
+            try:
+                subj = Subject.objects.prefetch_related('videos', 'notes').get(slug=subject_slug)
+                context_data['title'] = subj.name
+                context_data['subject_name'] = subj.name
+                context_data['summary'] = subj.description
+                sample_videos = [v.title for v in subj.videos.all()[:4]]
+                context_data['topics'] = sample_videos
+            except Subject.DoesNotExist:
+                pass
+
+        result = ask_concept_tutor(context_data, question, action_type)
+        return Response({
+            'success': True,
+            'data': result,
+            'context_title': context_data['title']
+        })
+
+
+@method_decorator(ratelimit(key='ip', rate='15/m', method='POST', block=True), name='post')
+class QuickQuizView(views.APIView):
+    """
+    AI Diagnostic Quiz Generator.
+    Generates a 4-question targeted quiz based on the active learning module context.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        from services.claude_service import generate_quick_quiz
+
+        video_id = request.data.get('video_id')
+        note_id = request.data.get('note_id')
+        subject_slug = request.data.get('subject_slug')
+
+        context_data = {
+            'title': 'Technical Concept',
+            'subject_name': 'Engineering',
+            'topics': [],
+            'summary': '',
+            'notes_content': ''
+        }
+
+        if video_id:
+            try:
+                vid = Video.objects.select_related('subject').prefetch_related('notes').get(id=video_id)
+                context_data['title'] = vid.title
+                context_data['subject_name'] = vid.subject.name if vid.subject else 'Computer Science'
+                context_data['topics'] = vid.roadmap or [t.strip() for t in vid.important_topics.split(',') if t.strip()]
+                context_data['summary'] = vid.quick_summary or vid.description
+                if vid.notes.exists():
+                    context_data['notes_content'] = "\n".join([n.content for n in vid.notes.all()[:2]])
+            except (Video.DoesNotExist, ValueError):
+                pass
+        elif note_id:
+            try:
+                n = Note.objects.select_related('subject', 'video').get(id=note_id)
+                context_data['title'] = n.title
+                context_data['subject_name'] = n.subject.name if n.subject else 'Computer Science'
+                context_data['notes_content'] = n.content
+            except (Note.DoesNotExist, ValueError):
+                pass
+        elif subject_slug:
+            try:
+                subj = Subject.objects.get(slug=subject_slug)
+                context_data['title'] = subj.name
+                context_data['subject_name'] = subj.name
+                context_data['summary'] = subj.description
+            except Subject.DoesNotExist:
+                pass
+
+        result = generate_quick_quiz(context_data)
+        return Response({
+            'success': True,
+            'data': result,
+            'context_title': context_data['title']
+        })
+

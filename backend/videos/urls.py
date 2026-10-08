@@ -6,6 +6,7 @@ from .views import (
     AdminVideoViewSet, AdminNoteViewSet, AdminSubjectViewSet, AdminSubCategoryViewSet,
     AdminCategoryViewSet, AdminReelViewSet,
     LoginView, LogoutView, UserStatusView, AdminDashboardStatsView,
+    ConceptTutorView, QuickQuizView,
     health_check
 )
 
@@ -65,4 +66,10 @@ urlpatterns = [
 
     # ── api/status/ — auth status alias (matches frontend call) ───────
     path('status/', UserStatusView.as_view(), name='api-status'),
+
+    # ── AI Concept Tutor & Quick Quiz Endpoints ──────────────────────
+    path('ai/concept-tutor/', ConceptTutorView.as_view(), name='ai-concept-tutor'),
+    path('ai/quick-quiz/', QuickQuizView.as_view(), name='ai-quick-quiz'),
+    path('public/ai/concept-tutor/', ConceptTutorView.as_view(), name='public-ai-concept-tutor'),
+    path('public/ai/quick-quiz/', QuickQuizView.as_view(), name='public-ai-quick-quiz'),
 ]

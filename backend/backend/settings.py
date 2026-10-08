@@ -288,11 +288,11 @@ SESSION_COOKIE_SAMESITE = 'Lax'     # CSRF protection for session cookie
 CSRF_COOKIE_HTTPONLY = False         # Must be False so axios can read CSRF token
 CSRF_COOKIE_SAMESITE = 'Lax'        # CSRF protection for CSRF cookie
 
-# Production HTTPS settings - enabled dynamically in non-debug mode
+# Production HTTPS settings - enabled only in production when not on Render
 IS_RENDER = os.getenv("RENDER", "false").lower() == "true"
 
-# Disable SECURE_SSL_REDIRECT on Render or in development to prevent infinite redirect loops
-if IS_RENDER or DEBUG:
+# Disable SECURE_SSL_REDIRECT when testing, on Render, or in local development
+if IS_RENDER or DEBUG or ENVIRONMENT != "production" or 'test' in sys.argv:
     SECURE_SSL_REDIRECT = False
 else:
     SECURE_SSL_REDIRECT = True
