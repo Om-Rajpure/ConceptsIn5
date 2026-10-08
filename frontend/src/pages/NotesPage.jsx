@@ -114,11 +114,11 @@ export default function NotesPage() {
       setCategories(cRes.data.results || cRes.data);
       setSubcategories(scRes.data.results || scRes.data);
     } catch (err) {
-      console.error("Critical failure in neural data link:", err);
+      console.error("Failed to load notes data:", err);
       if (notes.length > 0) {
         toast.error("Failed to sync latest data ripples.");
       } else {
-        setError('Global notes repository offline. System sync required.');
+        setError('Unable to load notes. Please check your connection and try again.');
       }
     } finally {
       setLoading(false);
@@ -190,7 +190,7 @@ export default function NotesPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-4 py-2 mb-8 glass-card border-accent-purple/30 text-accent-purple text-[10px] font-black uppercase tracking-[0.2em]"
           >
-            <Sparkles className="w-4 h-4" /> Neural Data Repository
+            <Sparkles className="w-4 h-4" /> Study Guides & Notes
           </motion.div>
           
           <motion.h1 
@@ -207,7 +207,7 @@ export default function NotesPage() {
             transition={{ delay: 0.2 }}
             className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed mb-12"
           >
-            Find high-octane, structured notes for quick understanding and exam-lethal revision.
+            Find structured, concise notes for quick concept mastery and exam revision.
           </motion.p>
         </div>
       </section>

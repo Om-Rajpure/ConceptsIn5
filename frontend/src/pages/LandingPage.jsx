@@ -69,7 +69,7 @@ export default function LandingPage() {
         setReels((rResponse.data.results || rResponse.data).slice(0, 4));
       } catch (err) {
         console.error('Failed to fetch landing page data', err);
-        setError('Synchronizing with the main neural core failed. System disruption detected.');
+        setError('Failed to load content. Please check your connection and try again.');
       } finally {
         setLoading(false);
       }
@@ -149,7 +149,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-4 py-2 mb-8 glass-card border-accent-blue/30 text-accent-blue text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(0,240,255,0.1)]"
             >
               <div className="w-2 h-2 rounded-full bg-accent-blue animate-pulse" />
-              Initializing Intelligence v2.0
+              AI-Powered Micro-Learning
             </motion.div>
             
             <h1 className="text-hero text-center lg:text-left">
@@ -194,7 +194,7 @@ export default function LandingPage() {
               <div className="relative aspect-[4/5] md:aspect-square overflow-hidden rounded-[2rem]">
                 <img 
                   src="/images/ai_human_hybrid.png" 
-                  alt="Founder AI-Human Hybrid" 
+                  alt="ConceptsIn5 learning interface preview" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                 />
                 
@@ -214,8 +214,8 @@ export default function LandingPage() {
                          <Zap size={14} className="text-accent-blue animate-pulse" />
                       </div>
                       <div>
-                         <div className="text-[10px] font-black text-white uppercase tracking-widest">AI + Human Clarity</div>
-                         <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Neural Sync Optimized</div>
+                         <div className="text-[10px] font-black text-white uppercase tracking-widest">Structured Learning</div>
+                         <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Concepts in 5 minutes</div>
                       </div>
                    </div>
                 </div>
@@ -236,7 +236,7 @@ export default function LandingPage() {
                 style={{ willChange: "transform" }}
                 className="absolute bottom-20 -left-10 p-4 glass-card border-accent-purple/30 backdrop-blur-md hidden lg:block"
               >
-                <div className="text-accent-purple font-black text-[10px] uppercase tracking-tighter italic">Powered by Clarity</div>
+                <div className="text-accent-purple font-black text-[10px] uppercase tracking-tighter italic">Powered by Claude AI</div>
               </motion.div>
             </div>
           </motion.div>
@@ -246,8 +246,8 @@ export default function LandingPage() {
       {/* 2 Main Categories Section */}
       <section id="categories" className="py-10 md:py-20 px-0 relative categories-grid-container overflow-hidden">
         <motion.div {...fadeInUp} className="text-center mb-10 md:mb-16 px-6">
-          <h2 className="text-section-title mb-4 md:mb-6">Select Mission</h2>
-          <p className="text-gray-400 text-base md:text-lg">Main entry points into the hive of knowledge.</p>
+          <h2 className="text-section-title mb-4 md:mb-6">Explore Subjects</h2>
+          <p className="text-gray-400 text-base md:text-lg">Browse our structured subject areas.</p>
         </motion.div>
         
         <div className="relative group/scroll px-6 md:px-0">
@@ -300,9 +300,9 @@ export default function LandingPage() {
                           </div>
                           <div className="p-6 sm:p-8 flex flex-col flex-1">
                             <h3 className="text-xl sm:text-2xl font-black mb-3 group-hover:text-accent-blue transition-colors italic uppercase tracking-tight break-words">{cat.name}</h3>
-                            <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Knowledge module available for deployment."}</p>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-6 font-light line-clamp-2 break-words">{cat.description || "Structured learning content organized by topic."}</p>
                             <div className="mt-auto flex items-center gap-2 text-accent-blue font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
-                               Initialize <ArrowRight size={14} />
+                               Explore <ArrowRight size={14} />
                             </div>
                           </div>
                         </GlassCard>
@@ -429,7 +429,7 @@ export default function LandingPage() {
           <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 md:mb-16 text-center md:text-left px-0">
             <div>
               <h2 className="text-section-title mb-4 md:mb-6">Start Learning</h2>
-              <p className="text-gray-400 text-base md:text-lg font-light">High-density engineering concepts in 5-minute packets.</p>
+              <p className="text-gray-400 text-base md:text-lg font-light">Complex technical concepts, explained clearly in under 5 minutes.</p>
             </div>
             <Link to="/notes" className="px-8 py-3 glass-card border-white/10 text-xs font-black uppercase tracking-widest text-accent-cyan hover:text-white transition-colors">
               View All Content
@@ -467,7 +467,7 @@ export default function LandingPage() {
                       <h3 className="text-lg sm:text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight break-words">{video.title}</h3>
                       <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
                         <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
-                        <span className="text-accent-cyan flex items-center gap-1">Deploy <ChevronRight size={14} /></span>
+                        <span className="text-accent-cyan flex items-center gap-1">Watch Now <ChevronRight size={14} /></span>
                       </div>
                     </div>
                   </GlassCard>
@@ -485,7 +485,7 @@ export default function LandingPage() {
           <motion.div {...fadeInUp} className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 px-0">
             <div>
               <h2 className="text-section-title">Quick Concepts ⚡</h2>
-              <p className="text-gray-400 text-sm font-medium mt-2">Explosive 60-second learning bursts</p>
+              <p className="text-gray-400 text-sm font-medium mt-2">60-second concept summaries for quick revision</p>
             </div>
             <Link to="/reels" className="px-8 py-3 glass-card border-white/10 text-[10px] font-black uppercase tracking-widest text-accent-purple hover:text-white transition-colors">
               Explore All Reels
@@ -527,7 +527,7 @@ export default function LandingPage() {
                 ))
               ) : (
                   <div className="w-full py-12 text-center glass-card border-dashed border-white/10">
-                      <span className="text-gray-500 font-black uppercase tracking-widest text-xs">No active transmissions detected</span>
+                      <span className="text-gray-500 font-black uppercase tracking-widest text-xs">No quick concept videos available yet</span>
                   </div>
               )}
             </div>
@@ -539,8 +539,8 @@ export default function LandingPage() {
       {/* 5 How it Works Section */}
       <section className="py-16 md:py-20 px-0 relative border-y border-white/5 overflow-hidden section-container">
         <motion.div {...fadeInUp} className="text-center mb-20 px-0">
-          <h2 className="text-hero underline decoration-accent-purple/30 underline-offset-8">The HUD Logic</h2>
-          <p className="text-gray-400 text-lg font-light">Download knowledge into your long-term memory in three steps.</p>
+          <h2 className="text-hero underline decoration-accent-purple/30 underline-offset-8">How ConceptsIn5 Works</h2>
+          <p className="text-gray-400 text-lg font-light">Learn any technical concept in three clear steps.</p>
         </motion.div>
         
         <div className="relative group/scroll">
@@ -549,9 +549,9 @@ export default function LandingPage() {
             className="flex md:grid md:grid-cols-3 gap-6 md:gap-10 overflow-x-auto md:overflow-visible pb-8 md:pb-0 scrollbar-hide snap-x snap-mandatory flex-nowrap px-4 md:px-0"
           >
             {[
-              { step: "MISSION 01", title: "Pick Category", desc: "Select your target subject from our high-precision database.", icon: <Target className="text-accent-blue" />, color: "blue" },
-              { step: "MISSION 02", title: "Watch & Ingest", desc: "Absorb core concepts via 5-minute high-octane video data.", icon: <Video className="text-accent-purple" />, color: "purple" },
-              { step: "MISSION 03", title: "Revise & Conquer", desc: "Secure your grades with lethal cheat sheets and notes.", icon: <CheckCircle2 className="text-accent-cyan" />, color: "blue" },
+              { step: "STEP 01", title: "Choose a Subject", desc: "Pick from our structured subject library organized by exam and topic.", icon: <Target className="text-accent-blue" />, color: "blue" },
+              { step: "STEP 02", title: "Watch & Learn", desc: "Understand concepts through short structured videos and curated notes.", icon: <Video className="text-accent-purple" />, color: "purple" },
+              { step: "STEP 03", title: "Revise & Retain", desc: "Reinforce learning with exam-ready notes and AI-powered concept explanations.", icon: <CheckCircle2 className="text-accent-cyan" />, color: "blue" },
             ].map((item, i) => (
               <div key={i} className="min-w-[85%] max-w-[90%] md:max-w-none md:min-w-[45%] lg:min-w-0 snap-center flex-shrink-0 flex items-stretch">
                 <GlassCard glow neonColor={item.color} className="p-6 sm:p-10 group bg-white/[0.01] hover:bg-white/[0.03] transition-all h-full w-full">
@@ -574,7 +574,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-20 items-center">
             <motion.div {...fadeInUp}>
-              <h2 className="text-4xl md:text-6xl font-black mb-10 glow-text leading-tight tracking-tighter italic">Why Students <br />Join the Hive?</h2>
+              <h2 className="text-4xl md:text-6xl font-black mb-10 glow-text leading-tight tracking-tighter italic">Why Students <br />Choose ConceptsIn5</h2>
               <div className="space-y-8">
                 {[
                   { title: "Save 100+ Hours", desc: "No more long, boring lectures. Only what matters." },
@@ -605,15 +605,15 @@ export default function LandingPage() {
               <GlassCard className="p-12 border-accent-blue/20 bg-dark/40 backdrop-blur-2xl">
                  <div className="mb-10 text-center">
                    <Award className="w-16 h-16 text-accent-cyan mx-auto mb-4" />
-                   <h3 className="text-3xl font-black text-white italic">Target Achieved</h3>
+                   <h3 className="text-3xl font-black text-white italic">Focused Learning</h3>
                  </div>
                  <div className="space-y-6">
                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                     <motion.div initial={{ width: 0 }} whileInView={{ width: '95%' }} transition={{ duration: 1 }} className="h-full bg-accent-blue" />
+                     <motion.div initial={{ width: 0 }} whileInView={{ width: '80%' }} transition={{ duration: 1 }} className="h-full bg-accent-blue" />
                    </div>
                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
-                     <span>Efficiency</span>
-                     <span>95% Boost</span>
+                     <span>Concepts covered</span>
+                     <span>5 min avg</span>
                    </div>
                  </div>
               </GlassCard>
@@ -647,7 +647,7 @@ export default function LandingPage() {
 
           <div className="flex-1 text-center lg:text-left">
             <motion.div {...fadeInUp} className="inline-block px-3 py-1 mb-6 border border-accent-cyan/30 text-accent-cyan text-[10px] font-black uppercase tracking-widest rounded bg-accent-cyan/5">
-              Command Center
+              About the Founder
             </motion.div>
             <motion.h2 {...fadeInUp} className="text-4xl md:text-6xl font-black mb-8 glow-text italic leading-tight">
               Built by a Student, <br />for Students

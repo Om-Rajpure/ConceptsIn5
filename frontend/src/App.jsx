@@ -4,9 +4,6 @@ import {
   Linkedin, 
   Youtube, 
   Instagram,
-  Lock,
-  ShieldCheck,
-  Target,
   Github
 } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -20,6 +17,9 @@ import VideoPage from './pages/VideoPage';
 import SearchPage from './pages/SearchPage';
 import AboutPage from './pages/AboutPage';
 import ReelsPage from './pages/ReelsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import ContactPage from './pages/ContactPage';
 import NotFound from './pages/NotFound';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -52,24 +52,27 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/reels" element={<ReelsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/om/login" element={<AdminLogin />} />
+          {/* Admin Routes — hidden from public navigation */}
+          <Route path="/admin-portal/login" element={<AdminLogin />} />
           <Route element={<ProtectedRoute />}>
-              <Route path="/om" element={<AdminDashboard />} />
-              <Route path="/om/videos" element={<AdminVideoManager />} />
-              <Route path="/om/notes" element={<AdminNoteManager />} />
-              <Route path="/om/reels" element={<AdminReelManager />} />
-              <Route path="/om/categories" element={<AdminCategoryManager />} />
-              <Route path="/om/subcategories" element={<AdminSubCategoryManager />} />
-              <Route path="/om/subjects" element={<AdminSubjectManager />} />
+              <Route path="/admin-portal" element={<AdminDashboard />} />
+              <Route path="/admin-portal/videos" element={<AdminVideoManager />} />
+              <Route path="/admin-portal/notes" element={<AdminNoteManager />} />
+              <Route path="/admin-portal/reels" element={<AdminReelManager />} />
+              <Route path="/admin-portal/categories" element={<AdminCategoryManager />} />
+              <Route path="/admin-portal/subcategories" element={<AdminSubCategoryManager />} />
+              <Route path="/admin-portal/subjects" element={<AdminSubjectManager />} />
           </Route>
 
           {/* Catch-all 404 Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        {/* Global Footer (Common to all pages) */}
+        {/* Global Footer */}
         <footer className="py-20 px-6 border-t border-white/5 relative z-10 bg-dark/50 backdrop-blur-md">
           <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-2">
@@ -77,31 +80,31 @@ export default function App() {
                 ConceptsIn5
               </div>
               <p className="text-gray-500 text-lg max-w-sm leading-relaxed">
-                We provide high-octane engineering knowledge in 5-minute packets. 
-                Designed for the modern student who values time.
+                An AI-powered micro-learning platform that helps engineering students 
+                understand complex technical concepts in 5 minutes.
               </p>
             </div>
             <div>
-              <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">Navigation</h4>
+              <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">Learn</h4>
               <div className="flex flex-col gap-4 text-gray-500 text-base">
-                <Link to="/category/semester" className="hover:text-accent-blue transition-colors">Subjects</Link>
-                <Link to="/#features" className="hover:text-accent-blue transition-colors">AI Tools</Link>
-                <Link to="/notes" className="hover:text-accent-blue transition-colors">Study Guides</Link>
+                <Link to="/notes" className="hover:text-accent-blue transition-colors">Study Notes</Link>
+                <Link to="/reels" className="hover:text-accent-blue transition-colors">Quick Concepts</Link>
+                <Link to="/about" className="hover:text-accent-blue transition-colors">About</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">System</h4>
+              <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">Company</h4>
               <div className="flex flex-col gap-4 text-gray-500 text-base">
-                <Link to="/about" className="hover:text-accent-purple transition-colors">Status</Link>
-                <Link to="/about" className="hover:text-accent-purple transition-colors">Support</Link>
-                <Link to="/about" className="hover:text-accent-purple transition-colors">Contact</Link>
+                <Link to="/contact" className="hover:text-accent-purple transition-colors">Contact</Link>
+                <Link to="/privacy" className="hover:text-accent-purple transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-accent-purple transition-colors">Terms of Use</Link>
               </div>
             </div>
           </div>
           
           <div className="max-w-7xl mx-auto pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-sm text-gray-600 font-medium uppercase tracking-[0.2em]">
-              © 2026 ConceptsIn5. Initializing Success.
+            <div className="text-sm text-gray-600 font-medium">
+              © 2026 ConceptsIn5. All rights reserved.
             </div>
             <div className="flex gap-8 justify-center lg:justify-start grayscale hover:grayscale-0 transition-all items-center">
               <a href="https://instagram.com/conceptsin5" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition-colors">
@@ -116,9 +119,6 @@ export default function App() {
               <a href="https://github.com/Om-Rajpure" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                 <Github size={24} />
               </a>
-              <Link to="/om/login" className="hover:text-accent-purple transition-colors p-2 glass-card border-white/5 border">
-                 <Lock className="w-4 h-4" />
-              </Link>
             </div>
           </div>
         </footer>
