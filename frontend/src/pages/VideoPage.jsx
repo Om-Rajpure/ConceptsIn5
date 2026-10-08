@@ -24,6 +24,7 @@ import GlassCard from '../components/GlassCard';
 import SkeletonCard, { SkeletonSubject } from '../components/SkeletonCard';
 import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
+import ConceptTutor from '../components/ConceptTutor';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 15 },
@@ -69,7 +70,7 @@ export default function VideoPage() {
       });
     } catch (err) {
         console.error('Failed to fetch video details', err);
-        setError('Video stream synchronization failed. Neural link unstable.');
+        setError('Failed to load video. Please try again.');
     } finally {
         setLoading(false);
     }
@@ -148,7 +149,7 @@ export default function VideoPage() {
             className="lg:col-span-4 flex flex-col justify-center"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-accent-cyan/30 text-accent-cyan text-[10px] font-black uppercase tracking-widest rounded bg-accent-cyan/5 w-fit">
-              <Sparkles size={12} /> High-Density Module
+              <Sparkles size={12} /> Structured Learning Module
             </div>
             
             <h1 className="text-3xl md:text-4xl font-black mb-6 italic tracking-tighter leading-tight uppercase">
@@ -330,8 +331,19 @@ export default function VideoPage() {
           </aside>
         </div>
 
+        {/* AI Concept Tutor */}
+        {!loading && context?.video?.id && (
+          <section className="mt-16">
+            <ConceptTutor
+              videoId={context.video.id}
+              conceptTitle={context.video.title}
+              subjectSlug={context.subject?.slug}
+            />
+          </section>
+        )}
+
         {/* 3. Related Videos */}
-        <section className="mt-32 pt-20 border-t border-white/5">
+        <section className="mt-20 pt-20 border-t border-white/5">
            <h2 className="text-3xl font-black italic mb-12 glow-text tracking-tighter uppercase">More in {loading ? "..." : subject?.title}</h2>
            <div className="grid md:grid-cols-3 gap-8">
               {loading ? (
