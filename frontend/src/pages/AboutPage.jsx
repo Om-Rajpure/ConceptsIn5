@@ -273,8 +273,18 @@ export default function AboutPage() {
               <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-2xl mx-auto font-light mb-8 md:mb-12 italic">
                 "I faced the same struggles with engineering as you do. Long lectures that didn't help, exams that felt impossible, and resources that were too complex. I built ConceptsIn5 to be the mentor I wish I had—someone who explains things simply, quickly, and effectively."
               </p>
-              <div className="text-sm font-black uppercase tracking-[0.2em] text-white">
+              <div className="text-sm font-black uppercase tracking-[0.2em] text-white mb-6">
                 Om Rajpure <span className="text-accent-purple mx-2">|</span> Founder, ConceptsIn5
+              </div>
+              <div>
+                <a
+                  href="https://www.youtube.com/@ConceptsIn5"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-accent-purple/50 text-xs font-bold text-gray-300 hover:text-white transition-all shadow-md"
+                >
+                  <Video className="w-4 h-4 text-red-500" /> Watch Channel on YouTube (@ConceptsIn5)
+                </a>
               </div>
             </motion.div>
           </GlassCard>

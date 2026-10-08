@@ -1,5 +1,29 @@
 export const subjects = [
   {
+    id: "machine-learning",
+    slug: "machine-learning",
+    title: "Machine Learning & AI Foundations",
+    name: "Machine Learning",
+    category: "ai-ml",
+    subcategory: "Applied Machine Learning",
+    description: "Master foundational algorithms, cost functions, gradient descent, feature engineering, and complete project architectures.",
+    tags: ["Machine Learning", "AI", "Linear Regression", "Recommendation Systems", "Python"],
+    importantTopics: [
+      "Movie Recommendation Systems (TF-IDF & Cosine Similarity)",
+      "Linear Regression & Gradient Descent",
+      "Ordinary Least Squares (OLS) Derivation",
+      "Categorical Feature Encoding (Nominal, Ordinal, Binary)",
+      "AI vs ML vs Deep Learning Hierarchy"
+    ],
+    roadmap: [
+      "AI Spectrum & Machine Learning Foundations",
+      "Data Preprocessing & Categorical Feature Encoding",
+      "Supervised Regression Models & Loss Minimization",
+      "Analytical vs Numerical Optimization (OLS vs Gradient Descent)",
+      "Content-Based Recommendation Systems & Vectorization"
+    ]
+  },
+  {
     id: "dbms",
     slug: "dbms",
     title: "Database Management Systems",
@@ -7,9 +31,20 @@ export const subjects = [
     category: "computer-science",
     subcategory: "Database Systems",
     description: "Master relational algebra, normalization (1NF-BCNF), indexing, and ACID transactions through concise 5-minute modules.",
-    tags: ["DBMS", "SQL", "Databases", "Normalization"],
-    importantTopics: ["Normalization (1NF, 2NF, 3NF, BCNF)", "ACID Properties & Transactions", "B-Trees & Indexing", "SQL Joins & Optimization"],
-    roadmap: ["Database Architecture & ER Modeling", "Relational Algebra", "Functional Dependencies", "Normalization (1NF to BCNF)", "Transaction Management & Concurrency"]
+    tags: ["DBMS", "SQL", "Databases", "Normalization", "Cloud SQL"],
+    importantTopics: [
+      "Relational Schema Design & ACID Properties",
+      "Normalization (1NF, 2NF, 3NF, BCNF)",
+      "SQL Query Execution & Indexing",
+      "Cloud SQL Architecture"
+    ],
+    roadmap: [
+      "Relational Architecture & Schema Design",
+      "ACID Transaction Integrity",
+      "SQL Execution & Query Optimization",
+      "Normalization & Dependency Management",
+      "Cloud Database Scaling"
+    ]
   },
   {
     id: "os",
@@ -20,32 +55,19 @@ export const subjects = [
     subcategory: "Operating Systems",
     description: "Understand kernel architecture, process scheduling algorithms, memory management, and deadlock prevention mechanisms.",
     tags: ["OS", "Kernel", "CPU Scheduling", "Memory Management"],
-    importantTopics: ["CPU Scheduling (FCFS, SJF, Round Robin)", "Deadlocks (Banker's Algorithm)", "Virtual Memory & Paging", "Semaphores & Mutex"],
-    roadmap: ["OS Kernel Structures", "Process & Thread Lifecycle", "CPU Scheduling Algorithms", "Process Synchronization", "Deadlock Handling", "Virtual Memory"]
-  },
-  {
-    id: "ai-ml",
-    slug: "ai-ml",
-    title: "Artificial Intelligence & ML",
-    name: "Artificial Intelligence & ML",
-    category: "ai-ml",
-    subcategory: "Machine Learning Foundations",
-    description: "Break down neural network architectures, backpropagation mathematics, loss functions, and core machine learning paradigms.",
-    tags: ["AI", "Machine Learning", "Neural Networks", "Deep Learning"],
-    importantTopics: ["Neural Network Architecture & Weights", "Gradient Descent & Backpropagation", "Activation Functions (ReLU, Sigmoid)", "Supervised vs Unsupervised Learning"],
-    roadmap: ["Machine Learning Taxonomy", "Linear & Logistic Regression", "Neural Network Foundations", "Backpropagation Algorithm", "Model Evaluation & Metrics"]
-  },
-  {
-    id: "statistics",
-    slug: "statistics",
-    title: "Engineering Statistics & Data Science",
-    name: "Engineering Statistics & Data Science",
-    category: "ai-ml",
-    subcategory: "Data Science & Mathematics",
-    description: "Master probability theory, continuous & discrete distributions, hypothesis testing, and variance analysis for computer science.",
-    tags: ["Statistics", "Probability", "Data Science", "Math"],
-    importantTopics: ["Measures of Central Tendency & Dispersion", "Normal & Poisson Distributions", "Central Limit Theorem", "Hypothesis Testing (p-values)"],
-    roadmap: ["Descriptive Statistics", "Probability Axioms", "Probability Distributions", "Sampling & CLT", "Confidence Intervals"]
+    importantTopics: [
+      "CPU Scheduling (FCFS, SJF, Round Robin)",
+      "Deadlocks & Banker's Algorithm",
+      "Virtual Memory & Paging",
+      "Semaphores & Mutex"
+    ],
+    roadmap: [
+      "OS Kernel Structures",
+      "Process & Thread Lifecycle",
+      "CPU Scheduling Algorithms",
+      "Process Synchronization",
+      "Deadlock Handling & Safety"
+    ]
   },
   {
     id: "web-dev",
@@ -55,8 +77,19 @@ export const subjects = [
     category: "web-dev",
     subcategory: "Modern Frontend & Fullstack",
     description: "Master modern React component lifecycle, custom hooks, state synchronization, and scalable RESTful API architecture.",
-    tags: ["React", "JavaScript", "REST APIs", "Fullstack"],
-    importantTopics: ["React Hooks (useState, useEffect, useMemo)", "Component Lifecycle & Virtual DOM", "RESTful API Design & HTTP Status", "Client-Side Routing"],
-    roadmap: ["Modern JavaScript Foundations", "React Component Model", "Advanced React Hooks", "API Integration & Async State", "Production Deployment"]
+    tags: ["React", "JavaScript", "REST APIs", "Fullstack", "Git"],
+    importantTopics: [
+      "React Hooks (useState, useEffect, useMemo)",
+      "RESTful API Design & HTTP Status",
+      "Git Commit & Branching Workflows",
+      "Client-Side State Synchronization"
+    ],
+    roadmap: [
+      "Modern JavaScript & Component Architecture",
+      "React Hooks & Lifecycle Simulation",
+      "Version Control Best Practices",
+      "RESTful Backend Integration",
+      "Production Deployment"
+    ]
   }
 ];

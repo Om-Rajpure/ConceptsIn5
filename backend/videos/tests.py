@@ -207,3 +207,23 @@ class ComprehensiveAPITests(TestCase):
     def test_unauthenticated_admin_video_post_rejected(self):
         res = self.client.post('/api/admin/videos/', {"title": "Malicious Video"})
         self.assertIn(res.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+
+    # ─── YouTube Utility Verification ────────────────────────────────
+
+    def test_youtube_id_extraction_valid_formats(self):
+        from videos.utils.youtube_utils import extract_video_id
+        urls = [
+            ("https://www.youtube.com/watch?v=rVTSqba7UWk", "rVTSqba7UWk"),
+            ("https://youtu.be/rVTSqba7UWk", "rVTSqba7UWk"),
+            ("https://www.youtube.com/embed/rVTSqba7UWk", "rVTSqba7UWk"),
+            ("https://www.youtube.com/shorts/2_-boldmaFQ", "2_-boldmaFQ"),
+        ]
+        for url, expected_id in urls:
+            self.assertEqual(extract_video_id(url), expected_id)
+
+    def test_youtube_thumbnail_and_embed_generation(self):
+        from videos.utils.youtube_utils import get_thumbnail, get_embed_url
+        vid = "rVTSqba7UWk"
+        self.assertEqual(get_thumbnail(vid), "https://img.youtube.com/vi/rVTSqba7UWk/maxresdefault.jpg")
+        self.assertEqual(get_embed_url(vid), "https://www.youtube.com/embed/rVTSqba7UWk")
+

@@ -1,188 +1,201 @@
 export const notes = [
   {
     id: 1,
-    title: "DBMS Normalization & Functional Dependencies Cheat Sheet",
-    subjectId: "dbms",
+    title: "Movie Recommendation System: TF-IDF & Cosine Similarity Architecture",
+    subjectId: "machine-learning",
     videoId: 1,
-    category: "computer-science",
-    subcategory: "Database Systems",
-    tags: ["DBMS", "Normalization", "SQL", "Exam-Ready"],
-    type: "Cheat Sheet",
-    description: "High-yield summary of 1NF, 2NF, 3NF, and BCNF rules with dependency diagrams and common exam traps.",
-    content: `## Database Normalization Summary
+    category: "ai-ml",
+    subcategory: "Applied Machine Learning",
+    tags: ["Machine Learning", "Recommendation Systems", "TF-IDF", "Cosine Similarity", "Python"],
+    type: "Study Guide",
+    description: "End-to-end technical guide for content-based movie recommendation: TF-IDF vectorization mathematics, cosine similarity matrices, and Streamlit deployment.",
+    content: `## Content-Based Recommendation System Architecture
 
-### 1. First Normal Form (1NF)
-- **Rule:** Every column must contain atomic (indivisible) values, and each record must be unique.
-- **Violation:** Multivalued attributes (e.g., storing multiple phone numbers in one string).
+### 1. The Core Objective
+A Content-Based Recommendation System recommends items to a user based on the similarity between item metadata (e.g., genres, keywords, cast, overview) rather than collective user behavior.
 
-### 2. Second Normal Form (2NF)
-- **Rule:** Table must be in 1NF **AND** have no Partial Dependencies.
-- **Partial Dependency:** A non-prime attribute depends on only a *part* of a composite candidate key.
-- **Remedy:** Decompose table into separate relations where attributes depend on the full key.
+### 2. Feature Extraction: TF-IDF Vectorization
+Textual descriptions and tag soups are converted into numerical feature vectors using **Term Frequency-Inverse Document Frequency (TF-IDF)**:
 
-### 3. Third Normal Form (3NF)
-- **Rule:** Table must be in 2NF **AND** have no Transitive Dependencies.
-- **Condition:** For every functional dependency $X \\rightarrow Y$, either:
-  1. $X$ is a Superkey, OR
-  2. $Y$ is a Prime Attribute (member of candidate key).
+$$\\text{TF}(t, d) = \\frac{\\text{Count of term } t \\text{ in document } d}{\\text{Total words in document } d}$$
 
-### 4. Boyce-Codd Normal Form (BCNF)
-- **Rule:** A stricter version of 3NF. For every non-trivial dependency $X \\rightarrow Y$, **$X$ MUST be a Superkey**.`,
+$$\\text{IDF}(t, D) = \\log\\left(\\frac{N}{1 + |\\{d \\in D : t \\in d\\}|}\\right)$$
+
+$$\\text{TF-IDF}(t, d, D) = \\text{TF}(t, d) \\times \\text{IDF}(t, D)$$
+
+- **Why TF-IDF?** Penalizes common English words ("the", "is") while amplifying distinguishing keywords ("cyberpunk", "quantum", "dystopia").
+
+### 3. Measuring Closeness: Cosine Similarity
+To measure the similarity between two $n$-dimensional movie vectors $\\mathbf{A}$ and $\\mathbf{B}$:
+
+$$\\cos(\\theta) = \\frac{\\mathbf{A} \\cdot \\mathbf{B}}{\\|\\mathbf{A}\\| \\|\\mathbf{B}\\|} = \\frac{\\sum_{i=1}^n A_i B_i}{\\sqrt{\\sum_{i=1}^n A_i^2} \\sqrt{\\sum_{i=1}^n B_i^2}}$$
+
+- Output range: $[0, 1]$ (for non-negative TF-IDF vectors).
+- $1.0$ indicates identical direction (highest similarity), $0.0$ indicates orthogonal/unrelated topics.
+
+### 4. Implementation Pipeline
+1. **Data Preprocessing:** Extract genres, keywords, cast from TMDB 5000 dataset, apply lowercase normalization and stemming.
+2. **Matrix Construction:** Generate $5000 \\times 5000$ pairwise similarity matrix using Scikit-Learn.
+3. **Model Persistence:** Serialize preprocessed dataframe and similarity matrix using Python \`pickle\` (\`.pkl\`).
+4. **Interactive UI:** Streamlit dropdown menu triggers TMDB API queries to render high-resolution movie posters dynamically.`,
     examPoints: [
-      "1NF: Atomic values only. No repeating groups.",
-      "2NF: No partial dependency on composite candidate keys.",
-      "3NF: For X -> Y, X is superkey OR Y is prime attribute.",
-      "BCNF: For every X -> Y, X must strictly be a superkey."
+      "Content-Based: Recommends items based on item attributes, not user history.",
+      "TF-IDF: Balances term frequency with corpus rarity to highlight distinctive keywords.",
+      "Cosine Similarity: Measures angle between vectors regardless of document length.",
+      "Pickle (.pkl): Efficiently serializes precomputed similarity matrices for low-latency retrieval."
     ],
-    thumbnail: "/images/thumb_dbms.png"
+    thumbnail: "https://img.youtube.com/vi/rVTSqba7UWk/maxresdefault.jpg"
   },
   {
     id: 2,
-    title: "Operating Systems: CPU Scheduling & Gantt Chart Formulas",
-    subjectId: "os",
+    title: "Linear Regression: Cost Function Formulation & Gradient Descent",
+    subjectId: "machine-learning",
     videoId: 2,
-    category: "computer-science",
-    subcategory: "Operating Systems",
-    tags: ["OS", "CPU Scheduling", "Gantt Chart", "Formulas"],
-    type: "Formulas",
-    description: "Formulas and algorithms for FCFS, SJF, SRTF, and Round Robin scheduling with turnaround & waiting time formulas.",
-    content: `## CPU Scheduling Formulas & Metrics
+    category: "ai-ml",
+    subcategory: "Supervised Learning",
+    tags: ["Machine Learning", "Linear Regression", "Gradient Descent", "Loss Functions"],
+    type: "Study Guide",
+    description: "Mathematical formulation of Linear Regression, Mean Squared Error (MSE), partial derivatives, and parameter update rules.",
+    content: `## Linear Regression Mechanics
 
-### Core Time Equations
-1. **Completion Time ($CT$):** Time at which process finishes execution.
-2. **Turnaround Time ($TAT$):**
-   $$TAT = CT - \\text{Arrival Time } (AT)$$
-3. **Waiting Time ($WT$):**
-   $$WT = TAT - \\text{Burst Time } (BT)$$
-4. **Response Time ($RT$):**
-   $$RT = \\text{Time of first CPU allocation} - AT$$
+### 1. Hypothesis Function
+For single-variable linear regression:
 
-### Algorithm Summary
-- **FCFS (First-Come, First-Served):** Non-preemptive. Suffers from Convoy Effect when a long burst process arrives first.
-- **SJF (Shortest Job First):** Optimal for minimizing average waiting time, but can cause starvation for long processes.
-- **Round Robin:** Preemptive using fixed Time Quantum ($q$). Ideal for time-sharing systems.`,
+$$\\hat{y} = h_\\theta(x) = \\theta_0 + \\theta_1 x = mx + c$$
+
+Where $\\theta_1$ (or $m$) is the slope/weight, and $\\theta_0$ (or $c$) is the intercept/bias.
+
+### 2. Cost Function (Mean Squared Error)
+The goal is to find parameters $\\theta$ that minimize the sum of squared differences between predictions and true labels:
+
+$$J(\\theta_0, \\theta_1) = \\frac{1}{2m} \\sum_{i=1}^m \\left( h_\\theta(x^{(i)}) - y^{(i)} \\right)^2$$
+
+### 3. Gradient Descent Optimization
+Parameters are updated iteratively in the direction of the steepest descent:
+
+$$\\theta_j := \\theta_j - \\alpha \\frac{\\partial}{\\partial \\theta_j} J(\\theta_0, \\theta_1)$$
+
+Where $\\alpha$ is the **Learning Rate**:
+- If $\\alpha$ is too small: Convergence is extremely slow.
+- If $\\alpha$ is too large: Gradient descent can overshoot the minimum and diverge.`,
     examPoints: [
-      "Turnaround Time = Completion Time - Arrival Time",
-      "Waiting Time = Turnaround Time - Burst Time",
-      "SJF gives minimum average waiting time but requires prior burst knowledge.",
-      "Time Quantum too large -> behaves like FCFS; too small -> high context switch overhead."
+      "MSE Cost Function is convex (parabolic bowl), guaranteeing a global minimum.",
+      "Gradient vector points in the direction of greatest increase; we subtract to minimize loss.",
+      "Learning rate alpha governs step size per iteration."
     ],
-    thumbnail: "/images/thumb_os.png"
+    thumbnail: "https://img.youtube.com/vi/2_-boldmaFQ/maxresdefault.jpg"
   },
   {
     id: 3,
-    title: "Deadlock Conditions & Banker's Algorithm Safety Guide",
-    subjectId: "os",
+    title: "Ordinary Least Squares (OLS) Derivation & Best Fit Line",
+    subjectId: "machine-learning",
     videoId: 3,
-    category: "computer-science",
-    subcategory: "Operating Systems",
-    tags: ["OS", "Deadlock", "Banker's Algorithm", "Cheat Sheet"],
-    type: "Cheat Sheet",
-    description: "The 4 Coffman conditions, Resource Allocation Graphs, and Banker's safety matrix step-by-step.",
-    content: `## Deadlock Conditions & Banker's Algorithm
+    category: "ai-ml",
+    subcategory: "Supervised Learning",
+    tags: ["Linear Algebra", "OLS", "Statistics", "Formulas"],
+    type: "Formulas",
+    description: "Closed-form analytical solution for the line of best fit using Covariance and Variance.",
+    content: `## Ordinary Least Squares (OLS) Closed-Form Solution
 
-### The 4 Necessary Coffman Conditions:
-1. **Mutual Exclusion:** Resources cannot be shared simultaneously.
-2. **Hold and Wait:** Process holds allocated resources while waiting for additional ones.
-3. **No Preemption:** Resources cannot be forcibly taken from a process.
-4. **Circular Wait:** Closed loop of processes where each waits for a resource held by the next.
+### 1. Analytical Formulas
+Rather than using iterative gradient descent, OLS calculates the exact optimal parameters analytically:
 
-### Banker's Algorithm Matrices:
-- **Available $[m]$:** Vector of available instances of each resource type.
-- **Max $[n \\times m]$:** Maximum demand of each process.
-- **Allocation $[n \\times m]$:** Resources currently assigned.
-- **Need Matrix:**
-  $$\\text{Need}[i][j] = \\text{Max}[i][j] - \\text{Allocation}[i][j]$$`,
+$$m = \\frac{\\sum_{i=1}^n (x_i - \\bar{x})(y_i - \\bar{y})}{\\sum_{i=1}^n (x_i - \\bar{x})^2} = \\frac{\\text{Cov}(X, Y)}{\\text{Var}(X)}$$
+
+$$c = \\bar{y} - m \\bar{x}$$
+
+### 2. Coefficient of Determination ($R^2$)
+Measures the proportion of variance in the dependent variable explained by the linear model:
+
+$$R^2 = 1 - \\frac{SS_{\\text{res}}}{SS_{\\text{tot}}} = 1 - \\frac{\\sum (y_i - \\hat{y}_i)^2}{\\sum (y_i - \\bar{y})^2}$$
+
+- $R^2 = 1.0$: Perfect fit.
+- $R^2 = 0.0$: Model predicts no better than the mean of $Y$.`,
     examPoints: [
-      "All 4 Coffman conditions must hold simultaneously for a deadlock to occur.",
-      "Deadlock Prevention: Invalidate at least one of the 4 conditions.",
-      "Deadlock Avoidance: Banker's algorithm checks for a safe sequence before allocating.",
-      "Safe state != Deadlock-free forever, but guarantees a safe execution sequence exists."
+      "OLS computes global optimal slope via Cov(X, Y) / Var(X).",
+      "Regression line always passes through the centroid point (x̄, ȳ).",
+      "R-squared represents the fraction of total variance explained by the model."
     ],
-    thumbnail: "/images/thumb_os.png"
+    thumbnail: "https://img.youtube.com/vi/HiMaBCL-6Qg/maxresdefault.jpg"
   },
   {
     id: 4,
-    title: "Neural Networks Architecture & Forward Pass Equations",
-    subjectId: "ai-ml",
+    title: "Categorical Feature Engineering: Nominal, Ordinal & Binary Data",
+    subjectId: "machine-learning",
     videoId: 4,
     category: "ai-ml",
-    subcategory: "Machine Learning Foundations",
-    tags: ["AI", "Machine Learning", "Neural Networks", "Deep Learning"],
-    type: "Formulas",
-    description: "Mathematical formulation of artificial neurons, dot products, biases, and activation function equations.",
-    content: `## Neural Network Forward Propagation
+    subcategory: "Data Preprocessing",
+    tags: ["Data Preprocessing", "Feature Engineering", "Categorical Data", "Encoding"],
+    type: "Cheat Sheet",
+    description: "Comprehensive guide to classifying categorical variables and applying One-Hot vs Label Encoding without inducing false relationships.",
+    content: `## Categorical Data Encoding in ML
 
-### 1. Neuron Computation
-For input vector $\\mathbf{x} = [x_1, x_2, \\dots, x_n]$ and weights $\\mathbf{w}$:
-$$z = \\sum_{i=1}^n w_i x_i + b = \\mathbf{w}^T \\mathbf{x} + b$$
-$$a = \\sigma(z)$$
+### 1. Data Type Classifications
+- **Nominal Data:** Distinct categories with NO intrinsic ranking (e.g., Colors, Cities, Blood Groups).
+- **Ordinal Data:** Categories with a clear, meaningful hierarchy (e.g., Education: High School < Bachelor < Master < PhD; Rating: Low < Medium < High).
+- **Binary Data:** Exactly two mutually exclusive categories (e.g., Yes/No, True/False, Male/Female).
 
-### 2. Common Activation Functions
-- **Sigmoid:** $\\sigma(z) = \\frac{1}{1 + e^{-z}} \\in (0, 1)$
-- **ReLU (Rectified Linear Unit):** $f(z) = \\max(0, z)$ (solves vanishing gradient for positive values)
-- **Softmax (Multi-class output):**
-  $$P(y=k) = \\frac{e^{z_k}}{\\sum_j e^{z_j}}$$`,
+### 2. Encoding Strategies
+1. **One-Hot Encoding:** Creates a binary column for each category. Use for Nominal features with low cardinality ($< 15$ unique values).
+2. **Ordinal / Label Encoding:** Maps categories to sequential integers ($0, 1, 2, \\dots$). Use ONLY when ranking holds true mathematical meaning.
+3. **Target Encoding:** Replaces categories with the average target value. Useful for high-cardinality nominal data.`,
     examPoints: [
-      "Linear transformations stacked without activation functions reduce to a single linear model.",
-      "ReLU is computationally efficient and avoids vanishing gradient for z > 0.",
-      "Softmax normalizes raw logits into a valid probability distribution summing to 1.0."
+      "Never use Label Encoding on Nominal data (models will infer false numerical magnitude).",
+      "One-Hot Encoding can cause the Curse of Dimensionality if cardinality is high.",
+      "Drop one dummy column (drop_first=True) to prevent multicollinearity in linear models."
     ],
-    thumbnail: "/images/thumb_ai.png"
+    thumbnail: "https://img.youtube.com/vi/-Rs2pnuBJF4/maxresdefault.jpg"
   },
   {
     id: 5,
-    title: "Engineering Statistics: Distributions & Central Limit Theorem",
-    subjectId: "statistics",
+    title: "AI vs Machine Learning vs Deep Learning Architectural Hierarchy",
+    subjectId: "machine-learning",
     videoId: 5,
     category: "ai-ml",
-    subcategory: "Data Science & Mathematics",
-    tags: ["Statistics", "Math", "CLT", "Distributions"],
-    type: "Guide",
-    description: "Essential statistical distributions, variance properties, and Central Limit Theorem application for computer science.",
-    content: `## Engineering Statistics & Probability
+    subcategory: "AI Foundations",
+    tags: ["Artificial Intelligence", "Machine Learning", "Deep Learning", "Overview"],
+    type: "Study Guide",
+    description: "Conceptual breakdown of the AI umbrella: rule-based systems, statistical machine learning, and representation learning via deep neural nets.",
+    content: `## The AI, ML & Deep Learning Spectrum
 
-### 1. Central Limit Theorem (CLT)
-As sample size $n$ increases ($n \\ge 30$), the distribution of the sample mean $\\bar{X}$ approaches a Normal distribution:
-$$\\bar{X} \\sim \\mathcal{N}\\left(\\mu, \\frac{\\sigma^2}{n}\\right)$$
-regardless of the underlying distribution of the population.
+### 1. The Concentric Hierarchy
+$$\\text{Artificial Intelligence} \\supset \\text{Machine Learning} \\supset \\text{Deep Learning}$$
 
-### 2. Properties of Variance
-- $\\text{Var}(c) = 0$
-- $\\text{Var}(aX + b) = a^2 \\text{Var}(X)$
-- Standard Deviation: $\\sigma = \\sqrt{\\text{Var}(X)}$`,
+- **Artificial Intelligence (1950s+):** Any technique enabling computers to mimic human intelligence (symbolic AI, expert systems, planning algorithms).
+- **Machine Learning (1980s+):** Algorithms that parse data, learn from it, and make predictions without being explicitly hard-coded (SVM, Decision Trees, Linear Models).
+- **Deep Learning (2010s+):** Multi-layered artificial neural networks capable of end-to-end representation learning from raw data (images, audio, unstructured text).`,
     examPoints: [
-      "CLT applies even if original data is skewed, provided sample size is sufficiently large (n >= 30).",
-      "Standard Error of the Mean = sigma / sqrt(n).",
-      "Median is preferred over Mean when dealing with heavily skewed data or extreme outliers."
+      "AI is the goal; ML is the method; DL is the deep neural architecture.",
+      "Classical ML requires manual feature engineering; DL learns representations directly.",
+      "DL requires large datasets and GPU acceleration to outperform classical ML."
     ],
-    thumbnail: "/images/thumb_stats.png"
+    thumbnail: "https://img.youtube.com/vi/5Ajp5oPinJs/maxresdefault.jpg"
   },
   {
     id: 6,
-    title: "React Hooks Architecture & Rules Reference Guide",
-    subjectId: "web-dev",
+    title: "Relational Database Management (RDBMS) & ACID Guarantees",
+    subjectId: "dbms",
     videoId: 6,
-    category: "web-dev",
-    subcategory: "Modern Frontend & Fullstack",
-    tags: ["React", "JavaScript", "Frontend", "Guide"],
-    type: "Guide",
-    description: "The 2 Golden Rules of Hooks, dependency array gotchas, and cleanup patterns for memory safety.",
-    content: `## React Hooks Architecture & Reference
+    category: "computer-science",
+    subcategory: "Database Systems",
+    tags: ["DBMS", "SQL", "ACID", "Cloud Databases"],
+    type: "Cheat Sheet",
+    description: "Core relational principles, schema relationships, ACID transaction guarantees, and cloud database deployment architecture.",
+    content: `## Relational DBMS & ACID Guarantees
 
-### The 2 Golden Rules of React Hooks:
-1. **Only Call Hooks at the Top Level:** Do not call hooks inside loops, conditions, or nested functions.
-2. **Only Call Hooks from React Functions:** Call them from React functional components or custom hooks.
+### 1. The ACID Transaction Properties
+- **Atomicity:** All operations in a transaction succeed, or the entire transaction is rolled back ("all or nothing").
+- **Consistency:** Transactions transition the database from one valid state to another, satisfying all constraints.
+- **Isolation:** Concurrent transactions execute without interfering with one another.
+- **Durability:** Once committed, changes survive system crashes and power failures.
 
-### useEffect Dependency Rules:
-- **Empty Array \`[]\`:** Runs only on initial mount, cleanup runs on unmount.
-- **With Dependencies \`[a, b]\`:** Runs on mount and re-runs when \`a\` or \`b\` change by reference (\`Object.is\`).
-- **No Array:** Runs on every render (high risk of performance degradation).`,
+### 2. Cloud SQL Architecture
+Managed Cloud SQL services (e.g., PostgreSQL on AWS RDS/Render/Cloud SQL) automate replication, failover, and point-in-time recovery while preserving strict relational schema guarantees.`,
     examPoints: [
-      "Hooks rely on stable call order across renders (internally managed as a linked list in fiber node).",
-      "Always clean up event listeners and timers in useEffect return function.",
-      "useMemo caches computed values; useCallback caches function references."
+      "Atomicity is enforced via undo logs and rollback mechanisms.",
+      "Durability is guaranteed through Write-Ahead Logging (WAL).",
+      "Isolation levels: Read Uncommitted < Read Committed < Repeatable Read < Serializable."
     ],
-    thumbnail: "/images/thumb_web.png"
+    thumbnail: "https://img.youtube.com/vi/SbTs57YD1CA/maxresdefault.jpg"
   }
 ];

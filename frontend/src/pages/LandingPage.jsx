@@ -467,7 +467,7 @@ export default function LandingPage() {
                       <h3 className="text-lg sm:text-xl font-black mb-4 group-hover:text-accent-blue transition-colors line-clamp-1 italic uppercase tracking-tight break-words">{video.title}</h3>
                       <div className="flex justify-between items-center text-gray-500 text-xs font-black uppercase tracking-[0.2em]">
                         <span className="flex items-center gap-1.5 uppercase tracking-widest">{video.type} module</span>
-                        <span className="text-accent-cyan flex items-center gap-1">Watch Now <ChevronRight size={14} /></span>
+                        <span className="text-accent-cyan flex items-center gap-1">Learn This Concept <ChevronRight size={14} /></span>
                       </div>
                     </div>
                   </GlassCard>
