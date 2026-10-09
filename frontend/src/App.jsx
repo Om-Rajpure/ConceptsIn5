@@ -13,6 +13,7 @@ import SubjectPage from './pages/SubjectPage';
 import CategoryPage from './pages/CategoryPage';
 import TopicPage from './pages/TopicPage';
 import NotesPage from './pages/NotesPage';
+import QuizPage from './pages/QuizPage';
 import VideoPage from './pages/VideoPage';
 import SearchPage from './pages/SearchPage';
 import AboutPage from './pages/AboutPage';
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/subject/:slug" element={<SubjectPage />} />
           <Route path="/topic/:id" element={<TopicPage />} />
           <Route path="/notes" element={<NotesPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
           <Route path="/video/:id" element={<VideoPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/search" element={<SearchPage />} />
@@ -88,6 +90,7 @@ export default function App() {
               <h4 className="font-black text-xs uppercase tracking-widest mb-8 text-white">Learn</h4>
               <div className="flex flex-col gap-4 text-gray-500 text-base">
                 <Link to="/notes" className="hover:text-accent-blue transition-colors">Study Notes</Link>
+                <Link to="/quiz" className="hover:text-accent-blue transition-colors">AI Quiz</Link>
                 <Link to="/reels" className="hover:text-accent-blue transition-colors">Quick Concepts</Link>
                 <Link to="/about" className="hover:text-accent-blue transition-colors">About</Link>
               </div>
